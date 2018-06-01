@@ -374,6 +374,7 @@ public partial class NetworkManagerMMO : NetworkManager {
                             prefab.name = message.name;
                             prefab.account = account;
                             prefab.className = classes[message.classIndex].name;
+                            // TODO: Null reference exception when creating a new character (01/06/2018)
                             prefab.transform.position = GetStartPositionFor(prefab.className).position;
                             for (int i = 0; i < prefab.inventorySize; ++i) {
                                 // add empty slot or default item if any
