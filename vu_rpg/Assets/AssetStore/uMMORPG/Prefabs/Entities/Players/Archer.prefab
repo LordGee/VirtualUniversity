@@ -114,6 +114,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 10100, guid: 0000000000000000e000000000000000, type: 0}
   m_StaticBatchInfo:
@@ -167,6 +168,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!102 &10296200
 TextMesh:
   serializedVersion: 3
@@ -270,7 +272,7 @@ MonoBehaviour:
   _healthMax:
     baseValue: 100
     bonusPerLevel: 10
-  invincible: 0
+  invincible: 1
   healthRecovery: 1
   _healthRecoveryRate:
     baseValue: 1
@@ -2348,6 +2350,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 10100, guid: 0000000000000000e000000000000000, type: 0}
   m_StaticBatchInfo:
@@ -2427,6 +2430,7 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: 2b6cafbdf2e71f245aa75a08b009a9c1, type: 2}
   m_StaticBatchInfo:
@@ -2522,6 +2526,7 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: 9c0068acf5b35694894fbc2b51a58234, type: 2}
   m_StaticBatchInfo:
@@ -2617,6 +2622,7 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: 571749e87f4a09840a11754952f3ad2d, type: 2}
   m_StaticBatchInfo:
@@ -2712,6 +2718,7 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: 1312d333909b41645a624a8b6eb69fcb, type: 2}
   - {fileID: 2100000, guid: 875e1683e8401a2479dd7a7109720b9c, type: 2}
@@ -2809,6 +2816,7 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: 72a49ef6cc83ca940b41521cd27e83bc, type: 2}
   m_StaticBatchInfo:
