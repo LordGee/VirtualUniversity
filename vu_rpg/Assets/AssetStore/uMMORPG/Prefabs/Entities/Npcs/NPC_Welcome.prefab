@@ -2484,7 +2484,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1314561735743490}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -30.68, y: 0, z: 20.26}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -4356,8 +4356,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 90e9c9458aa864b979e83f5515e7ba0a, type: 2}
   - {fileID: 11400000, guid: 0cb7a3a7a075643faabef79596574d0d, type: 2}
   quests:
-  - {fileID: 11400000, guid: 1ea6fa225f25c4bb7a3dd4166675a80b, type: 2}
-  - {fileID: 11400000, guid: ed60ac6cc5bf440dda9d829943d4ea77, type: 2}
+  - {fileID: 11400000, guid: dac3737e5924f70489f559539145af08, type: 2}
   teleportTo: {fileID: 0}
   offersGuildManagement: 1
   offersPetRevive: 1
