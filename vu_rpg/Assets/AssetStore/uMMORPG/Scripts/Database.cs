@@ -181,6 +181,21 @@ public partial class Database {
                             password TEXT NOT NULL,
                             banned INTEGER NOT NULL)");
 
+        // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
+        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS quizes (
+                            quiz TEXT NOT NULL PRIMARY KEY,
+                            date DATE NOT NULL,
+                            class TEXT NOT NULL)");
+
+        // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
+        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS questions (
+                            question TEXT NOT NULL PRIMARY KEY,
+                            answer1 text NOT NULL,
+                            answer2 text NOT NULL,
+                            answer3 text NOT NULL,
+                            correct INTEGER NOT NULL,
+                            quiz TEXT NOT NULL)");
+
         // addon system hooks
         Utils.InvokeMany(typeof(Database), null, "Initialize_");
 
@@ -289,6 +304,12 @@ public partial class Database {
         }
         return false;
     }
+
+
+    public static void CreateNewQuiz(string quiz, string className) {
+        ExecuteNonQuery("INSERT INTO quizes VALUES (@quiz, @date ,@class)", new SqliteParameter("@quiz", quiz), new SqliteParameter("@date", DateTime.Today), new SqliteParameter("@class", className));
+    } 
+
 
     // character data //////////////////////////////////////////////////////////
     public static bool CharacterExists(string characterName) {
