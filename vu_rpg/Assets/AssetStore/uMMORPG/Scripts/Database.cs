@@ -189,12 +189,16 @@ public partial class Database {
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
         ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS questions (
-                            question TEXT NOT NULL PRIMARY KEY,
-                            answer1 text NOT NULL,
-                            answer2 text NOT NULL,
-                            answer3 text NOT NULL,
+                            question_id INTEGER NOT NULL PRIMARY KEY,
+                            question TEXT NOT NULL)");
+
+        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS answers (
+                            answer_id INTEGER NOT NULL PRIMARY KEY autoincrement,
+                            answer1 TEXT NOT NULL,
+                            answer2 TEXT NOT NULL,
+                            answer3 TEXT NOT NULL,
                             correct INTEGER NOT NULL,
-                            quiz TEXT NOT NULL)");
+                            question_id INTEGER NOT NULL)");
 
         // addon system hooks
         Utils.InvokeMany(typeof(Database), null, "Initialize_");
@@ -248,6 +252,36 @@ public partial class Database {
 
         return result;
     }
+
+    // QUIZ Related SQL
+    private static int GetNewIDForQuestion() {
+        object id = ExecuteScalar("SELECT question_id FROM questions ORDER BY question_id DESC LIMIT 1");
+        int result = Convert.ToInt32(id);
+        return result + 1;
+    }
+
+    public static void CreateNewQuiz(string quiz, string className) {
+        // ExecuteNonQuery("INSERT INTO quizes VALUES (@quiz, @date ,@class)", new SqliteParameter("@quiz", quiz), new SqliteParameter("@date", DateTime.Today), new SqliteParameter("@class", className));
+    }
+
+    public static void AddNewQuestionAndAnswer(string question, string[] answers, int correct) {
+        int QuestionID = GetNewIDForQuestion();
+        ExecuteNonQuery("INSERT INTO questions (" +
+                        "question_id, question) VALUES (" +
+                        "@id, @question)",
+            new SqliteParameter("@id", QuestionID),
+            new SqliteParameter("@question", question));
+        ExecuteNonQuery("INSERT INTO answers (" +
+                        "answer1, answer2, answer3, correct, question_id) VALUES (" +
+                        "@ans1, @ans2, @ans3, @correct, @id)",
+            new SqliteParameter("@ans1", answers[0]),
+            new SqliteParameter("@ans2", answers[1]),
+            new SqliteParameter("@ans3", answers[2]),
+            new SqliteParameter("@correct", correct),
+            new SqliteParameter("@id", QuestionID));
+    }
+
+
 
     // account data ////////////////////////////////////////////////////////////
     public static bool IsValidAccount(string account, string password) {
@@ -305,11 +339,7 @@ public partial class Database {
         return false;
     }
 
-
-    public static void CreateNewQuiz(string quiz, string className) {
-        ExecuteNonQuery("INSERT INTO quizes VALUES (@quiz, @date ,@class)", new SqliteParameter("@quiz", quiz), new SqliteParameter("@date", DateTime.Today), new SqliteParameter("@class", className));
-    } 
-
+    
 
     // character data //////////////////////////////////////////////////////////
     public static bool CharacterExists(string characterName) {
