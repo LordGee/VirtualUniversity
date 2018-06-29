@@ -156,7 +156,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 224993881572692876}
-  - component: {fileID: 114982360892624736}
   - component: {fileID: 114089671704345792}
   m_Layer: 5
   m_Name: QuestionInsert
@@ -1842,25 +1841,6 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
---- !u!114 &114982360892624736
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1329441466617174}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc50cac6f9a354f5db256e68b456c541, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uiCharacterCreation: {fileID: 0}
-  manager: {fileID: 0}
-  panel: {fileID: 1665538250687166}
-  slotPrefab: {fileID: 114420738267157768, guid: 86be6d253bb284fe3b6c87145c739ca9,
-    type: 2}
-  content: {fileID: 0}
-  createButton: {fileID: 114732766115781498}
-  quitButton: {fileID: 114103585691617646}
 --- !u!114 &114986064258606436
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -194,7 +194,7 @@ public partial struct Quest {
 public partial class Database {
     static void Initialize_Example() {
         // it's usually best to create an extra table for your addon. example:
-        //ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS example (
+        //ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS example (
         //                  name TEXT NOT NULL PRIMARY KEY)");
     }
     static void CharacterLoad_Example(Player player) {}

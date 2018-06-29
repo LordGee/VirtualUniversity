@@ -90,7 +90,7 @@ public partial class Database {
 
         // create tables if they don't exist yet or were deleted
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS characters (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS characters (
                             name TEXT NOT NULL PRIMARY KEY,
                             account TEXT NOT NULL,
                             class TEXT NOT NULL,
@@ -107,10 +107,11 @@ public partial class Database {
                             gold INTEGER NOT NULL,
                             coins INTEGER NOT NULL,
                             online TEXT NOT NULL,
-                            deleted INTEGER NOT NULL)");
+                            deleted INTEGER NOT NULL,
+                            course_name TEXT)");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS character_inventory (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS character_inventory (
                             character TEXT NOT NULL,
                             slot INTEGER NOT NULL,
                             name TEXT NOT NULL,
@@ -121,7 +122,7 @@ public partial class Database {
                             PRIMARY KEY(character, slot))");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS character_equipment (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS character_equipment (
                             character TEXT NOT NULL,
                             slot INTEGER NOT NULL,
                             name TEXT NOT NULL,
@@ -129,7 +130,7 @@ public partial class Database {
                             PRIMARY KEY(character, slot))");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS character_skills (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS character_skills (
                             character TEXT NOT NULL,
                             name TEXT NOT NULL,
                             level INTEGER NOT NULL,
@@ -138,7 +139,7 @@ public partial class Database {
                             PRIMARY KEY(character, name))");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS character_buffs (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS character_buffs (
                             character TEXT NOT NULL,
                             name TEXT NOT NULL,
                             level INTEGER NOT NULL,
@@ -146,7 +147,7 @@ public partial class Database {
                             PRIMARY KEY(character, name))");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS character_quests (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS character_quests (
                             character TEXT NOT NULL,
                             name TEXT NOT NULL,
                             killed INTEGER NOT NULL,
@@ -156,7 +157,7 @@ public partial class Database {
         // INTEGER PRIMARY KEY is auto incremented by sqlite if the
         // insert call passes NULL for it.
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS character_orders (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS character_orders (
                             orderid INTEGER PRIMARY KEY,
                             character TEXT NOT NULL,
                             coins INTEGER NOT NULL,
@@ -164,35 +165,41 @@ public partial class Database {
 
         // guild master is not in guild_info in case we need more than one later
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS guild_info (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS guild_info (
                             name TEXT NOT NULL PRIMARY KEY,
                             notice TEXT NOT NULL)");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS guild_members (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS guild_members (
                             guild TEXT NOT NULL,
                             character TEXT NOT NULL,
                             rank INTEGER NOT NULL,
                             PRIMARY KEY(guild, character))");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS accounts (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS accounts (
                             name TEXT NOT NULL PRIMARY KEY,
                             password TEXT NOT NULL,
                             banned INTEGER NOT NULL)");
 
-        // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS quizes (
-                            quiz TEXT NOT NULL PRIMARY KEY,
-                            date DATE NOT NULL,
-                            class TEXT NOT NULL)");
+        /* Custom Implementation for our requirements */
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS courses (
+                            course_name TEXT NOT NULL PRIMARY KEY)");
 
-        // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS questions (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS quizes (
+                            quiz_id INTEGER NOT NULL PRIMARY KEY,
+                            quiz_name TEXT NOT NULL,
+                            creation_date DATETIME default CURRENT_TIMESTAMP,
+                            course_name TEXT NOT NULL,
+                            quiz_owner TEXT NOT NULL)");
+
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS questions (
                             question_id INTEGER NOT NULL PRIMARY KEY,
-                            question TEXT NOT NULL)");
+                            question TEXT NOT NULL,
+                            quiz_id INTEGER NOT NULL)");
+                            
 
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS answers (
+        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS answers (
                             answer_id INTEGER NOT NULL PRIMARY KEY autoincrement,
                             answer1 TEXT NOT NULL,
                             answer2 TEXT NOT NULL,
@@ -208,7 +215,7 @@ public partial class Database {
 
     // helper functions ////////////////////////////////////////////////////////
     // run a query that doesn't return anything
-    public static void ExecuteNonQuery(string sql, params SqliteParameter[] args) {
+    public static void ExecuteNoReturn(string sql, params SqliteParameter[] args) {
         using (SqliteCommand command = new SqliteCommand(sql, connection)) {
             foreach (SqliteParameter param in args)
                 command.Parameters.Add(param);
@@ -261,17 +268,17 @@ public partial class Database {
     }
 
     public static void CreateNewQuiz(string quiz, string className) {
-        // ExecuteNonQuery("INSERT INTO quizes VALUES (@quiz, @date ,@class)", new SqliteParameter("@quiz", quiz), new SqliteParameter("@date", DateTime.Today), new SqliteParameter("@class", className));
+        // ExecuteNoReturn("INSERT INTO quizes VALUES (@quiz, @date ,@class)", new SqliteParameter("@quiz", quiz), new SqliteParameter("@date", DateTime.Today), new SqliteParameter("@class", className));
     }
 
     public static void AddNewQuestionAndAnswer(string question, string[] answers, int correct) {
         int QuestionID = GetNewIDForQuestion();
-        ExecuteNonQuery("INSERT INTO questions (" +
+        ExecuteNoReturn("INSERT INTO questions (" +
                         "question_id, question) VALUES (" +
                         "@id, @question)",
             new SqliteParameter("@id", QuestionID),
             new SqliteParameter("@question", question));
-        ExecuteNonQuery("INSERT INTO answers (" +
+        ExecuteNoReturn("INSERT INTO answers (" +
                         "answer1, answer2, answer3, correct, question_id) VALUES (" +
                         "@ans1, @ans2, @ans3, @correct, @id)",
             new SqliteParameter("@ans1", answers[0]),
@@ -332,7 +339,7 @@ public partial class Database {
                 return (string)row[0] == password && (long)row[1] == 0;
             } else {
                 // account doesn't exist. create it.
-                ExecuteNonQuery("INSERT INTO accounts VALUES (@name, @password, 0)", new SqliteParameter("@name", account), new SqliteParameter("@password", password));
+                ExecuteNoReturn("INSERT INTO accounts VALUES (@name, @password, 0)", new SqliteParameter("@name", account), new SqliteParameter("@password", password));
                 return true;
             }
         }
@@ -350,7 +357,7 @@ public partial class Database {
 
     public static void CharacterDelete(string characterName) {
         // soft delete the character so it can always be restored later
-        ExecuteNonQuery("UPDATE characters SET deleted=1 WHERE name=@character", new SqliteParameter("@character", characterName));
+        ExecuteNoReturn("UPDATE characters SET deleted=1 WHERE name=@character", new SqliteParameter("@character", characterName));
     }
 
     // returns the list of character names for that account
@@ -577,11 +584,11 @@ public partial class Database {
         // inventory: remove old entries first, then add all new ones
         // (we could use UPDATE where slot=... but deleting everything makes
         //  sure that there are never any ghosts)
-        ExecuteNonQuery("DELETE FROM character_inventory WHERE character=@character", new SqliteParameter("@character", player.name));
+        ExecuteNoReturn("DELETE FROM character_inventory WHERE character=@character", new SqliteParameter("@character", player.name));
         for (int i = 0; i < player.inventory.Count; ++i) {
             ItemSlot slot = player.inventory[i];
             if (slot.amount > 0) // only relevant items to save queries/storage/time
-                ExecuteNonQuery("INSERT INTO character_inventory VALUES (@character, @slot, @name, @amount, @petHealth, @petLevel, @petExperience)",
+                ExecuteNoReturn("INSERT INTO character_inventory VALUES (@character, @slot, @name, @amount, @petHealth, @petLevel, @petExperience)",
                                 new SqliteParameter("@character", player.name),
                                 new SqliteParameter("@slot", i),
                                 new SqliteParameter("@name", slot.item.name),
@@ -596,11 +603,11 @@ public partial class Database {
         // equipment: remove old entries first, then add all new ones
         // (we could use UPDATE where slot=... but deleting everything makes
         //  sure that there are never any ghosts)
-        ExecuteNonQuery("DELETE FROM character_equipment WHERE character=@character", new SqliteParameter("@character", player.name));
+        ExecuteNoReturn("DELETE FROM character_equipment WHERE character=@character", new SqliteParameter("@character", player.name));
         for (int i = 0; i < player.equipment.Count; ++i) {
             ItemSlot slot = player.equipment[i];
             if (slot.amount > 0) // only relevant equip to save queries/storage/time
-                ExecuteNonQuery("INSERT INTO character_equipment VALUES (@character, @slot, @name, @amount)",
+                ExecuteNoReturn("INSERT INTO character_equipment VALUES (@character, @slot, @name, @amount)",
                                 new SqliteParameter("@character", player.name),
                                 new SqliteParameter("@slot", i),
                                 new SqliteParameter("@name", slot.item.name),
@@ -610,7 +617,7 @@ public partial class Database {
 
     static void SaveSkills(Player player) {
         // skills: remove old entries first, then add all new ones
-        ExecuteNonQuery("DELETE FROM character_skills WHERE character=@character", new SqliteParameter("@character", player.name));
+        ExecuteNoReturn("DELETE FROM character_skills WHERE character=@character", new SqliteParameter("@character", player.name));
         foreach (Skill skill in player.skills)
             if (skill.level > 0) // only learned skills to save queries/storage/time
                 // castTimeEnd and cooldownEnd are based on Time.time, which
@@ -618,7 +625,7 @@ public partial class Database {
                 // convert them to the remaining time for easier save & load
                 // note: this does NOT work when trying to save character data shortly
                 //       before closing the editor or game because Time.time is 0 then.
-                ExecuteNonQuery("INSERT INTO character_skills VALUES (@character, @name, @level, @castTimeEnd, @cooldownEnd)",
+                ExecuteNoReturn("INSERT INTO character_skills VALUES (@character, @name, @level, @castTimeEnd, @cooldownEnd)",
                                 new SqliteParameter("@character", player.name),
                                 new SqliteParameter("@name", skill.name),
                                 new SqliteParameter("@level", skill.level),
@@ -628,14 +635,14 @@ public partial class Database {
 
     static void SaveBuffs(Player player) {
         // buffs: remove old entries first, then add all new ones
-        ExecuteNonQuery("DELETE FROM character_buffs WHERE character=@character", new SqliteParameter("@character", player.name));
+        ExecuteNoReturn("DELETE FROM character_buffs WHERE character=@character", new SqliteParameter("@character", player.name));
         foreach (Buff buff in player.buffs)
             // buffTimeEnd is based on Time.time, which will be different when
             // restarting the server, so let's convert them to the remaining
             // time for easier save & load
             // note: this does NOT work when trying to save character data shortly
             //       before closing the editor or game because Time.time is 0 then.
-            ExecuteNonQuery("INSERT INTO character_buffs VALUES (@character, @name, @level, @buffTimeEnd)",
+            ExecuteNoReturn("INSERT INTO character_buffs VALUES (@character, @name, @level, @buffTimeEnd)",
                             new SqliteParameter("@character", player.name),
                             new SqliteParameter("@name", buff.name),
                             new SqliteParameter("@level", buff.level),
@@ -644,9 +651,9 @@ public partial class Database {
 
     static void SaveQuests(Player player) {
         // quests: remove old entries first, then add all new ones
-        ExecuteNonQuery("DELETE FROM character_quests WHERE character=@character", new SqliteParameter("@character", player.name));
+        ExecuteNoReturn("DELETE FROM character_quests WHERE character=@character", new SqliteParameter("@character", player.name));
         foreach (Quest quest in player.quests)
-            ExecuteNonQuery("INSERT INTO character_quests VALUES (@character, @name, @killed, @completed)",
+            ExecuteNoReturn("INSERT INTO character_quests VALUES (@character, @name, @killed, @completed)",
                             new SqliteParameter("@character", player.name),
                             new SqliteParameter("@name", quest.name),
                             new SqliteParameter("@killed", quest.killed),
@@ -656,7 +663,7 @@ public partial class Database {
     // adds or overwrites character data in the database
     public static void CharacterSave(Player player, bool online, bool useTransaction = true) {
         // only use a transaction if not called within SaveMany transaction
-        if (useTransaction) ExecuteNonQuery("BEGIN");
+        if (useTransaction) ExecuteNoReturn("BEGIN");
 
         // online status:
         //   '' if offline (if just logging out etc.)
@@ -668,7 +675,7 @@ public partial class Database {
         // -> it uses the ISO 8601 standard format
         string onlineString = online ? DateTime.UtcNow.ToString("s") : "";
 
-        ExecuteNonQuery("INSERT OR REPLACE INTO characters VALUES (@name, @account, @class, @x, @y, @z, @level, @health, @mana, @strength, @intelligence, @experience, @skillExperience, @gold, @coins, @online, 0)",
+        ExecuteNoReturn("INSERT OR REPLACE INTO characters VALUES (@name, @account, @class, @x, @y, @z, @level, @health, @mana, @strength, @intelligence, @experience, @skillExperience, @gold, @coins, @online, 0)",
                         new SqliteParameter("@name", player.name),
                         new SqliteParameter("@account", player.account),
                         new SqliteParameter("@class", player.className),
@@ -695,36 +702,36 @@ public partial class Database {
         // addon system hooks
         Utils.InvokeMany(typeof(Database), null, "CharacterSave_", player);
 
-        if (useTransaction) ExecuteNonQuery("END");
+        if (useTransaction) ExecuteNoReturn("END");
     }
 
     // save multiple characters at once (useful for ultra fast transactions)
     public static void CharacterSaveMany(List<Player> players, bool online = true) {
-        ExecuteNonQuery("BEGIN"); // transaction for performance
+        ExecuteNoReturn("BEGIN"); // transaction for performance
         foreach (Player player in players)
             CharacterSave(player, online, false);
-        ExecuteNonQuery("END");
+        ExecuteNoReturn("END");
     }
 
     // guilds //////////////////////////////////////////////////////////////////
     public static void SaveGuild(string guild, string notice, List<GuildMember> members) {
-        ExecuteNonQuery("BEGIN"); // transaction for performance
+        ExecuteNoReturn("BEGIN"); // transaction for performance
 
         // guild info
-        ExecuteNonQuery("INSERT OR REPLACE INTO guild_info VALUES (@guild, @notice)",
+        ExecuteNoReturn("INSERT OR REPLACE INTO guild_info VALUES (@guild, @notice)",
                         new SqliteParameter("@guild", guild),
                         new SqliteParameter("@notice", notice));
 
         // members list
-        ExecuteNonQuery("DELETE FROM guild_members WHERE guild=@guild", new SqliteParameter("@guild", guild));
+        ExecuteNoReturn("DELETE FROM guild_members WHERE guild=@guild", new SqliteParameter("@guild", guild));
         foreach (GuildMember member in members) {
-            ExecuteNonQuery("INSERT INTO guild_members VALUES(@guild, @character, @rank)",
+            ExecuteNoReturn("INSERT INTO guild_members VALUES(@guild, @character, @rank)",
                             new SqliteParameter("@guild", guild),
                             new SqliteParameter("@character", member.name),
                             new SqliteParameter("@rank", member.rank));
         }
 
-        ExecuteNonQuery("END");
+        ExecuteNoReturn("END");
     }
 
     public static bool GuildExists(string guild) {
@@ -732,10 +739,10 @@ public partial class Database {
     }
 
     public static void RemoveGuild(string guild) {
-        ExecuteNonQuery("BEGIN"); // transaction for performance
-        ExecuteNonQuery("DELETE FROM guild_info WHERE name=@name", new SqliteParameter("@name", guild));
-        ExecuteNonQuery("DELETE FROM guild_members WHERE guild=@guild", new SqliteParameter("@guild", guild));
-        ExecuteNonQuery("END");
+        ExecuteNoReturn("BEGIN"); // transaction for performance
+        ExecuteNoReturn("DELETE FROM guild_info WHERE name=@name", new SqliteParameter("@name", guild));
+        ExecuteNoReturn("DELETE FROM guild_members WHERE guild=@guild", new SqliteParameter("@guild", guild));
+        ExecuteNoReturn("END");
     }
 
     // item mall ///////////////////////////////////////////////////////////////
@@ -752,7 +759,7 @@ public partial class Database {
         List< List<object> > table = ExecuteReader("SELECT orderid, coins FROM character_orders WHERE character=@character AND processed=0", new SqliteParameter("@character", characterName));
         foreach (List<object> row in table) {
             result.Add((long)row[1]);
-            ExecuteNonQuery("UPDATE character_orders SET processed=1 WHERE orderid=@orderid", new SqliteParameter("@orderid", (long)row[0]));
+            ExecuteNoReturn("UPDATE character_orders SET processed=1 WHERE orderid=@orderid", new SqliteParameter("@orderid", (long)row[0]));
         }
         return result;
     }
