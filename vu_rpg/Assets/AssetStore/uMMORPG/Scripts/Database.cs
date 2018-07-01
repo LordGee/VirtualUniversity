@@ -182,30 +182,8 @@ public partial class Database {
                             password TEXT NOT NULL,
                             banned INTEGER NOT NULL)");
 
-        /* Custom Implementation for our requirements */
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS courses (
-                            course_name TEXT NOT NULL PRIMARY KEY)");
-
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS quizes (
-                            quiz_id INTEGER NOT NULL PRIMARY KEY,
-                            quiz_name TEXT NOT NULL,
-                            creation_date DATETIME default CURRENT_TIMESTAMP,
-                            course_name TEXT NOT NULL,
-                            quiz_owner TEXT NOT NULL)");
-
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS questions (
-                            question_id INTEGER NOT NULL PRIMARY KEY,
-                            question TEXT NOT NULL,
-                            quiz_id INTEGER NOT NULL)");
-                            
-
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS answers (
-                            answer_id INTEGER NOT NULL PRIMARY KEY autoincrement,
-                            answer1 TEXT NOT NULL,
-                            answer2 TEXT NOT NULL,
-                            answer3 TEXT NOT NULL,
-                            correct INTEGER NOT NULL,
-                            question_id INTEGER NOT NULL)");
+        /* Custom Implementation for quiz tables */
+        Initialize_Quiz();
 
         // addon system hooks
         Utils.InvokeMany(typeof(Database), null, "Initialize_");
@@ -259,36 +237,6 @@ public partial class Database {
 
         return result;
     }
-
-    // QUIZ Related SQL
-    private static int GetNewIDForQuestion() {
-        object id = ExecuteScalar("SELECT question_id FROM questions ORDER BY question_id DESC LIMIT 1");
-        int result = Convert.ToInt32(id);
-        return result + 1;
-    }
-
-    public static void CreateNewQuiz(string quiz, string className) {
-        // ExecuteNoReturn("INSERT INTO quizes VALUES (@quiz, @date ,@class)", new SqliteParameter("@quiz", quiz), new SqliteParameter("@date", DateTime.Today), new SqliteParameter("@class", className));
-    }
-
-    public static void AddNewQuestionAndAnswer(string question, string[] answers, int correct) {
-        int QuestionID = GetNewIDForQuestion();
-        ExecuteNoReturn("INSERT INTO questions (" +
-                        "question_id, question) VALUES (" +
-                        "@id, @question)",
-            new SqliteParameter("@id", QuestionID),
-            new SqliteParameter("@question", question));
-        ExecuteNoReturn("INSERT INTO answers (" +
-                        "answer1, answer2, answer3, correct, question_id) VALUES (" +
-                        "@ans1, @ans2, @ans3, @correct, @id)",
-            new SqliteParameter("@ans1", answers[0]),
-            new SqliteParameter("@ans2", answers[1]),
-            new SqliteParameter("@ans3", answers[2]),
-            new SqliteParameter("@correct", correct),
-            new SqliteParameter("@id", QuestionID));
-    }
-
-
 
     // account data ////////////////////////////////////////////////////////////
     public static bool IsValidAccount(string account, string password) {
