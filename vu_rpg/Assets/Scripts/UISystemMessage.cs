@@ -5,16 +5,16 @@ using UnityEngine.UI;
 
 public class UISystemMessage : MonoBehaviour {
 
-    public Text message;
+    public GameObject message;
 
     public void NewTextAndDisplay(string text) {
-        message.text = text;
-        this.gameObject.SetActive(true);
-        StartCoroutine("Display");
+        message.GetComponent<Text>().text = text;
+        message.SetActive(true);
+        StartCoroutine(Display());
     }
 
-    public IEnumerable Display() {
+    public IEnumerator Display() {
         yield return new WaitForSeconds(3f);
-        this.gameObject.SetActive(false);
+        message.SetActive(false);
     }
 }

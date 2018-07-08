@@ -935,7 +935,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1989597474758772
 GameObject:
   m_ObjectHideFlags: 1
@@ -1240,7 +1240,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   manager: {fileID: 0}
   quizCreationPanel: {fileID: 1953914035921864}
-  serverDropdown: {fileID: 114608591583558346}
+  courseDropdown: {fileID: 114608591583558346}
   quizName: {fileID: 114168421394267732}
   questionInsertPanel: {fileID: 1437761739410468}
   question: {fileID: 114066128733510044}
