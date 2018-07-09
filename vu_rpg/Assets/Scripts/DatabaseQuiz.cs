@@ -12,7 +12,7 @@ public partial class Database {
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS CourseSubjects (
                             course_subject_id INTEGER NOT NULL PRIMARY KEY autoincrement,
                             fk_course_name TEXT NOT NULL,
-                            fk_subject_name");
+                            fk_subject_name TEXT NOT NULL)");
 
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Subjects (
                             subject_name TEXT NOT NULL PRIMARY KEY)");
