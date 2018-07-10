@@ -77,9 +77,19 @@ public partial class Database {
     public static List<string> GetCourseNames() {
         List<List<object>> results = new List<List<object>>();
         List<string> stringResults = new List<string>();
-        results = ExecuteReaderNoParams("SELECT * FROM Courses ORDER BY course_name ASC");
+        results = ExecuteReaderNoParams("SELECT quiz_name FROM Courses ORDER BY course_name ASC");
         for (int i = 0; i < results.Count; i++) {
             stringResults.Add(results[i][0].ToString());   
+        }
+        return stringResults;
+    }
+
+    public static List<string> GetQuizNames() {
+        List<List<object>> results       = new List<List<object>>();
+        List<string>       stringResults = new List<string>();
+        results = ExecuteReaderNoParams("SELECT * FROM Quizes ORDER BY quiz_name ASC");
+        for (int i = 0; i < results.Count; i++) {
+            stringResults.Add(results[i][0].ToString());
         }
         return stringResults;
     }
@@ -89,8 +99,38 @@ public partial class Database {
             new SqliteParameter("@course", course));
     }
 
+    public static void AddNewSubject(string subject) {
+        ExecuteNoReturn("INSERT INTO Subjects (subject_name) VALUES (@subject)",
+            new SqliteParameter("@subject", subject));
+    }
+
+    public static void AddCourseSubjects(string course, string subject) {
+        ExecuteNoReturn("INSERT INTO CourseSubjects (fk_course_name, fk_subject_name) VALUES (@course, @subject)",
+            new SqliteParameter("@course", course),
+            new SqliteParameter("@subject", subject));
+    }
+
     public static bool CheckCourseExists(string course) {
         object result = ExecuteScalar("SELECT course_name FROM Courses WHERE course_name = @course",
+            new SqliteParameter("@course", course));
+        if (result == null) {
+            return false;
+        }
+        return true;
+    }
+
+    public static bool CheckSubjectExists(string subject) {
+        object result = ExecuteScalar("SELECT subject_name FROM Subjects WHERE subject_name = @subject",
+            new SqliteParameter("@subject", subject));
+        if (result == null) {
+            return false;
+        }
+        return true;
+    }
+
+    public static bool CheckSubjectLinkedToCourseExists(string subject, string course) {
+        object result = ExecuteScalar("SELECT fk_subject_name, fk_course_name FROM CourseSubjects WHERE fk_subject_name = @subject AND fk_course_name = @course",
+            new SqliteParameter("@subject", subject),
             new SqliteParameter("@course", course));
         if (result == null) {
             return false;
