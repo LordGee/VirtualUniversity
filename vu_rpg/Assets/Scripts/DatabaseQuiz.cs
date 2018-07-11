@@ -77,7 +77,7 @@ public partial class Database {
     public static List<string> GetCourseNames() {
         List<List<object>> results = new List<List<object>>();
         List<string> stringResults = new List<string>();
-        results = ExecuteReaderNoParams("SELECT quiz_name FROM Courses ORDER BY course_name ASC");
+        results = ExecuteReaderNoParams("SELECT course_name FROM Courses ORDER BY course_name ASC");
         for (int i = 0; i < results.Count; i++) {
             stringResults.Add(results[i][0].ToString());   
         }
@@ -87,7 +87,18 @@ public partial class Database {
     public static List<string> GetQuizNames() {
         List<List<object>> results       = new List<List<object>>();
         List<string>       stringResults = new List<string>();
-        results = ExecuteReaderNoParams("SELECT * FROM Quizes ORDER BY quiz_name ASC");
+        results = ExecuteReaderNoParams("SELECT quiz_name FROM Quizes ORDER BY quiz_name ASC");
+        for (int i = 0; i < results.Count; i++) {
+            stringResults.Add(results[i][0].ToString());
+        }
+        return stringResults;
+    }
+
+    public static List<string> GetSubjectsLinkedToCourse(string course) {
+        List<List<object>> results = new List<List<object>>();
+        List<string> stringResults = new List<string>();
+        results = ExecuteReader("SELECT fk_subject_name FROM CourseSubjects WHERE fk_course_name = @course ORDER BY fk_subject_name ASC",
+            new SqliteParameter("@course", course));
         for (int i = 0; i < results.Count; i++) {
             stringResults.Add(results[i][0].ToString());
         }

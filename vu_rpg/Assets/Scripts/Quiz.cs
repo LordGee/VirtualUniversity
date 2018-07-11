@@ -1,18 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-struct Questions {
-    /// <summary>
-    /// Table: Questions
-    /// </summary>
-    public int question_id;
-    public string question;
-    /// <summary>
-    /// Table: Answers
-    /// </summary>
-    public string[] answers;
-    public int correct;
-}
+
 
 public class QuizCreation {
     /// <summary>
@@ -67,17 +56,4 @@ public class QuizCreation {
 
 }
 
-public class Quiz {
-    /// <summary>
-    /// Table: Course
-    /// </summary>
-    private string course_name;
-    /// <summary>
-    /// Table: Quizes
-    /// </summary>
-    private string quiz_name;
-    private string quiz_owner;
 
-    private List<Questions> questions;
-
-}
