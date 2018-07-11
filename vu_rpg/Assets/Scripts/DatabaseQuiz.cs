@@ -20,6 +20,7 @@ public partial class Database {
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Quizes (
                             quiz_id INTEGER NOT NULL PRIMARY KEY,
                             quiz_name TEXT NOT NULL,
+                            number_questions INTEGER default 1,
                             creation_date DATETIME default CURRENT_TIMESTAMP,
                             quiz_owner TEXT NOT NULL,                            
                             fk_subject_name TEXT NOT NULL
