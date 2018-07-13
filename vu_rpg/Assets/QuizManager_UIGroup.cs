@@ -295,7 +295,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         dropBox.SetActive(false);
         secondaryButton.SetActive(false);
 
-        inputBox.GetComponent<InputField>().contentType = InputField.ContentType.Standard;
+        
         inputBox.GetComponentInChildren<Text>().text = "";
         if (isNew) {
             inputBox.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Enter your question here...";
@@ -333,6 +333,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         dropBox.SetActive(true);
         primaryButton.SetActive(true);
         secondaryButton.SetActive(true);
+        inputBox.GetComponent<InputField>().contentType = InputField.ContentType.Standard;
     }
 
     private void PopulateDropboxData(string caption) {
