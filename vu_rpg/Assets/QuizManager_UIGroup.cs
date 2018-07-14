@@ -50,6 +50,12 @@ public class Quiz {
         set { questions = value; }
     }
 
+    private int quiz_id;
+    public int QuizId {
+        get { return quiz_id; }
+        set { quiz_id = value; }
+    }
+
     public Quiz() {
         questions = new List<Questions>();
     }
@@ -70,7 +76,7 @@ public class Questions {
 
 public class Answers {
     public string answer;
-    public bool isCorrect;
+    public int isCorrect; // was boolean, stored as int in database.
 }
 
 public class QuizManager_UIGroup : MonoBehaviour {
@@ -87,6 +93,9 @@ public class QuizManager_UIGroup : MonoBehaviour {
     private Administration admin;
 
     private bool isNew;
+    private int answerCount = 0;
+
+    private const int MAX_ANSWER = 4;
 
     public enum UI_STATE {
         Begin,
@@ -96,7 +105,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         NameQuiz,
         NumberOfQuestions,
         AddQuestion,
-        AddCorrectAnswer,
+        AddAnswer,
         AddWrongAnswer,
         EditQuestion,
         EditCorrectAnswer,
@@ -163,12 +172,33 @@ public class QuizManager_UIGroup : MonoBehaviour {
                 NumberOfQuestions();
                 break;
             case UI_STATE.NumberOfQuestions:
+                AddQuizToDatabase();
                 currentUI = UI_STATE.AddQuestion;
                 SetQuestion();
                 break;
             case UI_STATE.AddQuestion:
-                currentUI = UI_STATE.AddCorrectAnswer;
-                AddCorrectAnswer();
+                currentUI = UI_STATE.AddAnswer;
+                answerCount = -1;
+                AddAnswer();
+                break;
+            case UI_STATE.AddAnswer:
+                Debug.Log("Count : " + answerCount);
+                if (answerCount <= 4) {
+                    if (answerCount >= 1) {
+                        SetAnswer();
+                        AddAnswer();
+                    }
+                    if (answerCount == 4) {
+                        AddQuestionToDatabase();
+                        AddAnswersToDatabase();
+                        answerCount = -1;
+                        Message("Add another question?");
+                        currentUI = UI_STATE.AddQuestion;
+                        SetQuestion();
+                    }
+                } else {
+                   
+                } 
                 break;
             default:
                 Debug.LogWarning("This button is not assigned");
@@ -281,14 +311,13 @@ public class QuizManager_UIGroup : MonoBehaviour {
         primaryButton.GetComponentInChildren<Text>().text = buttonName;
     }
 
-   
 
     private void SetQuestion()
     {
-        quiz.NumberQuestions = Int32.Parse(inputBox.GetComponent<InputField>().text);
+        // moved to add quiz to database function
         Message("Number of Questions Added");
 
-        string heading = (isNew) ? "Set you first question" : "Update this question";
+        string heading = (isNew) ? "Set your question" : "Update this question";
         admin.SetHeadingText(heading);
 
         ActivateAllUi();
@@ -296,7 +325,6 @@ public class QuizManager_UIGroup : MonoBehaviour {
         secondaryButton.SetActive(false);
 
         
-        inputBox.GetComponentInChildren<Text>().text = "";
         if (isNew) {
             inputBox.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Enter your question here...";
         }
@@ -305,28 +333,82 @@ public class QuizManager_UIGroup : MonoBehaviour {
         primaryButton.GetComponentInChildren<Text>().text = buttonName;
     }
 
-    private void AddCorrectAnswer() {
-        tempQuestion = new Questions();
-        tempQuestion.question = inputBox.GetComponent<InputField>().text;
-        Message("Question Added");
+    private void AddAnswer() {
+        string heading = "";
+        if (answerCount < 1) {
+            tempQuestion = new Questions();
+            tempQuestion.answers = new List<Answers>();
+            tempQuestion.question = inputBox.GetComponent<InputField>().text;
+            Message("Question Added");
+            heading = (isNew) ? "Set the correct answer" : "Update the correct answer";
+            answerCount = 1;
+        } else {
+            Message("Answer Added");
+            heading = (isNew) ? "Set " + answerCount + "/4 incorrect answer" : "Update " + answerCount + "/4 incorrect answer";
+        }
 
-        string heading = (isNew) ? "Set the correct answer" : "Update the correct answer";
         admin.SetHeadingText(heading);
+
+        ActivateAllUi();
+        dropBox.SetActive(false);
+        secondaryButton.SetActive(false);
+
+        inputBox.GetComponentInChildren<Text>().text = "";
+
+        string buttonName = "";
+        if (isNew) {
+            inputBox.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Enter the correct answer here...";
+            if (answerCount > 1) {
+                buttonName = answerCount + "/4 : Add\nIncorrect\nAnswer";
+            } else {
+                buttonName = "Add\nCorrect\nAnswer";
+            }
+        } else {
+            if (answerCount > 1) {
+                buttonName = answerCount + "/4 : Update\nIncorrect\nAnswer";
+            } else {
+                buttonName = "Update\nCorrect\nAnswer";
+            }
+        }        
+
+        primaryButton.GetComponentInChildren<Text>().text = buttonName;
+    }
+
+    private void SetAnswer() {
+        Answers answer = new Answers();
+        answer.answer = inputBox.GetComponent<InputField>().text;
+        if (answerCount == 1) {
+            answer.isCorrect = 1;
+        } else {
+            answer.isCorrect = 0;
+        }
+        tempQuestion.answers.Add(answer);
+        answerCount++;
+        Message("Answer Added");
+    }
+
+    private void AddQuizToDatabase() {
+        quiz.NumberQuestions = Int32.Parse(inputBox.GetComponent<InputField>().text);
+        Debug.Log("Nuber of questions = " + quiz.NumberQuestions);
+        quiz.QuizId = Database.GetNewIDForQuiz();
+        Database.CreateNewQuiz(quiz.QuizId, quiz.QuizName, quiz.NumberQuestions, "Gordon", quiz.SubjectName);
+        // todo change to user account name:
+    }
+
+    private void AddQuestionToDatabase() {
+        tempQuestion.question_id = Database.GetNewIDForQuestion();
+        Database.AddQuestionToQuiz(tempQuestion.question_id, tempQuestion.question, quiz.QuizId);
+    }
+
+    private void AddAnswersToDatabase() {
+        for (int i = 0; i < tempQuestion.answers.Count; i++) {
+            Database.AddAnswerToQuestion(tempQuestion.answers[i].answer, tempQuestion.answers[i].isCorrect, tempQuestion.question_id);
+        }
     }
 
     /// <summary>
     /// HELPER Functions Below
     /// </summary>
-
-    public void ConstrainInputNumber() {
-        if (currentUI != UI_STATE.NumberOfQuestions) { return; }
-        int value = Int32.Parse(inputBox.GetComponent<InputField>().text);
-        if (value < 1) {
-            inputBox.GetComponent<InputField>().text = "1";
-        } else if (value > 500) {
-            inputBox.GetComponent<InputField>().text = "500";
-        }
-    }
 
     private void ActivateAllUi() {
         inputBox.SetActive(true);
@@ -334,6 +416,8 @@ public class QuizManager_UIGroup : MonoBehaviour {
         primaryButton.SetActive(true);
         secondaryButton.SetActive(true);
         inputBox.GetComponent<InputField>().contentType = InputField.ContentType.Standard;
+        inputBox.GetComponent<InputField>().characterLimit = 255;
+        inputBox.GetComponentInChildren<Text>().text = "";
     }
 
     private void PopulateDropboxData(string caption) {

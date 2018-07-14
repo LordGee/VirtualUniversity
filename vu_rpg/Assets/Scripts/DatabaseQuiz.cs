@@ -64,8 +64,14 @@ public partial class Database {
     /// todo: If questions get deleted or bd empty this may cause issues.
     /// </summary>
     /// <returns>Returns next available index value</returns>
-    private static int GetNewIDForQuestion() {
+    public static int GetNewIDForQuestion() {
         object id     = ExecuteScalar("SELECT question_id FROM Questions ORDER BY question_id DESC LIMIT 1");
+        int    result = Convert.ToInt32(id);
+        return result + 1;
+    }
+
+    public static int GetNewIDForQuiz() {
+        object id     = ExecuteScalar("SELECT quiz_id FROM Quizes ORDER BY quiz_id DESC LIMIT 1");
         int    result = Convert.ToInt32(id);
         return result + 1;
     }
@@ -160,10 +166,29 @@ public partial class Database {
         return dontExists;
     }
 
-    public static void CreateNewQuiz(string quiz, string className) {
-        // ExecuteNoReturn("INSERT INTO Quizes VALUES (@quiz, @date ,@class)", new SqliteParameter("@quiz", quiz), new SqliteParameter("@date", DateTime.Today), new SqliteParameter("@class", className));
+
+    public static void CreateNewQuiz(int quiz, string name, int number, string owner, string subject) {
+        ExecuteNoReturn("INSERT INTO Quizes (quiz_id, quiz_name, number_questions, quiz_owner, fk_subject_name) VALUES (@quizid, @name ,@number, @owner, @subject)", 
+            new SqliteParameter("@quizid", quiz), 
+            new SqliteParameter("@name", name), 
+            new SqliteParameter("@number", number),
+            new SqliteParameter("@owner", owner),
+            new SqliteParameter("@subject", subject));
     }
 
+    public static void AddQuestionToQuiz(int id, string question, int quiz) {
+        ExecuteNoReturn("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (@id, @quest, @quiz)",
+            new SqliteParameter("@id", id),
+            new SqliteParameter("@quest", question),
+            new SqliteParameter("@quiz", quiz));
+    }
+
+    public static void AddAnswerToQuestion(string answer, int isCorrect, int question) {
+        ExecuteNoReturn("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (@ans, @isCorrect, @question)",
+            new SqliteParameter("@ans", answer),
+            new SqliteParameter("@isCorrect", isCorrect),
+            new SqliteParameter("@question", question));
+    }
     /// <summary>
     /// Adds question and answers to the database
     /// todo: answers needs to be more dynamic, one answer per row.
