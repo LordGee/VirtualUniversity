@@ -1,9 +1,7 @@
 fileFormatVersion: 2
 guid: 1cb053a79ec4941c09e73dedbad6060a
-timeCreated: 1498687137
-licenseType: Store
 ModelImporter:
-  serializedVersion: 21
+  serializedVersion: 23
   fileIDToRecycleName:
     100000: Bip001
     100002: Bip001 Head
@@ -140,10 +138,13 @@ ModelImporter:
     13700014: pants
     13700016: shoulders
     13700018: top
+    2186277476908879412: ImportLogs
+  externalObjects: {}
   materials:
     importMaterials: 0
     materialName: 0
     materialSearch: 1
+    materialLocation: 0
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
@@ -157,7 +158,7 @@ ModelImporter:
       might lower retargeting quality:\n\t'Bip001 Neck1' is inbetween humanoid transforms
       and has rotation animation that will be discarded.\n"
     animationRetargetingWarnings: "\nRetargeting quality report for clip 'Take 001':\n\tLeftLowerLeg
-      average position error 29.3 mm and maximum position error 151.5 mm at time 10:
+      average position error 29.3 mm and maximum position error 151.6 mm at time 10:
       7 (73.0%) Frame 307\n\tLeftFoot average position error 29.3 mm and maximum position
       error 151.6 mm at time 10: 7 (73.0%) Frame 307\n\tRightLowerLeg average position
       error 20.0 mm and maximum position error 165.0 mm at time 10: 7 (73.0%) Frame
@@ -168,11 +169,12 @@ ModelImporter:
       (56.5%) Frame 238\n\tLeftHand average position error 2.4 mm and maximum position
       error 9.1 mm at time 7:28 (56.5%) Frame 238\n\tRightUpperArm average position
       error 2.4 mm and maximum position error 9.1 mm at time 7:28 (56.5%) Frame 238\n\tRightLowerArm
-      average position error 2.4 mm and maximum position error 9.3 mm at time 7:28
+      average position error 2.4 mm and maximum position error 9.1 mm at time 7:28
       (56.5%) Frame 238\n\tRightHand average position error 2.4 mm and maximum position
-      error 9.1 mm at time 7:28 (56.5%) Frame 238\n\tHead average position error 4.1
-      mm and maximum position error 26.7 mm at time 2:20 (18.7%) Frame 80\n"
+      error 9.5 mm at time 7:28 (56.5%) Frame 238\n"
     animationDoRetargetingWarnings: 1
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
     animationCompression: 0
     animationRotationError: 0.5
     animationPositionError: 0.5
@@ -1253,11 +1255,15 @@ ModelImporter:
     optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
+    previousCalculatedGlobalScale: 0.0508
+    hasPreviousCalculatedGlobalScale: 1
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
