@@ -20,11 +20,13 @@ public partial class Administration : MonoBehaviour {
     public UIAdminGroups groupQuiz;
 
     private UIAdminGroups current;
+    private Player player;
 
     void Start() {
         current = groupAdmin;
         current.groupObject.SetActive(true);
         SetHeadingText(current.title);
+        player = FindObjectOfType<Player>();
     }
 
     public void SetHeadingText(string value) {
@@ -47,6 +49,13 @@ public partial class Administration : MonoBehaviour {
         // todo exit administration as well
     }
 
-    
+    /// <summary>
+    /// Needed to store in database at various points of the administration process.
+    /// Presume this is the primary key in the player table.
+    /// </summary>
+    /// <returns>Player Account Name</returns>
+    public string GetPlayerName() {
+        return player.account;
+    }
 
 }

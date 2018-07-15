@@ -14,7 +14,7 @@ public class UISystemMessage : MonoBehaviour {
     }
 
     public IEnumerator Display() {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(2.5f);
         message.SetActive(false);
     }
 }
