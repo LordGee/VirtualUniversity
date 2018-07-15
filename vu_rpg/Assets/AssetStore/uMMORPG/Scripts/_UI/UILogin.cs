@@ -45,7 +45,10 @@ public partial class UILogin : MonoBehaviour {
             // (using IsConnecting is slightly delayed and would allow multiple clicks)
             registerButton.onClick.SetListener(() => { uiPopup.Show(registerMessage); });
             loginButton.interactable = !manager.isNetworkActive && manager.IsAllowedAccountName(accountInput.text);
-            loginButton.onClick.SetListener(() => { manager.StartClient(); });
+            loginButton.onClick.SetListener(() => {
+                // todo: add account information previously below here...
+                manager.StartClient();
+            });
             hostButton.interactable = !manager.isNetworkActive && manager.IsAllowedAccountName(accountInput.text);
             hostButton.onClick.SetListener(() => { manager.StartHost(); });
             cancelButton.gameObject.SetActive(manager.IsConnecting());

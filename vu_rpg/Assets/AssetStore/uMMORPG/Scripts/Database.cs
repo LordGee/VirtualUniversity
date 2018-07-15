@@ -177,10 +177,7 @@ public partial class Database {
                             PRIMARY KEY(guild, character))");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS accounts (
-                            name TEXT NOT NULL PRIMARY KEY,
-                            password TEXT NOT NULL,
-                            banned INTEGER NOT NULL)");
+        
 
         /* Custom Implementation for quiz tables */
         Initialize_User();
