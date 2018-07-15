@@ -183,6 +183,7 @@ public partial class Database {
                             banned INTEGER NOT NULL)");
 
         /* Custom Implementation for quiz tables */
+        Initialize_User();
         Initialize_Quiz();
 
         // addon system hooks
