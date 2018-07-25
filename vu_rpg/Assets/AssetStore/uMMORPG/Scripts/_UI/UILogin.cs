@@ -20,12 +20,15 @@ public partial class UILogin : MonoBehaviour {
     public Button cancelButton;
     public Button quitButton;
 
+
+
     void Start() {
         // load last server by name in case order changes some day.
         if (PlayerPrefs.HasKey("LastServer")) {
             string last = PlayerPrefs.GetString("LastServer", "");
             serverDropdown.value = manager.serverList.FindIndex(s => s.name == last);
         }
+        InitStart();
     }
 
     void OnDestroy() {
@@ -39,11 +42,14 @@ public partial class UILogin : MonoBehaviour {
             panel.SetActive(true);
 
             // status
-            statusText.text = manager.IsConnecting() ? "Connecting..." : "";
+            if (manager.IsConnecting()) statusText.text = "Connecting...";
 
             // buttons. interactable while network is not active
             // (using IsConnecting is slightly delayed and would allow multiple clicks)
-            registerButton.onClick.SetListener(() => { uiPopup.Show(registerMessage); });
+            registerButton.onClick.SetListener(() => {
+                // todo: enable registration process
+                uiPopup.Show(registerMessage);
+            });
             loginButton.interactable = !manager.isNetworkActive && manager.IsAllowedAccountName(accountInput.text);
             loginButton.onClick.SetListener(() => {
                 // todo: add account information previously below here...
@@ -58,18 +64,20 @@ public partial class UILogin : MonoBehaviour {
             quitButton.onClick.SetListener(() => { NetworkManagerMMO.Quit(); });
 
             // inputs
-            manager.loginAccount = accountInput.text;
-            manager.loginPassword = passwordInput.text;
+            manager.loginAccount = username;
+            manager.loginPassword = password;
 
             // copy servers to dropdown; copy selected one to networkmanager ip/port.
             serverDropdown.interactable = !manager.isNetworkActive;
             serverDropdown.options = manager.serverList.Select(
                 sv => new Dropdown.OptionData(sv.name)
             ).ToList();
-            manager.networkAddress = manager.serverList[serverDropdown.value].ip;
+            manager.networkAddress = manager.serverList[server].ip;
 
             // addon system hooks
             Utils.InvokeMany(typeof(UILogin), this, "Update_");
         } else panel.SetActive(false);
     }
+
+
 }
