@@ -9,7 +9,7 @@ public partial class Database {
                             name TEXT NOT NULL PRIMARY KEY,
                             password TEXT NOT NULL,
                             banned INTEGER NOT NULL DEFAULT 0,
-                            account_type SET ('Admin', 'Student') NOT NULL,
+                            account_type TEXT NOT NULL DEFAULT 'Student',
                             fk_course TEXT)");
 
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Enrolled (
@@ -18,11 +18,10 @@ public partial class Database {
                             fk_subject TEXT NOT NULL)");
     }
 
-    public static void RegisterUser(string account, string password, string type, string course) {
-        ExecuteNoReturn("INSERT INTO accounts (name, password, account_type, fk_course) VALUES (@name, @password, @type, @course)", 
+    public static void RegisterUser(string account, string password, string course) {
+        ExecuteNoReturn("INSERT INTO accounts (name, password, fk_course) VALUES (@name, @password, @course)", 
             new SqliteParameter("@name", account), 
             new SqliteParameter("@password", password),
-            new SqliteParameter("@type", type),
             new SqliteParameter("@course", course));
     }
 }

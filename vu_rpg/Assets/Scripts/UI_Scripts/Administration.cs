@@ -22,10 +22,6 @@ public partial class Administration : MonoBehaviour {
     private UIAdminGroups current;
     private Player player;
 
-    void Start() {
-        
-    }
-
     public void BeginAdministrationUI() {
         current = groupAdmin;
         current.groupObject.SetActive(true);

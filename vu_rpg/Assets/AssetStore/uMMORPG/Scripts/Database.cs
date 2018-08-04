@@ -237,7 +237,7 @@ public partial class Database {
     }
 
     // account data ////////////////////////////////////////////////////////////
-    public static bool IsValidAccount(string account, string password) {
+    public static bool IsValidAccount(string account, string password, string course, bool reg) {
         // this function can be used to verify account credentials in a database
         // or a content management system.
         //
@@ -285,8 +285,12 @@ public partial class Database {
                 return (string)row[0] == password && (long)row[1] == 0;
             } else {
                 // account doesn't exist. create it.
-                ExecuteNoReturn("INSERT INTO accounts VALUES (@name, @password, 0)", new SqliteParameter("@name", account), new SqliteParameter("@password", password));
-                return true;
+                if (reg) {
+                    RegisterUser(account, password, course);
+                    return true;
+                }
+                // ExecuteNoReturn("INSERT INTO accounts VALUES (@name, @password, 0)", new SqliteParameter("@name", account), new SqliteParameter("@password", password));
+                return false;
             }
         }
         return false;

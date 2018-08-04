@@ -42,6 +42,8 @@ public partial class NetworkManagerMMO : NetworkManager {
     [Header("Login")]
     public string loginAccount = "";
     public string loginPassword = "";
+    public string loginCourse = "";
+    public bool registration = false;
 
     // we may want to add another game server if the first one gets too crowded.
     // the server list allows people to choose a server.
@@ -111,7 +113,8 @@ public partial class NetworkManagerMMO : NetworkManager {
         print("OnClientReceivePopup: " + message.text);
 
         // show a popup
-        uiPopup.Show(message.text);
+        FindObjectOfType<UISystemMessage>().NewTextAndDisplay(message.text);
+        // FindObjectOfType<UISystemMessage>().NewTextAndDisplay(message.text);
 
         // disconnect if it was an important network error
         // (this is needed because the login failure message doesn't disconnect
@@ -241,7 +244,7 @@ public partial class NetworkManagerMMO : NetworkManager {
             // allowed account name?
             if (IsAllowedAccountName(message.account)) {
                 // validate account info
-                if (Database.IsValidAccount(message.account, message.password)) {
+                if (Database.IsValidAccount(message.account, message.password, loginCourse, registration)) {
                     // not in lobby and not in world yet?
                     if (!AccountLoggedIn(message.account)) {
                         print("login successful: " + message.account);
@@ -282,7 +285,6 @@ public partial class NetworkManagerMMO : NetworkManager {
     void OnClientCharactersAvailable(NetworkMessage netMsg) {
         charactersAvailableMsg = netMsg.ReadMessage<CharactersAvailableMsg>();
         print("characters available:" + charactersAvailableMsg.characters.Length);
-
         // addon system hooks
         Utils.InvokeMany(typeof(NetworkManagerMMO), this, "OnClientCharactersAvailable_", charactersAvailableMsg);
     }
@@ -495,7 +497,7 @@ public partial class NetworkManagerMMO : NetworkManager {
         print("OnClientDisconnect");
 
         // show a popup so that users know what happened
-        uiPopup.Show("Disconnected.");
+        FindObjectOfType<UISystemMessage>().NewTextAndDisplay("Disconnected.");
 
         // call base function to guarantee proper functionality
         base.OnClientDisconnect(conn);

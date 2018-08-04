@@ -13,7 +13,7 @@ public partial class Administration {
 public class QuizManager_UIGroup : MonoBehaviour {
 
     public GameObject inputBox;
-    public GameObject dropBox;
+    public Dropdown dropBox;
     public GameObject primaryButton;
     public GameObject secondaryButton;
     public GameObject backButton;
@@ -151,7 +151,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         admin.SetHeadingText("Add / Edit Quizes");
         content = new List<string>();
         content = Database.GetQuizNames();
-        PopulateDropboxData("Select Quiz");
+        PopulateDropbox.Run(ref dropBox, content, "Select Quiz");
         primaryButton.GetComponentInChildren<Text>().text = "Manage\nSelected\nQuiz";
         secondaryButton.GetComponentInChildren<Text>().text = "Create\nNew\nQuiz";
     }
@@ -163,7 +163,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         admin.SetHeadingText("Select a Course");
         content = new List<string>();
         content = Database.GetCourseNames();
-        PopulateDropboxData("Select Course");
+        PopulateDropbox.Run(ref dropBox, content, "Select Course");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nCourse";
         quiz = new Quiz();
     }
@@ -177,7 +177,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         admin.SetHeadingText("Select a Subject");
         content = new List<string>();
         content = Database.GetSubjectsLinkedToCourse(quiz.CourseName); 
-        PopulateDropboxData("Select Subject");
+        PopulateDropbox.Run(ref dropBox, content, "Select Subject");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nSubject";
         backButton.GetComponentInChildren<Text>().text = "Exit Quiz\nManagement";
     }
@@ -188,7 +188,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         string heading = (isNew) ? "Name your new quiz" : "Update the name of your quiz";
         admin.SetHeadingText(heading);
         ActivateAllUi();
-        dropBox.SetActive(false);
+        dropBox.gameObject.SetActive(false);
         secondaryButton.SetActive(false);
         if (isNew) {
             inputBox.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Give your new quiz a name...";
@@ -203,7 +203,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         string heading = (isNew) ? "How many questions will be asked" : "Update how many questions will be asked";
         admin.SetHeadingText(heading);
         ActivateAllUi();
-        dropBox.SetActive(false);
+        dropBox.gameObject.SetActive(false);
         secondaryButton.SetActive(false);
         if (isNew) {
             inputBox.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Enter number of questions to be asked...";
@@ -222,7 +222,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         string heading = (isNew) ? "Set your question" : "Update this question";
         admin.SetHeadingText(heading);
         ActivateAllUi();
-        dropBox.SetActive(false);
+        dropBox.gameObject.SetActive(false);
         secondaryButton.SetActive(false);
         if (isNew) {
             inputBox.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Enter your question here...";
@@ -246,7 +246,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         }
         admin.SetHeadingText(heading);
         ActivateAllUi();
-        dropBox.SetActive(false);
+        dropBox.gameObject.SetActive(false);
         secondaryButton.SetActive(false);
         backButton.SetActive(false);
         inputBox.GetComponentInChildren<Text>().text = "";
@@ -307,7 +307,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
 
     private void ActivateAllUi() {
         inputBox.SetActive(true);
-        dropBox.SetActive(true);
+        dropBox.gameObject.SetActive(true);
         primaryButton.SetActive(true);
         secondaryButton.SetActive(true);
         backButton.SetActive(true);
@@ -316,12 +316,6 @@ public class QuizManager_UIGroup : MonoBehaviour {
         inputBox.GetComponent<InputField>().characterLimit = 255;
         inputBox.GetComponentInChildren<Text>().text = "";
         inputBox.GetComponent<InputField>().text = "";
-    }
-
-    private void PopulateDropboxData(string caption) {
-        dropBox.GetComponent<Dropdown>().ClearOptions();
-        dropBox.GetComponent<Dropdown>().AddOptions(content);
-        dropBox.GetComponent<Dropdown>().captionText.text = caption;
     }
 
     private void Message(string message) {

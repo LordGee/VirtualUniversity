@@ -47,8 +47,8 @@ public partial class UILogin : MonoBehaviour {
             // buttons. interactable while network is not active
             // (using IsConnecting is slightly delayed and would allow multiple clicks)
             registerButton.onClick.SetListener(() => {
-                // todo: enable registration process
-                uiPopup.Show(registerMessage);
+                ProceedRegistration();
+                // uiPopup.Show(registerMessage);
             });
             loginButton.interactable = !manager.isNetworkActive && manager.IsAllowedAccountName(accountInput.text);
             loginButton.onClick.SetListener(() => {
@@ -66,6 +66,8 @@ public partial class UILogin : MonoBehaviour {
             // inputs
             manager.loginAccount = username;
             manager.loginPassword = password;
+            manager.loginCourse = course;
+            manager.registration = registration;
 
             // copy servers to dropdown; copy selected one to networkmanager ip/port.
             serverDropdown.interactable = !manager.isNetworkActive;
