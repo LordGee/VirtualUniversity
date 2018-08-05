@@ -20,9 +20,7 @@ public partial class UILogin : MonoBehaviour {
         PASSWORD,
         SERVER,
         COURSE,
-        CHARACTER,
         COUNT
-
     };
 
     private UIState currentState;
