@@ -26,10 +26,10 @@ public partial class Npc : Entity {
     public Transform teleportTo;
 
     [Header("Guild Management")]
-    public bool offersGuildManagement = true;
+    public bool offersGuildManagement = false;
 
     [Header("Pets")]
-    public bool offersPetRevive = true;
+    public bool offersPetRevive = false;
 
     // networkbehaviour ////////////////////////////////////////////////////////
     public override void OnStartServer() {

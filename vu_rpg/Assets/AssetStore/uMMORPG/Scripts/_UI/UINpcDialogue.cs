@@ -40,7 +40,7 @@ public partial class UINpcDialogue : MonoBehaviour {
             });
 
             // teleport button
-            if (player.accountType == "Admin") {
+            if (player.IsAdmin()) {
                 teleportButton.gameObject.SetActive(npc.teleportTo != null);
                 if (npc.teleportTo != null)
                     teleportButton.GetComponentInChildren<Text>().text = "Teleport: " + npc.teleportTo.name;
