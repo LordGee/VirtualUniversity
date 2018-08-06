@@ -24,4 +24,16 @@ public partial class Database {
             new SqliteParameter("@password", password),
             new SqliteParameter("@course", course));
     }
+
+    public static string GetAccountType(string account) {
+        object value     = ExecuteScalar("SELECT account_type FROM accounts WHERE name = @value", new SqliteParameter("@value", account));
+        string result = value.ToString();
+        return result;
+    }
+
+    public static string GetCourseName(string course) {
+        object value  = ExecuteScalar("SELECT fk_course FROM accounts WHERE name = @value", new SqliteParameter("@value", course));
+        string result = value.ToString();
+        return result;
+    }
 }

@@ -73,6 +73,8 @@ public partial class Player : Entity {
     // some meta info
     [HideInInspector] public string account = "";
     [HideInInspector] public string className = "";
+    [HideInInspector] public string accountType = "";
+    [HideInInspector] public string course = "";
 
     // health
     public override int healthMax {

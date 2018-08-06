@@ -107,8 +107,7 @@ public partial class Database {
                             gold INTEGER NOT NULL,
                             coins INTEGER NOT NULL,
                             online TEXT NOT NULL,
-                            deleted INTEGER NOT NULL,
-                            course_name TEXT)");
+                            deleted INTEGER NOT NULL)");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS character_inventory (
@@ -496,6 +495,8 @@ public partial class Database {
                 player.skillExperience    = (long)mainrow[12];
                 player.gold               = (long)mainrow[13];
                 player.coins              = (long)mainrow[14];
+                player.course = Database.GetCourseName(player.account);
+                player.accountType = Database.GetAccountType(player.account);
 
                 // try to warp to loaded position.
                 // => agent.warp is recommended over transform.position and

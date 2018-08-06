@@ -43,6 +43,7 @@ public partial class NetworkManagerMMO : NetworkManager {
     public string loginAccount = "";
     public string loginPassword = "";
     public string loginCourse = "";
+    public string loginAccountType = "";
     public bool registration = false;
 
     // we may want to add another game server if the first one gets too crowded.

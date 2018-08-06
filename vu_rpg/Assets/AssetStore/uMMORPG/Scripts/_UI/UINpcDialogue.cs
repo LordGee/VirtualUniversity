@@ -40,12 +40,12 @@ public partial class UINpcDialogue : MonoBehaviour {
             });
 
             // teleport button
-            teleportButton.gameObject.SetActive(npc.teleportTo != null);
-            if (npc.teleportTo != null)
-                teleportButton.GetComponentInChildren<Text>().text = "Teleport: " + npc.teleportTo.name;
-            teleportButton.onClick.SetListener(() => {
-                player.CmdNpcTeleport();
-            });
+            if (player.accountType == "Admin") {
+                teleportButton.gameObject.SetActive(npc.teleportTo != null);
+                if (npc.teleportTo != null)
+                    teleportButton.GetComponentInChildren<Text>().text = "Teleport: " + npc.teleportTo.name;
+                teleportButton.onClick.SetListener(() => { player.CmdNpcTeleport(); });
+            } else teleportButton.gameObject.SetActive(false);
 
             // filter out the quests that are available for the player
             List<QuestTemplate> questsAvailable = npc.QuestsVisibleFor(player);
