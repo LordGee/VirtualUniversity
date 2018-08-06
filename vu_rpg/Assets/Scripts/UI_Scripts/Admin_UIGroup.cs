@@ -35,6 +35,7 @@ public class Admin_UIGroup : MonoBehaviour {
 
     public void btn_Exit() {
         admin.ExitCurrentPanel();
+        admin.ExitAdministrationUI();
     }
 	
 }

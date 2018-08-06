@@ -23,6 +23,7 @@ public partial class Administration : MonoBehaviour {
     private Player player;
 
     public void BeginAdministrationUI() {
+        backPanel.SetActive(true);
         current = groupAdmin;
         current.groupObject.SetActive(true);
         SetHeadingText(current.title);
@@ -30,8 +31,7 @@ public partial class Administration : MonoBehaviour {
     }
 
     public void ExitAdministrationUI() {
-        current.groupObject.SetActive(false);
-        this.gameObject.SetActive(false);
+        backPanel.SetActive(false);
     }
 
     public void SetHeadingText(string value) {

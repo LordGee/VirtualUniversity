@@ -31,44 +31,45 @@ public partial class UINpcDialogue : MonoBehaviour {
             // welcome text
             welcomeText.text = npc.welcome;
 
-            // trading button
-            tradingButton.gameObject.SetActive(npc.saleItems.Length > 0);
-            tradingButton.onClick.SetListener(() => {
-                npcTradingPanel.SetActive(true);
-                inventoryPanel.SetActive(true); // better feedback
-                panel.SetActive(false);
-            });
+            UpdateButtons(npc, player);
 
-            // teleport button
-            if (player.IsAdmin()) {
-                teleportButton.gameObject.SetActive(npc.teleportTo != null);
-                if (npc.teleportTo != null)
-                    teleportButton.GetComponentInChildren<Text>().text = "Teleport: " + npc.teleportTo.name;
-                teleportButton.onClick.SetListener(() => { player.CmdNpcTeleport(); });
-            } else teleportButton.gameObject.SetActive(false);
+            // trading button
+            //tradingButton.gameObject.SetActive(npc.saleItems.Length > 0);
+            //tradingButton.onClick.SetListener(() => {
+            //    npcTradingPanel.SetActive(true);
+            //    inventoryPanel.SetActive(true); // better feedback
+            //    panel.SetActive(false);
+            //});
+
+            // teleport button 
+            //teleportButton.gameObject.SetActive(npc.teleportTo != null);
+            //if (npc.teleportTo != null)
+            //    teleportButton.GetComponentInChildren<Text>().text = "Teleport: " + npc.teleportTo.name;
+            //teleportButton.onClick.SetListener(() => { player.CmdNpcTeleport(); });
+        
 
             // filter out the quests that are available for the player
-            List<QuestTemplate> questsAvailable = npc.QuestsVisibleFor(player);
-            questsButton.gameObject.SetActive(questsAvailable.Count > 0);
-            questsButton.onClick.SetListener(() => {
-                npcQuestPanel.SetActive(true);
-                panel.SetActive(false);
-            });
+            //List<QuestTemplate> questsAvailable = npc.QuestsVisibleFor(player);
+            //questsButton.gameObject.SetActive(questsAvailable.Count > 0);
+            //questsButton.onClick.SetListener(() => {
+            //    npcQuestPanel.SetActive(true);
+            //    panel.SetActive(false);
+            //});
 
             // guild
-            guildButton.gameObject.SetActive(npc.offersGuildManagement);
-            guildButton.onClick.SetListener(() => {
-                npcGuildPanel.SetActive(true);
-                panel.SetActive(false);
-            });
+            //guildButton.gameObject.SetActive(npc.offersGuildManagement);
+            //guildButton.onClick.SetListener(() => {
+            //    npcGuildPanel.SetActive(true);
+            //    panel.SetActive(false);
+            //});
 
             // pet revive
-            petReviveButton.gameObject.SetActive(npc.offersPetRevive);
-            petReviveButton.onClick.SetListener(() => {
-                npcPetRevivePanel.SetActive(true);
-                inventoryPanel.SetActive(true); // better feedback
-                panel.SetActive(false);
-            });
+            //petReviveButton.gameObject.SetActive(npc.offersPetRevive);
+            //petReviveButton.onClick.SetListener(() => {
+            //    npcPetRevivePanel.SetActive(true);
+            //    inventoryPanel.SetActive(true); // better feedback
+            //    panel.SetActive(false);
+            //});
         } else panel.SetActive(false); // hide
 
         // addon system hooks
