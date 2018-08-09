@@ -13,6 +13,9 @@ public partial class UINpcDialogue {
     public Button workshopButton;
     public Button adminButton;
 
+    [Header("Custom Panels")]
+    public GameObject StudentQuizPanel;
+
     private void UpdateButtons(Npc npc, Player player) {
 
         teleportButton.gameObject.SetActive(npc.teleportTo != null);
@@ -23,7 +26,10 @@ public partial class UINpcDialogue {
         if (!player.IsAdmin()) {
             // quiz
             quizButton.gameObject.SetActive(true);
-
+            quizButton.onClick.SetListener((() => {
+                Hide();
+                StudentQuizPanel.GetComponent<StudentQuiz_UIGroup>().InitStart();
+            }));
             // lecture
             lectureButton.gameObject.SetActive(true);
 

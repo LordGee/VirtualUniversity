@@ -181,6 +181,7 @@ public partial class Database {
         /* Custom Implementation for quiz tables */
         Initialize_User();
         Initialize_Quiz();
+        Initialize_StudentQuiz();
 
         // addon system hooks
         Utils.InvokeMany(typeof(Database), null, "Initialize_");
