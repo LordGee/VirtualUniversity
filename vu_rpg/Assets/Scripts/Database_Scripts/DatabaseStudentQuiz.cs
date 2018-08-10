@@ -41,7 +41,6 @@ public partial class Database {
                 quiz.Add(temp);
             }
         }
-        int z = 0;
     }
 
     private static bool HasQuizBeenCompleted(string account, int quiz) {
