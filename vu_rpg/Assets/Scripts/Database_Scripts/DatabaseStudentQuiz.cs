@@ -59,5 +59,29 @@ public partial class Database {
             new SqliteParameter("@subject", subject));
     }
 
+    public static List<Questions> GetQuestionsForChoosenQuiz(int quiz) {
+        List<Questions> questions = new List<Questions>();
+
+        List<List<object>> questionResults = ExecuteReader("SELECT question_id, question FROM Questions WHERE fk_quiz_id = @quiz", new SqliteParameter("@quiz", quiz));
+        for (int i = 0; i < questionResults.Count; i++) {
+            Questions q = new Questions();
+            q.question_id = Convert.ToInt32(questionResults[i][0]);
+            q.question = (string) questionResults[i][1];
+            q.answers = new List<Answers>();
+            List<List<object>> answerResults =
+                ExecuteReader("SELECT answer_id, answer, is_correct FROM Answers WHERE fk_question_id = @question",
+                    new SqliteParameter("@question", q.question_id));
+            for (int j = 0; j < answerResults.Count; j++) {
+                Answers a = new Answers();
+                a.answer_id = Convert.ToInt32(answerResults[j][0]);
+                a.answer = (string) answerResults[j][1];
+                a.isCorrect = Convert.ToInt32(answerResults[j][2]);
+                q.answers.Add(a);
+            }
+            questions.Add(q);
+        }
+
+        return questions;
+    }
 
 }

@@ -64,6 +64,14 @@ public class Questions {
 }
 
 public class Answers {
+    public int answer_id;
     public string answer;
     public int isCorrect; // was boolean, stored as int in database.
+}
+
+public class QuestionResults {
+    public int fk_results_id;
+    public int fk_question_id;
+    public int fk_answer_id;
+    public int isCorrect;
 }
