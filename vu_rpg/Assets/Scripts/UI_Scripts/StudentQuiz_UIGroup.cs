@@ -1,14 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class StudentQuiz_UIGroup : MonoBehaviour {
 
     [Header("Panels")]
     public GameObject quizSelectionPanel;
     public GameObject quizQuestionPanel;
+    public GameObject quizResultsPanel;
 
     [Header("Quiz Selection")]
     public Transform quizContent;
@@ -19,6 +22,12 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     public Text questionSubHeading;
     public Text questionText;
     public Button[] answerButtons;
+
+    [Header("Quiz Results")]
+    public Text resultsHeadingText;
+    public Text resultsSubHeadingText;
+    public Transform resultContent;
+    public QuizResultSlot resultSlot;
 
     private List<Quiz> quizzes;
     private Player player;
@@ -167,7 +176,44 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     }
 
     private void EndQuiz() {
-        Debug.Log("Ending quiz");
+        // Update Database with result is_completed
+        Database.UpdateResultsToIsCompleted(results_id); 
+
+        // Display Result Panel
+        startQuiz = false;
+        quizQuestionPanel.gameObject.SetActive(false);
+        quizResultsPanel.gameObject.SetActive(true);
+        resultsHeadingText.text = "Results for " + quizzes[choosenQuiz].QuizName;
+
+        // Calculate result as percentage
+        int totalQuestions = quizzes[choosenQuiz].Questions.Count;
+        int totalCorrect = Database.GetTotalCorrectFromResults(results_id);
+        float percentage = 0;
+        if (totalCorrect != 0 || totalQuestions != 0) {
+            percentage = (float) (totalCorrect * 100) / totalQuestions;
+        }
+        resultsSubHeadingText.text = "Your Result is " + Math.Ceiling(percentage) + "%";
+
+        // Show each question and define correct and wrong answers.
+        UIUtils.BalancePrefabs(resultSlot.gameObject, totalQuestions, resultContent);
+        for (int i = 0; i < totalQuestions; i++) {
+            QuizResultSlot slot = resultContent.GetChild(i).GetComponent<QuizResultSlot>();
+            slot.nameText.text = "Q" + (i + 1) + ". " + quizzes[choosenQuiz].Questions[i].question;
+            slot.correctAnswerText.text = "Correct Answer: " + Database.GetCorrectAnswer(quizzes[choosenQuiz].Questions[i].question_id);
+            if (Database.GetWasAnswerCorrect(results_id, quizzes[choosenQuiz].Questions[i].question_id)) {
+                slot.selectButton.GetComponentInChildren<Text>().text = "CORRECT";
+                slot.selectButton.GetComponent<Image>().color = Color.green;
+            } else {
+                slot.selectButton.GetComponentInChildren<Text>().text = "Incorrect";
+                slot.selectButton.GetComponent<Image>().color = Color.yellow;
+                slot.wrongAnswerText.text = "You Answered: " +
+                                            Database.GetActualAnswer(Database.GetStudentsAnswerId(results_id,
+                                                quizzes[choosenQuiz].Questions[i].question_id));
+            }
+        }
+
+        // Set start new button
+        Debug.Log("Almost there");
     }
 
     private bool HasAllocationFinished(List<bool> test) {
@@ -183,5 +229,14 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
     private string UpdateSubHeading() {
         return "Timer: " + (int)quizTimer;
+    }
+
+    public void ExitQuizSelection() {
+        quizSelectionPanel.gameObject.SetActive(false);
+    }
+
+    public void ExitResultsPanel() {
+        quizResultsPanel.gameObject.SetActive(false);
+        InitStart();
     }
 }

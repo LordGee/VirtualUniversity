@@ -104,4 +104,44 @@ public partial class Database {
             new SqliteParameter("@answer", result.fk_answer_id));
     }
 
+    public static void UpdateResultsToIsCompleted(int result) {
+        ExecuteNoReturn("UPDATE Results SET is_completed = 1 WHERE result_id = @id",
+            new SqliteParameter("@id", result));
+    }
+
+    public static int GetTotalCorrectFromResults(int result) {
+        object value = ExecuteScalar("SELECT result_value FROM Results WHERE result_id = @id",
+            new SqliteParameter("@id", result));
+        return Convert.ToInt32(value);
+    }
+
+    public static bool GetWasAnswerCorrect(int result, int question) {
+        object value = ExecuteScalar(
+            "SELECT is_correct FROM Answers, ResultQA WHERE ResultQA.fk_result_id = @result AND " +
+            "ResultQA.fk_question_id = @question AND ResultQA.fk_answer_id = Answers.answer_id",
+            new SqliteParameter("@result", result), new SqliteParameter("@question", question));
+        if (Convert.ToInt32(value) == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public static string GetCorrectAnswer(int question) {
+        object text = ExecuteScalar("SELECT answer FROM Answers WHERE fk_question_id = @id AND is_correct = 1",
+            new SqliteParameter("@id", question));
+        return text.ToString();
+    }
+
+    public static int GetStudentsAnswerId(int result, int question) {
+        object id = ExecuteScalar(
+            "SELECT fk_answer_id FROM ResultQA WHERE fk_result_id = @result AND fk_question_id = @question",
+            new SqliteParameter("@result", result), new SqliteParameter("@question", question));
+        return Convert.ToInt32(id);
+    }
+
+    public static string GetActualAnswer(int answer) {
+        object text = ExecuteScalar("SELECT answer FROM Answers WHERE answer_id = @id",
+            new SqliteParameter("@id", answer));
+        return text.ToString();
+    }
 }
