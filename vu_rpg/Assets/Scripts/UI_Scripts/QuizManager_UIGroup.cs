@@ -200,17 +200,17 @@ public class QuizManager_UIGroup : MonoBehaviour {
     private void NumberOfQuestions() {
         quiz.QuizName = inputBox.GetComponent<InputField>().text;
         Message("Quiz Name Added");
-        string heading = (isNew) ? "How many questions will be asked" : "Update how many questions will be asked";
+        string heading = (isNew) ? "How long will the quiz last for in minutes" : "Update how long the quiz will last for";
         admin.SetHeadingText(heading);
         ActivateAllUi();
         dropBox.gameObject.SetActive(false);
         secondaryButton.SetActive(false);
         if (isNew) {
-            inputBox.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Enter number of questions to be asked...";
+            inputBox.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Enter how long in minutes...";
         }
         inputBox.GetComponent<InputField>().contentType = InputField.ContentType.IntegerNumber;
         inputBox.GetComponent<InputField>().characterLimit = 3;
-        string buttonName = (isNew) ? "Set\nNumber\nQuestions" : "Update\nNumber\nQuestions";
+        string buttonName = (isNew) ? "Set\nMinutes" : "Update\nMinutes";
         primaryButton.GetComponentInChildren<Text>().text = buttonName;
     }
 
@@ -282,12 +282,10 @@ public class QuizManager_UIGroup : MonoBehaviour {
     }
 
     private void AddQuizToDatabase() {
-        quiz.NumberQuestions = Int32.Parse(inputBox.GetComponent<InputField>().text);
-        Debug.Log("Nuber of questions = " + quiz.NumberQuestions);
+        quiz.QuizTimer = Int32.Parse(inputBox.GetComponent<InputField>().text);
+        Debug.Log("Nuber of questions = " + quiz.QuizTimer);
         quiz.QuizId = Database.GetNewIDForQuiz();
-        Database.CreateNewQuiz(quiz.QuizId, quiz.QuizName, quiz.NumberQuestions, "Gordon", quiz.SubjectName);
-        // todo change to user account name:
-//        Debug.Log("Account name = " + admin.GetPlayerName());
+        Database.CreateNewQuiz(quiz.QuizId, quiz.QuizName, quiz.QuizTimer, FindObjectOfType<Player>().account, quiz.SubjectName);
     }
 
     private void AddQuestionToDatabase() {

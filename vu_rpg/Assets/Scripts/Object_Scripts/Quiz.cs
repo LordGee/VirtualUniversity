@@ -25,10 +25,10 @@ public class Quiz {
         set { quiz_name = value; }
     }
 
-    private int number_questions;
-    public int NumberQuestions {
-        get { return number_questions; }
-        set { number_questions = value; }
+    private int quiz_timer;
+    public int QuizTimer {
+        get { return quiz_timer; }
+        set { quiz_timer = value; }
     }
 
     private string quiz_owner;

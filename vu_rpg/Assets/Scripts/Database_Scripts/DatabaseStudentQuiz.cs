@@ -25,7 +25,7 @@ public partial class Database {
     // get all quizes by course... narrow to subject later
     public static void GetStudentQuizzes(ref List<Quiz> quiz, string account, string course) {
         List<List<object>> result = ExecuteReader(
-            "SELECT quiz_id, quiz_name, number_questions, creation_date, quiz_owner, Quizes.fk_subject_name " +
+            "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizes.fk_subject_name " +
             "FROM Quizes, Subjects, CourseSubjects WHERE Quizes.fk_subject_name = Subjects.subject_name AND " +
             "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
             "GROUP BY quiz_name ORDER BY quiz_name",
@@ -35,7 +35,7 @@ public partial class Database {
                 Quiz temp = new Quiz();
                 temp.QuizId = Convert.ToInt32(result[i][0]);
                 temp.QuizName = (string) result[i][1];
-                temp.NumberQuestions = Convert.ToInt32(result[i][2]);
+                temp.QuizTimer = Convert.ToInt32(result[i][2]);
                 temp.CourseName = GetCourseNameFromSubject((string)result[i][5]);
                 temp.SubjectName = (string)result[i][5];
                 quiz.Add(temp);
@@ -142,6 +142,6 @@ public partial class Database {
     public static string GetActualAnswer(int answer) {
         object text = ExecuteScalar("SELECT answer FROM Answers WHERE answer_id = @id",
             new SqliteParameter("@id", answer));
-        return text.ToString();
+        return (text == null) ? "" : text.ToString();
     }
 }

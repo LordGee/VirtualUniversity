@@ -37,8 +37,9 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     private int results_id;
 
     private bool startQuiz = false;
+    private const int SECONDS_IN_MINUTE = 60;
     private float quizTimer, currentTime, lastUpdate;
-    private const float QUIZ_TIMER = 300.0f;
+    private int QUIZ_TIMER = 0;
     private int currentQuestion = 0;
 
     private List<int> questionIndexOrder;
@@ -60,8 +61,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         PopulateQuizzes();
         selectionQuiz = true;
         startQuiz = false;
-        quizTimer = QUIZ_TIMER;
-        lastUpdate = QUIZ_TIMER;
+        quizTimer = SECONDS_IN_MINUTE;
+        lastUpdate = SECONDS_IN_MINUTE;
         currentTime = 0.0f;
     }
 
@@ -73,6 +74,10 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
             }
         } else if (startQuiz) {
+            if (quizTimer < 0) {
+                FindObjectOfType<UISystemMessage>().NewTextAndDisplay("Time has run out");
+                EndQuiz();
+            }
             if (lastUpdate - quizTimer >= 1.0f) {
                 questionSubHeading.text = UpdateSubHeading();
                 lastUpdate = quizTimer;
@@ -122,6 +127,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
                 hasQuestionBeenAllocated[index] = true;
             }
         }
+        quizTimer = quizzes[choosenQuiz].QuizTimer * SECONDS_IN_MINUTE;
+        lastUpdate = quizzes[choosenQuiz].QuizTimer * SECONDS_IN_MINUTE;
         startQuiz = true;
         NextQuestion();
     }
@@ -177,7 +184,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
     private void EndQuiz() {
         // Update Database with result is_completed
-        Database.UpdateResultsToIsCompleted(results_id); 
+        //Database.UpdateResultsToIsCompleted(results_id); 
 
         // Display Result Panel
         startQuiz = false;
@@ -211,9 +218,6 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
                                                 quizzes[choosenQuiz].Questions[i].question_id));
             }
         }
-
-        // Set start new button
-        Debug.Log("Almost there");
     }
 
     private bool HasAllocationFinished(List<bool> test) {
@@ -228,7 +232,11 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     }
 
     private string UpdateSubHeading() {
-        return "Timer: " + (int)quizTimer;
+        // todo Reference: https://answers.unity.com/questions/45676/making-a-timer-0000-minutes-and-seconds.html
+        float minutes = Mathf.Floor(quizTimer / SECONDS_IN_MINUTE);
+        float seconds = quizTimer % SECONDS_IN_MINUTE;
+        string zero = (seconds < 10) ? "0" : "";
+        return "Timer: " + minutes + ":" + zero + (int)seconds;
     }
 
     public void ExitQuizSelection() {
