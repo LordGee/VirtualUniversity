@@ -25,6 +25,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
     private int choosenQuiz = -1;
     private bool selectionQuiz = false;
+    private int results_id;
 
     private bool startQuiz = false;
     private float quizTimer, currentTime, lastUpdate;
@@ -51,9 +52,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         selectionQuiz = true;
         startQuiz = false;
         quizTimer = QUIZ_TIMER;
+        lastUpdate = QUIZ_TIMER;
         currentTime = 0.0f;
-        lastUpdate = 0.0f;
-        Debug.Log("Started Quiz Panel");
     }
 
     void Update() {
@@ -61,11 +61,13 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
             PopulateQuizzes();
             if (choosenQuiz != -1) {
                 selectionQuiz = false;
+
             }
         } else if (startQuiz) {
             if (lastUpdate - quizTimer >= 1.0f) {
                 questionSubHeading.text = UpdateSubHeading();
                 lastUpdate = quizTimer;
+                questionHeading.text = UpdateHeading();
             }
             quizTimer -= Time.timeSinceLevelLoad - currentTime;
             currentTime = Time.timeSinceLevelLoad;
@@ -81,6 +83,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
             int count = i;
             slot.selectButton.onClick.SetListener(() => {
                 choosenQuiz = count;
+                results = new List<QuestionResults>();
+                results_id = Database.CreateNewResultsForChoosenQuiz(player.account, quizzes[choosenQuiz].QuizId);
                 SelectedQuiz();
             });
         }
@@ -127,7 +131,6 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
                 hasAnswerBeenAllocated[index] = true;
             }
         }
-        Debug.Log("Defined Question");
     }
 
     private void SetupAnswerButton() {
@@ -143,8 +146,28 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     }
 
     private void ConfirmAnswer() {
-        // TODO: this is where I am!
-        Debug.LogWarning("Answered = " + selectedAnswer);
+        QuestionResults result = new QuestionResults();
+        result.fk_results_id = results_id;
+        result.fk_answer_id = quizzes[choosenQuiz].Questions[questionIndexOrder[currentQuestion]].answers[selectedAnswer].answer_id;
+        result.fk_question_id = quizzes[choosenQuiz].Questions[questionIndexOrder[currentQuestion]].question_id;
+        result.isCorrect = quizzes[choosenQuiz].Questions[questionIndexOrder[currentQuestion]].answers[selectedAnswer].isCorrect;
+        results.Add(result);
+        Database.UpdateResultsAfterQuestionAnswered(result);
+        if (currentQuestion < quizzes[choosenQuiz].Questions.Count - 1) {
+            currentQuestion++;
+            if (result.isCorrect == 1) {
+                FindObjectOfType<UISystemMessage>().NewTextAndDisplay("CORRECT");
+            } else {
+                FindObjectOfType<UISystemMessage>().NewTextAndDisplay("Wrong");
+            }
+            NextQuestion();
+        } else {
+            EndQuiz();
+        }
+    }
+
+    private void EndQuiz() {
+        Debug.Log("Ending quiz");
     }
 
     private bool HasAllocationFinished(List<bool> test) {
