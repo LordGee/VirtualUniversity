@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public partial class Administration {
 
@@ -10,6 +8,10 @@ public partial class Administration {
 
     public void Admin_Quiz() {
         DeactivateActivateGroup(groupQuiz);
+    }
+
+    public void Admin_Lecture() {
+        DeactivateActivateGroup(groupLecture);
     }
 
     public void ExitCurrentPanel() {
@@ -31,6 +33,10 @@ public class Admin_UIGroup : MonoBehaviour {
 
     public void btn_Quiz() {
         admin.Admin_Quiz();
+    }
+
+    public void btn_Lecture() {
+        admin.Admin_Lecture();
     }
 
     public void btn_Exit() {

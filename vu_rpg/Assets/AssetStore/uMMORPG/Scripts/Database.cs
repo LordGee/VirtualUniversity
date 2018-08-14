@@ -182,6 +182,7 @@ public partial class Database {
         Initialize_User();
         Initialize_Quiz();
         Initialize_StudentQuiz();
+        Initialize_Lecture();
 
         // addon system hooks
         Utils.InvokeMany(typeof(Database), null, "Initialize_");

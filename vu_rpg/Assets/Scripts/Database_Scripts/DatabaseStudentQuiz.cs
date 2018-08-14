@@ -17,7 +17,8 @@ public partial class Database {
 
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS ResultQA (
                             result_qa_id INTEGER NOT NULL PRIMARY KEY autoincrement,
-                            fk_result_id INTEGER NOT NULL,
+                            fk_result_id INTEGER NOT NULL DEFAULT -1,
+                            fk_lecture_id INTEGER NOT NULL DEFAULT -1,
                             fk_question_id INTEGER NOT NULL,
                             fk_answer_id INTEGER NOT NULL)");
     }

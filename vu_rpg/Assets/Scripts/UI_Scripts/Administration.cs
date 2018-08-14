@@ -14,10 +14,12 @@ public partial class Administration : MonoBehaviour {
 
     public GameObject backPanel;
     public Text headingText;
+
     [Header("UI Groups")]
     public UIAdminGroups groupAdmin; 
     public UIAdminGroups groupSubject;
     public UIAdminGroups groupQuiz;
+    public UIAdminGroups groupLecture;
 
     private UIAdminGroups current;
     private Player player;
