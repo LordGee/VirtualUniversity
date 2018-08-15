@@ -1385,7 +1385,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1092218595475802
 GameObject:
   m_ObjectHideFlags: 1
@@ -5770,6 +5770,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 224652043125245630}
+  - component: {fileID: 114062650749241114}
   m_Layer: 5
   m_Name: Lecture_UIGroup
   m_TagString: Untagged
@@ -16396,6 +16397,22 @@ MonoBehaviour:
   dragable: 1
   dropable: 1
   draggedToSlot: 0
+--- !u!114 &114062650749241114
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1422369012432952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e244777008157934d979dd0bfa2da53c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputBox: {fileID: 1549038022271626}
+  dropBox: {fileID: 114556157475568430}
+  primaryButton: {fileID: 1443544143166470}
+  secondaryButton: {fileID: 1878629352024480}
+  backButton: {fileID: 1008314294636236}
 --- !u!114 &114063318885569842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -17571,7 +17588,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 114062650749241114}
         m_MethodName: SecondaryButton
         m_Mode: 1
         m_Arguments:
@@ -34256,7 +34273,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 114338331905290082}
-        m_MethodName: btn_Quiz
+        m_MethodName: btn_Lecture
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -39511,7 +39528,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 114062650749241114}
         m_MethodName: PrimaryButton
         m_Mode: 1
         m_Arguments:

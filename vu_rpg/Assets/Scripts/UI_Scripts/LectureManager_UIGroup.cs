@@ -68,8 +68,10 @@ public class LectureManager_UIGroup : MonoBehaviour {
                 break;
             case UI_STATE.SetBreak:
                 breakPoint = new LectureBreakPoint();
+                    // todo: may need to change breaktime to represent time of video
                 breakPoint.break_time = Convert.ToInt32(inputBox.GetComponent<InputField>().text);
                 // add first step to database.
+                lecture.lecture_id = Database.CreateNewLectureInit(lecture, FindObjectOfType<Player>().account);
                 Message("Lecture Details added to Database");
                 SetQuestion();
                 break;
@@ -89,7 +91,7 @@ public class LectureManager_UIGroup : MonoBehaviour {
                 answerCount++;
                 if (answerCount > 4) {
                     // add this step to database.
-
+                    Database.CreateNewBreakForLecture(ref breakPoint, lecture.lecture_id);
                     // Return to 
                     Message("Question and Answers Added to Database");
                     SetBreak();
@@ -98,6 +100,10 @@ public class LectureManager_UIGroup : MonoBehaviour {
                 }
                 break;
         }
+    }
+
+    public void SecondaryButton() {
+
     }
 
     private void BeginState() {

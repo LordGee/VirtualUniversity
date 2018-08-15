@@ -30,7 +30,7 @@ public partial class Database {
                             question_id INTEGER NOT NULL PRIMARY KEY,
                             question TEXT NOT NULL,
                             fk_quiz_id INTEGER NOT NULL DEFAULT -1,
-                            fk_lecture_id INTEGER NOT NULL DEFAULT -1)");
+                            fk_break_id INTEGER NOT NULL DEFAULT -1)");
 
 
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Answers (
