@@ -168,7 +168,7 @@ public partial class Database {
     }
 
     public static void CreateNewQuiz(int quiz, string name, int number, string owner, string subject) {
-        ExecuteNoReturn("INSERT INTO Quizes (quiz_id, quiz_name, number_questions, quiz_owner, fk_subject_name) VALUES (@quizid, @name ,@number, @owner, @subject)", 
+        ExecuteNoReturn("INSERT INTO Quizes (quiz_id, quiz_name, quiz_timer, quiz_owner, fk_subject_name) VALUES (@quizid, @name ,@number, @owner, @subject)", 
             new SqliteParameter("@quizid", quiz), 
             new SqliteParameter("@name", name), 
             new SqliteParameter("@number", number),

@@ -39,7 +39,6 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     private bool startQuiz = false;
     private const int SECONDS_IN_MINUTE = 60;
     private float quizTimer, currentTime, lastUpdate;
-    private int QUIZ_TIMER = 0;
     private int currentQuestion = 0;
 
     private List<int> questionIndexOrder;
@@ -61,8 +60,6 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         PopulateQuizzes();
         selectionQuiz = true;
         startQuiz = false;
-        quizTimer = SECONDS_IN_MINUTE;
-        lastUpdate = SECONDS_IN_MINUTE;
         currentTime = 0.0f;
     }
 
@@ -184,7 +181,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
     private void EndQuiz() {
         // Update Database with result is_completed
-        //Database.UpdateResultsToIsCompleted(results_id); 
+        Database.UpdateResultsToIsCompleted(results_id); 
 
         // Display Result Panel
         startQuiz = false;
