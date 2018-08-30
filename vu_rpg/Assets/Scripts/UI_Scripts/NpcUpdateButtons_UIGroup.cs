@@ -26,12 +26,16 @@ public partial class UINpcDialogue {
         if (!player.IsAdmin()) {
             // quiz
             quizButton.gameObject.SetActive(true);
-            quizButton.onClick.SetListener((() => {
+            quizButton.onClick.SetListener(() => {
                 Hide();
                 StudentQuizPanel.GetComponent<StudentQuiz_UIGroup>().InitStart();
-            }));
+            });
             // lecture
             lectureButton.gameObject.SetActive(true);
+            lectureButton.onClick.SetListener(() => {
+                Hide();
+
+            });
 
             // workshop
             workshopButton.gameObject.SetActive(true);

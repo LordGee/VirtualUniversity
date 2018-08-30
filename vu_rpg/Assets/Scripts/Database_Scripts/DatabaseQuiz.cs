@@ -65,17 +65,16 @@ public partial class Database {
     /// todo: If questions get deleted or bd empty this may cause issues.
     /// </summary>
     /// <returns>Returns next available index value</returns>
-    public static int GetNewIDForQuestion() {
-        object id     = ExecuteScalar("SELECT question_id FROM Questions ORDER BY question_id DESC LIMIT 1");
-        int    result = Convert.ToInt32(id);
-        return result + 1;
-    }
-
-    public static int GetNewIDForQuiz() {
-        object id     = ExecuteScalar("SELECT quiz_id FROM Quizes ORDER BY quiz_id DESC LIMIT 1");
-        int    result = Convert.ToInt32(id);
-        return result + 1;
-    }
+    //public static int GetNewIDForQuestion() {
+    //    object id     = ExecuteScalar("SELECT question_id FROM Questions ORDER BY question_id DESC LIMIT 1");
+    //    int    result = Convert.ToInt32(id);
+    //    return result + 1;
+    //}
+    //public static int GetNewIDForQuiz() {
+    //    object id     = ExecuteScalar("SELECT quiz_id FROM Quizes ORDER BY quiz_id DESC LIMIT 1");
+    //    int    result = Convert.ToInt32(id);
+    //    return result + 1;
+    //}
 
     /// <summary>
     /// Retrieve all avaiilable course names from the database
@@ -197,7 +196,7 @@ public partial class Database {
     /// <param name="answers">Array of string answers (max 3)</param>
     /// <param name="correct">Correct answer 1 - 3</param>
     public static void AddNewQuestionAndAnswer(string question, string[] answers, int correct) {
-        int QuestionID = GetNewIDForQuestion();
+        int QuestionID = GetNextID("Questions", "question_id");
         // todo: need to get quiz_id for this insert statement
         ExecuteNoReturn("INSERT INTO Questions (" +
                         "question_id, question, fk_quiz_id) VALUES (" +

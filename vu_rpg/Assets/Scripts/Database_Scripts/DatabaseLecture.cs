@@ -56,14 +56,33 @@ public partial class Database {
         }
     }
 
-    /// <summary>
-    /// Helper function to get the next available ID from a given table that does not autoincrement
-    /// </summary>
-    /// <param name="tableName">Name of the target table</param>
-    /// <param name="primaryKey">Primary Key for the target table</param>
-    /// <returns>Next Available ID</returns>
-    private static int GetNextID(string tableName, string primaryKey) {
-        object result = ExecuteScalar("SELECT " + primaryKey + " FROM " + tableName + " ORDER BY " + primaryKey + " DESC LIMIT 1");
-        return Convert.ToInt32(result) + 1;
+    public static void GetStudentLectures(ref List<Lecture> lectures, string account, string course) {
+        List<List<object>> result = ExecuteReader(
+            "SELECT lecture_id, lecture_title, lecture_url, Lectures.fk_subject_name " +
+            "FROM Lectures, Subjects, CourseSubjects WHERE Lectures.fk_subject_name = Subjects.subject_name AND " +
+            "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
+            "GROUP BY lecture_title ORDER BY lecture_title",
+            new SqliteParameter("@course", course));
+        for (int i = 0; i < result.Count; i++) {
+            if (HasLectureBeenCompleted(account, Convert.ToInt32(result[i][0]))) {
+                Lecture temp = new Lecture();
+                temp.lecture_id = Convert.ToInt32(result[i][0]);
+                temp.lecture_title = (string)result[i][1];
+                temp.lecture_url = (string)result[i][2];
+                temp.course_name = GetCourseNameFromSubject((string)result[i][3]);
+                temp.fk_subject_name = (string)result[i][3];
+                lectures.Add(temp);
+            }
+        }
     }
+
+    private static bool HasLectureBeenCompleted(string account, int lecture) {
+        int count =
+            Convert.ToInt32(ExecuteScalar("SELECT COUNT(*) FROM LectureAttend WHERE fk_lecture_id = @lecture AND fk_account = @account AND has_attended = 1",
+                new SqliteParameter("@lecture", lecture), new SqliteParameter("@account", account)));
+        if (count == 0) { return true; }
+        return false;
+    }
+
+
 }

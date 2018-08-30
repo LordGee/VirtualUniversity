@@ -24,8 +24,6 @@ public class LectureManager_UIGroup : MonoBehaviour {
     private LectureBreakPoint breakPoint;
 
     private int answerCount = 0;
-
-
     public enum UI_STATE {
         Begin,
         LectureName,
@@ -103,7 +101,11 @@ public class LectureManager_UIGroup : MonoBehaviour {
     }
 
     public void SecondaryButton() {
-
+        switch (currentUI) {
+            case UI_STATE.SetURL:
+                Message("Feature Coming Soon.");
+                break;
+        }
     }
 
     private void BeginState() {
@@ -142,7 +144,7 @@ public class LectureManager_UIGroup : MonoBehaviour {
     private void SetURL() {
         ActivateAllUi();
         dropBox.gameObject.SetActive(false);
-        admin.SetHeadingText("Enter YouTube URL");
+        admin.SetHeadingText("Enter URL to your Video (MP4/AVI)");
         primaryButton.GetComponentInChildren<Text>().text = "Add\nURL";
         secondaryButton.GetComponentInChildren<Text>().text = "Upload\nVideo";
         currentUI = UI_STATE.SetURL;

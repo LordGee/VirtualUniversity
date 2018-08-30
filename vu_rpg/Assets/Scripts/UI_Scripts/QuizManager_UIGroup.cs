@@ -282,13 +282,12 @@ public class QuizManager_UIGroup : MonoBehaviour {
 
     private void AddQuizToDatabase() {
         quiz.QuizTimer = Int32.Parse(inputBox.GetComponent<InputField>().text);
-        Debug.Log("Nuber of questions = " + quiz.QuizTimer);
-        quiz.QuizId = Database.GetNewIDForQuiz();
+        quiz.QuizId = Database.GetNextID("Quizes", "quiz_id");
         Database.CreateNewQuiz(quiz.QuizId, quiz.QuizName, quiz.QuizTimer, FindObjectOfType<Player>().account, quiz.SubjectName);
     }
 
     private void AddQuestionToDatabase() {
-        tempQuestion.question_id = Database.GetNewIDForQuestion();
+        tempQuestion.question_id = Database.GetNextID("Questions", "question_id");
         Database.AddQuestionToQuiz(tempQuestion.question_id, tempQuestion.question, quiz.QuizId);
     }
 
