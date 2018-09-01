@@ -1,13 +1,19 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class StudentLecture_UIGroup : MonoBehaviour {
 
     [Header("Panels")]
     public GameObject lectureSelectionPanel;
     public GameObject lectureQuestionPanel;
+
+    [Header("Lecture")]
+    public Camera lectureCamera;
+    public VideoPlayer video;
 
     [Header("Lecture Selection")]
     public Transform lectureContent;
@@ -19,14 +25,15 @@ public class StudentLecture_UIGroup : MonoBehaviour {
     public Text questionText;
     public Button[] answerButtons;
 
-    private int choosenLecture;
+    private int chosenLecture;
     private float currentTime;
     private Player player;
     private List<Lecture> lectures;
     private bool startLecture;
+    private List<bool> breakComplete;
 
     public void InitStart() {
-        choosenLecture = -1;
+        chosenLecture = -1;
         lectureSelectionPanel.SetActive(true);
         player = FindObjectOfType<Player>();
         lectures = new List<Lecture>();
@@ -36,6 +43,25 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         currentTime = 0.0f; 
     }
 
+    void Update() {
+        if (startLecture) {
+            if (video.isPlaying) {
+                Debug.Log("Video time is : " + video.time);
+                for (int i = 0; i < lectures[chosenLecture].break_points.Count; i++) {
+                    // check for breakpoint questions
+                    if (video.time >= lectures[chosenLecture].break_points[i].break_time && !breakComplete[i]) {
+                        // pause video and display question
+                        Debug.Log("Question Time: " + i);
+                        breakComplete[i] = true;
+                    }
+                }
+            } else {
+                Debug.Log("Video is NOT Playing");
+                // switch off lecture camera and return to UI with results
+            }
+        }
+    }
+
     private void PopulateLectures() {
         UIUtils.BalancePrefabs(slotPrefab.gameObject, lectures.Count, lectureContent);
         for (int i = 0; i < lectures.Count; i++) {
@@ -43,13 +69,34 @@ public class StudentLecture_UIGroup : MonoBehaviour {
             slot.nameText.text = lectures[i].lecture_title;
             int count = i;
             slot.selectButton.onClick.SetListener(() => {
-                choosenLecture = count;
+                chosenLecture = count;
                 SelectedLecture();
             });
         }
     }
 
     private void SelectedLecture() {
+        if (LoadChosenLecture()) {
+            lectureCamera.gameObject.SetActive(true);
+            breakComplete = new List<bool>();
+            // Loop through number of breakpoints and set boolean value to determine if break has already been completed
+            for (int i = 0; i < lectures[chosenLecture].break_points.Count; i++) {
+                breakComplete.Add(false);
+            }
+            startLecture = true;
+        }
+    }
 
+    private bool LoadChosenLecture() {
+        try {
+            video.Stop();
+            video.url = lectures[chosenLecture].lecture_url;
+            video.Play();
+            video.isLooping = false;
+            return true;
+        } catch (Exception e) {
+            Debug.LogError("Lecture failed to load: " + e);
+            return false;
+        }
     }
 }

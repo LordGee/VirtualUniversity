@@ -14,7 +14,8 @@ public partial class UINpcDialogue {
     public Button adminButton;
 
     [Header("Custom Panels")]
-    public GameObject StudentQuizPanel;
+    public GameObject studentQuizPanel;
+    public GameObject studentLecturePanel;
 
     private void UpdateButtons(Npc npc, Player player) {
 
@@ -28,13 +29,13 @@ public partial class UINpcDialogue {
             quizButton.gameObject.SetActive(true);
             quizButton.onClick.SetListener(() => {
                 Hide();
-                StudentQuizPanel.GetComponent<StudentQuiz_UIGroup>().InitStart();
+                studentQuizPanel.GetComponent<StudentQuiz_UIGroup>().InitStart();
             });
             // lecture
             lectureButton.gameObject.SetActive(true);
             lectureButton.onClick.SetListener(() => {
                 Hide();
-
+                studentLecturePanel.GetComponent<StudentLecture_UIGroup>().InitStart();
             });
 
             // workshop

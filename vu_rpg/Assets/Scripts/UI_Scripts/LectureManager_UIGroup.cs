@@ -62,15 +62,14 @@ public class LectureManager_UIGroup : MonoBehaviour {
             case UI_STATE.SetURL:
                 lecture.lecture_url = inputBox.GetComponent<InputField>().text;
                 lecture.break_points = new List<LectureBreakPoint>();
+                // add first step to database.
+                lecture.lecture_id = Database.CreateNewLectureInit(lecture, FindObjectOfType<Player>().account);
+                Message("Lecture Details added to Database");
                 SetBreak();
                 break;
             case UI_STATE.SetBreak:
                 breakPoint = new LectureBreakPoint();
-                    // todo: may need to change breaktime to represent time of video
                 breakPoint.break_time = Convert.ToInt32(inputBox.GetComponent<InputField>().text);
-                // add first step to database.
-                lecture.lecture_id = Database.CreateNewLectureInit(lecture, FindObjectOfType<Player>().account);
-                Message("Lecture Details added to Database");
                 SetQuestion();
                 break;
             case UI_STATE.SetQuestion:

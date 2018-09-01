@@ -23,7 +23,7 @@ public partial class Database {
 
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS LectureBreakPoints (
                             break_id INTEGER NOT NULL PRIMARY KEY,
-                            break_time DATETIME,
+                            break_time INTEGER,
                             fk_lecture_id INTEGER NOT NULL)");
     }
 
@@ -71,10 +71,27 @@ public partial class Database {
                 temp.lecture_url = (string)result[i][2];
                 temp.course_name = GetCourseNameFromSubject((string)result[i][3]);
                 temp.fk_subject_name = (string)result[i][3];
+                temp.break_points = new List<LectureBreakPoint>();
+                List<List<object>> point = ExecuteReader(
+                    "SELECT break_id, break_time FROM LectureBreakPoints WHERE fk_lecture_id = @lecture",
+                    new SqliteParameter("@lecture", temp.lecture_id)
+                );
+                if (point.Count > 0) {
+                    for (int j = 0; j < point.Count; j++) {
+                        LectureBreakPoint tempBreakPoint = new LectureBreakPoint();
+                        tempBreakPoint.break_id = Convert.ToInt32(point[j][0]);
+                        tempBreakPoint.break_time = Convert.ToInt32(point[j][1]);
+                        tempBreakPoint.break_question = new Questions();
+                        tempBreakPoint.break_question.answers = new List<Answers>();
+                        tempBreakPoint.break_question = Database.GetQuestionsForChosenLecture(tempBreakPoint.break_id); // loc: DatabaseStudentQuiz.cs
+                        temp.break_points.Add(tempBreakPoint);
+                    }
+                }
                 lectures.Add(temp);
             }
         }
     }
+
 
     private static bool HasLectureBeenCompleted(string account, int lecture) {
         int count =
