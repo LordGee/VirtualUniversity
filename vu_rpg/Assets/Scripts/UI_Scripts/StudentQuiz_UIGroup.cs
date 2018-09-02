@@ -37,7 +37,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     private int results_id;
 
     private bool startQuiz = false;
-    private const int SECONDS_IN_MINUTE = 60;
+    
     private float quizTimer, currentTime, lastUpdate;
     private int currentQuestion = 0;
 
@@ -117,15 +117,15 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         for (int i = 0; i < quizzes[choosenQuiz].Questions.Count; i++) {
             hasQuestionBeenAllocated.Add(false);
         }
-        while (!HasAllocationFinished(hasQuestionBeenAllocated)) {
+        while (!AllocationTest.HasAllocationFinished(hasQuestionBeenAllocated)) {
             int index = Random.Range(0, quizzes[choosenQuiz].Questions.Count);
             if (!hasQuestionBeenAllocated[index]) {
                 questionIndexOrder.Add(index);
                 hasQuestionBeenAllocated[index] = true;
             }
         }
-        quizTimer = quizzes[choosenQuiz].QuizTimer * SECONDS_IN_MINUTE;
-        lastUpdate = quizzes[choosenQuiz].QuizTimer * SECONDS_IN_MINUTE;
+        quizTimer = quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE;
+        lastUpdate = quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE;
         startQuiz = true;
         NextQuestion();
     }
@@ -137,7 +137,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         for (int i = 0; i < quizzes[choosenQuiz].Questions[questionIndexOrder[currentQuestion]].answers.Count; i++) {
             hasAnswerBeenAllocated.Add(false);
         }
-        while (!HasAllocationFinished(hasAnswerBeenAllocated)) {
+        while (!AllocationTest.HasAllocationFinished(hasAnswerBeenAllocated)) {
             int index = Random.Range(0, quizzes[choosenQuiz].Questions[questionIndexOrder[currentQuestion]].answers.Count);
             if (!hasAnswerBeenAllocated[index]) {
                 answerIndexOrder.Add(index);
@@ -165,7 +165,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         result.fk_question_id = quizzes[choosenQuiz].Questions[questionIndexOrder[currentQuestion]].question_id;
         result.isCorrect = quizzes[choosenQuiz].Questions[questionIndexOrder[currentQuestion]].answers[selectedAnswer].isCorrect;
         results.Add(result);
-        Database.UpdateResultsAfterQuestionAnswered(result);
+        Database.UpdateResultsAfterQuestionAnswered(result, false);
         if (currentQuestion < quizzes[choosenQuiz].Questions.Count - 1) {
             currentQuestion++;
             if (result.isCorrect == 1) {
@@ -191,7 +191,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
         // Calculate result as percentage
         int totalQuestions = quizzes[choosenQuiz].Questions.Count;
-        int totalCorrect = Database.GetTotalCorrectFromResults(results_id);
+        int totalCorrect = Database.GetTotalCorrectFromResults(results_id, false);
         float percentage = 0;
         if (totalCorrect != 0 || totalQuestions != 0) {
             percentage = (float) (totalCorrect * 100) / totalQuestions;
@@ -204,7 +204,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
             QuizResultSlot slot = resultContent.GetChild(i).GetComponent<QuizResultSlot>();
             slot.nameText.text = "Q" + (i + 1) + ". " + quizzes[choosenQuiz].Questions[i].question;
             slot.correctAnswerText.text = "Correct Answer: " + Database.GetCorrectAnswer(quizzes[choosenQuiz].Questions[i].question_id);
-            if (Database.GetWasAnswerCorrect(results_id, quizzes[choosenQuiz].Questions[i].question_id)) {
+            if (Database.GetWasAnswerCorrect(results_id, quizzes[choosenQuiz].Questions[i].question_id, false)) {
                 slot.selectButton.GetComponentInChildren<Text>().text = "CORRECT";
                 slot.selectButton.GetComponent<Image>().color = Color.green;
             } else {
@@ -212,16 +212,9 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
                 slot.selectButton.GetComponent<Image>().color = Color.yellow;
                 slot.wrongAnswerText.text = "You Answered: " +
                                             Database.GetActualAnswer(Database.GetStudentsAnswerId(results_id,
-                                                quizzes[choosenQuiz].Questions[i].question_id));
+                                                quizzes[choosenQuiz].Questions[i].question_id, false));
             }
         }
-    }
-
-    private bool HasAllocationFinished(List<bool> test) {
-        for (int i = 0; i < test.Count; i++) {
-            if (!test[i]) { return false; }
-        }
-        return true;
     }
 
     private string UpdateHeading() {
@@ -230,8 +223,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
     private string UpdateSubHeading() {
         // todo Reference: https://answers.unity.com/questions/45676/making-a-timer-0000-minutes-and-seconds.html
-        float minutes = Mathf.Floor(quizTimer / SECONDS_IN_MINUTE);
-        float seconds = quizTimer % SECONDS_IN_MINUTE;
+        float minutes = Mathf.Floor(quizTimer / _CONST.SECONDS_IN_MINUTE);
+        float seconds = quizTimer % _CONST.SECONDS_IN_MINUTE;
         string zero = (seconds < 10) ? "0" : "";
         return "Timer: " + minutes + ":" + zero + (int)seconds;
     }

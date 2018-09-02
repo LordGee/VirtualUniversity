@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using Random = UnityEngine.Random;
 
 public class StudentLecture_UIGroup : MonoBehaviour {
 
     [Header("Panels")]
     public GameObject lectureSelectionPanel;
     public GameObject lectureQuestionPanel;
+    public GameObject lectureResultsPanel;
 
     [Header("Lecture")]
     public Camera lectureCamera;
@@ -18,19 +20,36 @@ public class StudentLecture_UIGroup : MonoBehaviour {
     [Header("Lecture Selection")]
     public Transform lectureContent;
     public QuizSelectionSlot slotPrefab;
-    public Text lectureHeading;
 
     [Header("Lecture Questions")]
-    public Text questionSubHeading;
     public Text questionText;
     public Button[] answerButtons;
 
+    [Header("Lecture Results")]
+    public Text resultsHeadingText;
+    public Text resultsSubHeadingText;
+    public Transform resultContent;
+    public QuizResultSlot resultSlot;
+
     private int chosenLecture;
-    private float currentTime;
     private Player player;
     private List<Lecture> lectures;
+    private int attend_id;
+    private List<QuestionResults> results;
     private bool startLecture;
     private List<bool> breakComplete;
+    private int currentBreakIndex;
+    private List<int> answerIndexOrder;
+    private int selectedAnswer;
+    private bool isPaused, isQuestion;
+
+    void OnApplicationFocus(bool hasFocus) {
+        isPaused = !hasFocus;
+    }
+
+    void OnApplicationPause(bool pauseStatus) {
+        isPaused = pauseStatus;
+    }
 
     public void InitStart() {
         chosenLecture = -1;
@@ -40,27 +59,34 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         Database.GetStudentLectures(ref lectures, player.account, player.course);
         PopulateLectures();
         startLecture = false;
-        currentTime = 0.0f; 
     }
 
     void Update() {
         if (startLecture) {
             if (video.isPlaying) {
-                Debug.Log("Video time is : " + video.time);
                 for (int i = 0; i < lectures[chosenLecture].break_points.Count; i++) {
                     // check for breakpoint questions
                     if (video.time >= lectures[chosenLecture].break_points[i].break_time && !breakComplete[i]) {
                         // pause video and display question
-                        Debug.Log("Question Time: " + i);
+                        isQuestion = true;
+                        BreakPoint(i);
                         breakComplete[i] = true;
                     }
                 }
-            } else {
-                Debug.Log("Video is NOT Playing");
-                // switch off lecture camera and return to UI with results
+                if (isPaused) {
+                    Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time));
+                    video.Pause();
+                }
+            } else if (!isPaused && !isQuestion) {
+                video.Play();
+            }
+            if (video.frame > 1 && video.frame == (long)video.frameCount) {
+                EndLecture();
             }
         }
     }
+
+
 
     private void PopulateLectures() {
         UIUtils.BalancePrefabs(slotPrefab.gameObject, lectures.Count, lectureContent);
@@ -91,12 +117,119 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         try {
             video.Stop();
             video.url = lectures[chosenLecture].lecture_url;
+            lectureSelectionPanel.SetActive(false);
+            isQuestion = false;
             video.Play();
             video.isLooping = false;
+            results = new List<QuestionResults>();
+            attend_id = Database.CreateNewLectureAttend(player.account, lectures[chosenLecture].lecture_id);
             return true;
         } catch (Exception e) {
             Debug.LogError("Lecture failed to load: " + e);
             return false;
         }
+    }
+
+    private void BreakPoint(int index) {
+        currentBreakIndex = index;
+        video.Pause();
+        lectureCamera.gameObject.SetActive(false);
+        lectureQuestionPanel.gameObject.SetActive(true);
+        PrepareQuestion();
+        SetupAnswerButton();
+        Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time));
+    }
+
+    private void PrepareQuestion() {
+        questionText.text = lectures[chosenLecture].break_points[currentBreakIndex].break_question.question;
+        List<bool> hasAnswerBeenAllocated = new List<bool>();
+        answerIndexOrder = new List<int>();
+        for (int i = 0; i < lectures[chosenLecture].break_points[currentBreakIndex].break_question.answers.Count; i++) {
+            hasAnswerBeenAllocated.Add(false);
+        }
+        while (!AllocationTest.HasAllocationFinished(hasAnswerBeenAllocated)) {
+            int index = Random.Range(0, lectures[chosenLecture].break_points[currentBreakIndex].break_question.answers.Count);
+            if (!hasAnswerBeenAllocated[index]) {
+                answerIndexOrder.Add(index);
+                hasAnswerBeenAllocated[index] = true;
+            }
+        }
+    }
+
+    private void SetupAnswerButton() {
+        for (int i = 0; i < lectures[chosenLecture].break_points[currentBreakIndex].break_question.answers.Count; i++) {
+            answerButtons[i].GetComponentInChildren<Text>().text = lectures[chosenLecture].break_points[currentBreakIndex]
+                .break_question.answers[answerIndexOrder[i]].answer;
+            int count = i;
+            answerButtons[i].onClick.SetListener(() => {
+                selectedAnswer = answerIndexOrder[count];
+                ConfirmAnswer();
+            });
+        }
+    }
+
+    private void ConfirmAnswer() {
+        QuestionResults result = new QuestionResults();
+        result.fk_attend_id = attend_id; 
+        result.fk_answer_id = lectures[chosenLecture].break_points[currentBreakIndex].break_question.answers[selectedAnswer].answer_id;
+        result.fk_question_id = lectures[chosenLecture].break_points[currentBreakIndex].break_question.question_id;
+        result.isCorrect = lectures[chosenLecture].break_points[currentBreakIndex].break_question.answers[selectedAnswer].isCorrect;
+        results.Add(result);
+        Database.UpdateResultsAfterQuestionAnswered(result, true);
+        
+        if (result.isCorrect == 1) {
+            FindObjectOfType<UISystemMessage>().NewTextAndDisplay("CORRECT");
+        } else {
+            FindObjectOfType<UISystemMessage>().NewTextAndDisplay("Wrong");
+        }
+
+        ResumeLecture();
+    }
+
+    private void ResumeLecture() {
+        lectureCamera.gameObject.SetActive(true);
+        lectureQuestionPanel.gameObject.SetActive(false);
+        isQuestion = false;
+        video.Play();
+    }
+
+    private void EndLecture() {
+        lectureCamera.gameObject.SetActive(false);
+        lectureResultsPanel.gameObject.SetActive(true);
+        video.Stop();
+        isQuestion = true;
+        startLecture = false;
+        resultsHeadingText.text = "Results for " + lectures[chosenLecture].lecture_title;
+
+        // Calculate result as percentage
+        int totalQuestions = lectures[chosenLecture].break_points.Count;
+        int totalCorrect = Database.GetTotalCorrectFromResults(attend_id, true);
+        float percentage = 0;
+        if (totalCorrect != 0 || totalQuestions != 0) {
+            percentage = (float)(totalCorrect * 100) / totalQuestions;
+        }
+        resultsSubHeadingText.text = "Your Result is " + Math.Ceiling(percentage) + "%";
+
+        // Show each question and define correct and wrong answers.
+        UIUtils.BalancePrefabs(resultSlot.gameObject, totalQuestions, resultContent);
+        for (int i = 0; i < totalQuestions; i++) {
+            QuizResultSlot slot = resultContent.GetChild(i).GetComponent<QuizResultSlot>();
+            slot.nameText.text = "Q" + (i + 1) + ". " + lectures[chosenLecture].break_points[i].break_question.question;
+            slot.correctAnswerText.text = "Correct Answer: " + Database.GetCorrectAnswer(lectures[chosenLecture].break_points[i].break_question.question_id);
+            if (Database.GetWasAnswerCorrect(attend_id, lectures[chosenLecture].break_points[i].break_question.question_id, true)) {
+                slot.selectButton.GetComponentInChildren<Text>().text = "CORRECT";
+                slot.selectButton.GetComponent<Image>().color = Color.green;
+            } else {
+                slot.selectButton.GetComponentInChildren<Text>().text = "Incorrect";
+                slot.selectButton.GetComponent<Image>().color = Color.yellow;
+                slot.wrongAnswerText.text = "You Answered: " +
+                                            Database.GetActualAnswer(Database.GetStudentsAnswerId(attend_id,
+                                                lectures[chosenLecture].break_points[i].break_question.question_id, true));
+            }
+        }
+
+        // update lecture attend table to be completed.
+        Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time));
+        Database.UpdateLectureAttendToComplete(attend_id);
     }
 }

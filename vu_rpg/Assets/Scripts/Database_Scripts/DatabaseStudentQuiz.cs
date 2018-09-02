@@ -18,7 +18,7 @@ public partial class Database {
         ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS ResultQA (
                             result_qa_id INTEGER NOT NULL PRIMARY KEY autoincrement,
                             fk_result_id INTEGER NOT NULL DEFAULT -1,
-                            fk_lecture_id INTEGER NOT NULL DEFAULT -1,
+                            fk_attend_id INTEGER NOT NULL DEFAULT -1,
                             fk_question_id INTEGER NOT NULL,
                             fk_answer_id INTEGER NOT NULL)");
     }
@@ -118,15 +118,28 @@ public partial class Database {
         return questions;
     }
 
-    public static void UpdateResultsAfterQuestionAnswered(QuestionResults result) {
-        if (result.isCorrect == 1) {
-            ExecuteNoReturn("UPDATE Results SET result_value = result_value + 1 WHERE result_id = @id", new SqliteParameter("@id", result.fk_results_id));
+    public static void UpdateResultsAfterQuestionAnswered(QuestionResults result, bool isLecture) {
+        if (!isLecture) {
+            if (result.isCorrect == 1) {
+                ExecuteNoReturn("UPDATE Results SET result_value = result_value + 1 WHERE result_id = @id",
+                    new SqliteParameter("@id", result.fk_results_id));
+            }
+            ExecuteNoReturn(
+                "INSERT INTO ResultQA (fk_result_id, fk_question_id, fk_answer_id) VALUES (@result, @question, @answer)",
+                new SqliteParameter("@result", result.fk_results_id),
+                new SqliteParameter("@question", result.fk_question_id),
+                new SqliteParameter("@answer", result.fk_answer_id));
+        } else {
+            if (result.isCorrect == 1) {
+                ExecuteNoReturn("UPDATE LectureAttend SET attend_value = attend_value + 1 WHERE attend_id = @id",
+                    new SqliteParameter("@id", result.fk_attend_id));
+            }
+            ExecuteNoReturn(
+                "INSERT INTO ResultQA (fk_attend_id, fk_question_id, fk_answer_id) VALUES (@result, @question, @answer)",
+                new SqliteParameter("@result", result.fk_attend_id),
+                new SqliteParameter("@question", result.fk_question_id),
+                new SqliteParameter("@answer", result.fk_answer_id));
         }
-        ExecuteNoReturn(
-            "INSERT INTO ResultQA (fk_result_id, fk_question_id, fk_answer_id) VALUES (@result, @question, @answer)",
-            new SqliteParameter("@result", result.fk_results_id),
-            new SqliteParameter("@question", result.fk_question_id),
-            new SqliteParameter("@answer", result.fk_answer_id));
     }
 
     public static void UpdateResultsToIsCompleted(int result) {
@@ -134,18 +147,33 @@ public partial class Database {
             new SqliteParameter("@id", result));
     }
 
-    public static int GetTotalCorrectFromResults(int result) {
-        object value = ExecuteScalar("SELECT result_value FROM Results WHERE result_id = @id",
-            new SqliteParameter("@id", result));
-        return Convert.ToInt32(value);
+    public static int GetTotalCorrectFromResults(int id, bool isLecture) {
+        int value = -1;
+        if (!isLecture) {
+            value = Convert.ToInt32(ExecuteScalar("SELECT result_value FROM Results WHERE result_id = @id",
+                new SqliteParameter("@id", id)));
+        } else {
+            value = Convert.ToInt32(ExecuteScalar("SELECT attend_value FROM LectureAttend WHERE attend_id = @id",
+                new SqliteParameter("@id", id)));
+        }
+        return value;
+
     }
 
-    public static bool GetWasAnswerCorrect(int result, int question) {
-        object value = ExecuteScalar(
-            "SELECT is_correct FROM Answers, ResultQA WHERE ResultQA.fk_result_id = @result AND " +
-            "ResultQA.fk_question_id = @question AND ResultQA.fk_answer_id = Answers.answer_id",
-            new SqliteParameter("@result", result), new SqliteParameter("@question", question));
-        if (Convert.ToInt32(value) == 1) {
+    public static bool GetWasAnswerCorrect(int id, int question, bool isLecture) {
+        int value = -1;
+        if (!isLecture) {
+            value = Convert.ToInt32(ExecuteScalar(
+                "SELECT is_correct FROM Answers, ResultQA WHERE ResultQA.fk_result_id = @result AND " +
+                "ResultQA.fk_question_id = @question AND ResultQA.fk_answer_id = Answers.answer_id",
+                new SqliteParameter("@result", id), new SqliteParameter("@question", question)));
+        } else {
+            value = Convert.ToInt32(ExecuteScalar(
+                "SELECT is_correct FROM Answers, ResultQA WHERE ResultQA.fk_attend_id = @result AND " +
+                "ResultQA.fk_question_id = @question AND ResultQA.fk_answer_id = Answers.answer_id",
+                new SqliteParameter("@result", id), new SqliteParameter("@question", question)));
+        }
+        if (value == 1) {
             return true;
         }
         return false;
@@ -157,11 +185,18 @@ public partial class Database {
         return text.ToString();
     }
 
-    public static int GetStudentsAnswerId(int result, int question) {
-        object id = ExecuteScalar(
-            "SELECT fk_answer_id FROM ResultQA WHERE fk_result_id = @result AND fk_question_id = @question",
-            new SqliteParameter("@result", result), new SqliteParameter("@question", question));
-        return Convert.ToInt32(id);
+    public static int GetStudentsAnswerId(int result, int question, bool isLecture) {
+        int id = -1;
+        if (!isLecture) {
+            id = Convert.ToInt32(ExecuteScalar(
+                "SELECT fk_answer_id FROM ResultQA WHERE fk_result_id = @result AND fk_question_id = @question",
+                new SqliteParameter("@result", result), new SqliteParameter("@question", question)));
+        } else {
+            id = Convert.ToInt32(ExecuteScalar(
+                "SELECT fk_answer_id FROM ResultQA WHERE fk_attend_id = @result AND fk_question_id = @question",
+                new SqliteParameter("@result", result), new SqliteParameter("@question", question)));
+        }
+        return id;
     }
 
     public static string GetActualAnswer(int answer) {

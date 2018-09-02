@@ -16540,19 +16540,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lectureSelectionPanel: {fileID: 1382786553735380}
   lectureQuestionPanel: {fileID: 1173945027057824}
+  lectureResultsPanel: {fileID: 1303222252127936}
   lectureCamera: {fileID: 0}
   video: {fileID: 0}
   lectureContent: {fileID: 224503860089914706}
   slotPrefab: {fileID: 114094708622943034, guid: 0cee9a4f89222614dbef631c873ff411,
     type: 2}
-  lectureHeading: {fileID: 114078470926516670}
-  questionSubHeading: {fileID: 114876395888895756}
   questionText: {fileID: 114632529995297494}
   answerButtons:
   - {fileID: 114812802609459500}
   - {fileID: 114223248142840222}
   - {fileID: 114081998181862972}
   - {fileID: 114834302220480924}
+  resultsHeadingText: {fileID: 114890988897372804}
+  resultsSubHeadingText: {fileID: 114351463483510744}
+  resultContent: {fileID: 224802612289911508}
+  resultSlot: {fileID: 114963514186170396, guid: 9a69e25955807cc478794e1f6742c743,
+    type: 2}
 --- !u!114 &114046095911840934
 MonoBehaviour:
   m_ObjectHideFlags: 1

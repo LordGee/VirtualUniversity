@@ -17,7 +17,7 @@ public partial class Database {
                             attend_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                             attend_value INTEGER DEFAULT 0,
                             has_attended INTEGER DEFAULT 0,
-                            watch_time DATETIME,
+                            watch_time INTEGER DEFAULT 0,
                             fk_account TEXT NOT NULL,
                             fk_lecture_id INTEGER NOT NULL)");
 
@@ -92,6 +92,14 @@ public partial class Database {
         }
     }
 
+    public static int CreateNewLectureAttend(string account, int lecture) {
+        int attend_id = GetNextID("LectureAttend", "attend_id");
+        ExecuteNoReturn(
+            "INSERT INTO LectureAttend (attend_id, fk_account, fk_lecture_ID) VALUES (@attend, @account, @lecture)",
+            new SqliteParameter("@attend", attend_id), new SqliteParameter("@account", account),
+            new SqliteParameter("@lecture", lecture));
+        return attend_id;
+    }
 
     private static bool HasLectureBeenCompleted(string account, int lecture) {
         int count =
@@ -101,5 +109,13 @@ public partial class Database {
         return false;
     }
 
+    public static void UpdateLectureAttendToComplete(int id) {
+        ExecuteNoReturn("UPDATE LectureAttend SET has_attended = 1 WHERE attend_id = @id",
+            new SqliteParameter("@id", id));
+    }
 
+    public static void UpdateLectureTime(int id, int time) {
+        ExecuteNoReturn("UPDATE LectureAttend SET watch_time = @time WHERE attend_id = @id",
+            new SqliteParameter("@time", time), new SqliteParameter("@id", id));
+    }
 }

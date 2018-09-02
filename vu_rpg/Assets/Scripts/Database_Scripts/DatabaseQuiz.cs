@@ -62,7 +62,6 @@ public partial class Database {
     /// <summary>
     /// Rather then getting the last index of the question table, we get create
     /// the index so it can be reused when inserting the answers.
-    /// todo: If questions get deleted or bd empty this may cause issues.
     /// </summary>
     /// <returns>Returns next available index value</returns>
     //public static int GetNewIDForQuestion() {

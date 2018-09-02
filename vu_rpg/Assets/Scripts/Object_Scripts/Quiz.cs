@@ -73,5 +73,6 @@ public class QuestionResults {
     public int fk_results_id;
     public int fk_question_id;
     public int fk_answer_id;
+    public int fk_attend_id;
     public int isCorrect;
 }
