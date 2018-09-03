@@ -44,6 +44,10 @@ public class LectureManager_UIGroup : MonoBehaviour {
         BeginState();
     }
 
+    void Update() {
+        Debug.Log(currentUI);
+    }
+
     public void PrimaryButton() {
         switch (currentUI) {
             case UI_STATE.LectureName:
@@ -103,6 +107,33 @@ public class LectureManager_UIGroup : MonoBehaviour {
         switch (currentUI) {
             case UI_STATE.SetURL:
                 Message("Feature Coming Soon.");
+                break;
+            case UI_STATE.SetBreak:
+                Message("Lecture has been added");
+                BeginState();
+                break;
+        }
+    }
+
+    public void BackButton() {
+        switch (currentUI) {
+            case UI_STATE.LectureName:
+                admin.Lecture_Admin();
+                break;
+            case UI_STATE.SetCourse:
+                currentUI = UI_STATE.LectureName;
+                PrimaryButton();
+                break;
+            case UI_STATE.SetSubject:
+                currentUI = UI_STATE.SetCourse;
+                PrimaryButton();
+                break;
+            case UI_STATE.SetURL:
+                currentUI = UI_STATE.SetSubject;
+                PrimaryButton();
+                break;
+            default:
+                Message("You must continue at this point");
                 break;
         }
     }

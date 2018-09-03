@@ -31,6 +31,9 @@ public class Quiz {
         set { quiz_timer = value; }
     }
 
+    public int result_id = -1;
+    public int time_elapsed = 0;
+
     private string quiz_owner;
 
     private List<Questions> questions;

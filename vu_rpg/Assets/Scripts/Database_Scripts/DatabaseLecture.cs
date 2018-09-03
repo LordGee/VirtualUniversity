@@ -71,6 +71,13 @@ public partial class Database {
                 temp.lecture_url = (string)result[i][2];
                 temp.course_name = GetCourseNameFromSubject((string)result[i][3]);
                 temp.fk_subject_name = (string)result[i][3];
+                List<List<object>> previousWatch = ExecuteReader(
+                    "SELECT attend_id, watch_time FROM LectureAttend WHERE fk_account = @account AND fk_lecture_id = @lecture",
+                    new SqliteParameter("@account", account), new SqliteParameter("@lecture", temp.lecture_id));
+                if (previousWatch.Count > 0) {
+                    temp.attend_id = Convert.ToInt32(previousWatch[0][0]);
+                    temp.watch_time = Convert.ToInt32(previousWatch[0][1]);
+                }
                 temp.break_points = new List<LectureBreakPoint>();
                 List<List<object>> point = ExecuteReader(
                     "SELECT break_id, break_time FROM LectureBreakPoints WHERE fk_lecture_id = @lecture",
@@ -117,5 +124,18 @@ public partial class Database {
     public static void UpdateLectureTime(int id, int time) {
         ExecuteNoReturn("UPDATE LectureAttend SET watch_time = @time WHERE attend_id = @id",
             new SqliteParameter("@time", time), new SqliteParameter("@id", id));
+    }
+
+    public static bool HasQuestionBeenAttempted(int question, int attend, bool isLecture) {
+        int count = -1;
+        if (!isLecture) {
+            count = Convert.ToInt32(ExecuteScalar("SELECT COUNT(*) FROM ResultQA WHERE fk_question_id = @question AND fk_result_id = @attend",
+                new SqliteParameter("@question", question), new SqliteParameter("@attend", attend)));
+        } else {
+            count = Convert.ToInt32(ExecuteScalar("SELECT COUNT(*) FROM ResultQA WHERE fk_question_id = @question AND fk_attend_id = @attend",
+                new SqliteParameter("@question", question), new SqliteParameter("@attend", attend)));
+        }
+        if (count == 1) { return true; }
+        return false;
     }
 }

@@ -56,6 +56,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         quizSelectionPanel.SetActive(true);
         player = FindObjectOfType<Player>();
         quizzes = new List<Quiz>();
+        hasQuestionBeenAllocated = new List<bool>();
+        questionIndexOrder = new List<int>();
         Database.GetStudentQuizzes(ref quizzes, player.account, player.course);
         PopulateQuizzes();
         selectionQuiz = true;
@@ -79,6 +81,9 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
                 questionSubHeading.text = UpdateSubHeading();
                 lastUpdate = quizTimer;
                 questionHeading.text = UpdateHeading();
+                if (Random.Range(0,10) > 5.0f) {
+                    Database.UpdateTimeElapsed(results_id, (quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE) - (int)quizTimer);
+                }
             }
             quizTimer -= Time.timeSinceLevelLoad - currentTime;
             currentTime = Time.timeSinceLevelLoad;
@@ -95,7 +100,11 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
             slot.selectButton.onClick.SetListener(() => {
                 choosenQuiz = count;
                 results = new List<QuestionResults>();
-                results_id = Database.CreateNewResultsForChoosenQuiz(player.account, quizzes[choosenQuiz].QuizId);
+                if (quizzes[choosenQuiz].result_id >= 0) {
+                    results_id = quizzes[choosenQuiz].result_id;
+                } else {
+                    results_id = Database.CreateNewResultsForChoosenQuiz(player.account, quizzes[choosenQuiz].QuizId);
+                }
                 SelectedQuiz();
             });
         }
@@ -120,11 +129,17 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         while (!AllocationTest.HasAllocationFinished(hasQuestionBeenAllocated)) {
             int index = Random.Range(0, quizzes[choosenQuiz].Questions.Count);
             if (!hasQuestionBeenAllocated[index]) {
-                questionIndexOrder.Add(index);
+                if (!Database.HasQuestionBeenAttempted(quizzes[choosenQuiz].Questions[index].question_id, results_id, false)) {
+                    questionIndexOrder.Add(index);
+                }
                 hasQuestionBeenAllocated[index] = true;
             }
         }
-        quizTimer = quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE;
+        if (quizzes[choosenQuiz].time_elapsed > 0) {
+            quizTimer = (quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE) - quizzes[choosenQuiz].time_elapsed;
+        } else {
+            quizTimer = quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE;
+        }
         lastUpdate = quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE;
         startQuiz = true;
         NextQuestion();
@@ -166,7 +181,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         result.isCorrect = quizzes[choosenQuiz].Questions[questionIndexOrder[currentQuestion]].answers[selectedAnswer].isCorrect;
         results.Add(result);
         Database.UpdateResultsAfterQuestionAnswered(result, false);
-        if (currentQuestion < quizzes[choosenQuiz].Questions.Count - 1) {
+        Database.UpdateTimeElapsed(results_id, (quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE) - (int)quizTimer);
+        if (currentQuestion < questionIndexOrder.Count - 1) {
             currentQuestion++;
             if (result.isCorrect == 1) {
                 FindObjectOfType<UISystemMessage>().NewTextAndDisplay("CORRECT");
@@ -218,7 +234,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     }
 
     private string UpdateHeading() {
-        return quizzes[choosenQuiz].QuizName + " - " + (currentQuestion + 1) + "/" + quizzes[choosenQuiz].Questions.Count;
+        return quizzes[choosenQuiz].QuizName + " - " + (currentQuestion + 1) + "/" + questionIndexOrder.Count;
     }
 
     private string UpdateSubHeading() {

@@ -6,7 +6,10 @@ public class Lecture {
     public string lecture_url;
     public string course_name;
     public string fk_subject_name;
+    public int watch_time = 0;
+    public int attend_id = -1;
     public List<LectureBreakPoint> break_points;
+
 }
 
 public class LectureBreakPoint {

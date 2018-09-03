@@ -43,13 +43,11 @@ public class StudentLecture_UIGroup : MonoBehaviour {
     private int selectedAnswer;
     private bool isPaused, isQuestion;
 
-    void OnApplicationFocus(bool hasFocus) {
-        isPaused = !hasFocus;
-    }
+    void OnApplicationFocus(bool hasFocus) { isPaused = !hasFocus; }
 
-    void OnApplicationPause(bool pauseStatus) {
-        isPaused = pauseStatus;
-    }
+    void OnApplicationPause(bool pauseStatus) { isPaused = pauseStatus; }
+
+    void OnApplicationQuit() { Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time)); }
 
     public void InitStart() {
         chosenLecture = -1;
@@ -107,7 +105,13 @@ public class StudentLecture_UIGroup : MonoBehaviour {
             breakComplete = new List<bool>();
             // Loop through number of breakpoints and set boolean value to determine if break has already been completed
             for (int i = 0; i < lectures[chosenLecture].break_points.Count; i++) {
-                breakComplete.Add(false);
+                if (Database.HasQuestionBeenAttempted(
+                    lectures[chosenLecture].break_points[i].break_question.question_id, attend_id, true)) {
+                    breakComplete.Add(true);
+                } else {
+                    breakComplete.Add(false);
+                }
+                
             }
             startLecture = true;
         }
@@ -117,12 +121,19 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         try {
             video.Stop();
             video.url = lectures[chosenLecture].lecture_url;
+            if (lectures[chosenLecture].watch_time > 0) {
+                video.time = (double)lectures[chosenLecture].watch_time;
+            }
             lectureSelectionPanel.SetActive(false);
             isQuestion = false;
             video.Play();
             video.isLooping = false;
             results = new List<QuestionResults>();
-            attend_id = Database.CreateNewLectureAttend(player.account, lectures[chosenLecture].lecture_id);
+            if (lectures[chosenLecture].attend_id >= 0) {
+                attend_id = lectures[chosenLecture].attend_id;
+            } else {
+                attend_id = Database.CreateNewLectureAttend(player.account, lectures[chosenLecture].lecture_id);
+            }
             return true;
         } catch (Exception e) {
             Debug.LogError("Lecture failed to load: " + e);

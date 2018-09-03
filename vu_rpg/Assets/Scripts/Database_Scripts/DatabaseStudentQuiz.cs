@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Mono.Data.Sqlite;
+using UnityEngine;
 
 public partial class Database {
 
@@ -11,7 +12,8 @@ public partial class Database {
                             result_id INTEGER NOT NULL PRIMARY KEY,
                             result_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                             result_value INTEGER DEFAULT 0,
-                            is_completed INTEGER DEFAULT 0, 
+                            is_completed INTEGER DEFAULT 0,
+                            time_elapsed INTEGER DEFAULT 0,
                             fk_account TEXT NOT NULL,
                             fk_quiz_id INTEGER NOT NULL)");
 
@@ -39,6 +41,13 @@ public partial class Database {
                 temp.QuizTimer = Convert.ToInt32(result[i][2]);
                 temp.CourseName = GetCourseNameFromSubject((string)result[i][5]);
                 temp.SubjectName = (string)result[i][5];
+                List<List<object>> previousAttempt = ExecuteReader(
+                    "SELECT result_id, time_elapsed FROM Results WHERE fk_account = @account AND fk_quiz_id = @quiz",
+                    new SqliteParameter("@account", account), new SqliteParameter("@quiz", temp.QuizId));
+                if (previousAttempt.Count > 0) {
+                    temp.result_id = Convert.ToInt32(previousAttempt[0][0]);
+                    temp.time_elapsed = Convert.ToInt32(previousAttempt[0][1]);
+                }
                 quiz.Add(temp);
             }
         }
@@ -203,5 +212,11 @@ public partial class Database {
         object text = ExecuteScalar("SELECT answer FROM Answers WHERE answer_id = @id",
             new SqliteParameter("@id", answer));
         return (text == null) ? "" : text.ToString();
+    }
+
+    public static void UpdateTimeElapsed(int result, int time) {
+        ExecuteNoReturn("UPDATE Results SET time_elapsed = @time WHERE result_id = @result",
+            new SqliteParameter("@time", time), new SqliteParameter("@result", result));
+        Debug.Log("Update timer");
     }
 }
