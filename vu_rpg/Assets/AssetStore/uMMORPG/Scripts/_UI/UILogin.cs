@@ -74,6 +74,7 @@ public partial class UILogin : MonoBehaviour {
             serverDropdown.options = manager.serverList.Select(
                 sv => new Dropdown.OptionData(sv.name)
             ).ToList();
+            server = serverDropdown.value;
             manager.networkAddress = manager.serverList[server].ip;
 
             // addon system hooks

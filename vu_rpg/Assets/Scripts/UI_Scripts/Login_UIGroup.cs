@@ -93,7 +93,8 @@ public partial class UILogin : MonoBehaviour {
             statusText.text = "Select Server";
             currentState = UIState.SERVER;
             hostButton.gameObject.SetActive(true);
-        } else if (currentState ==  UIState.SERVER) {
+        } else if (currentState == UIState.SERVER) {
+            manager.registration = true;
             manager.StartClient();
         }
     }

@@ -192,7 +192,7 @@ public partial class NetworkManagerMMO : NetworkManager {
         // Application.version can be modified under:
         // Edit -> Project Settings -> Player -> Bundle Version
         string hash = Utils.PBKDF2Hash(loginPassword, "at_least_16_byte" + loginAccount);
-        LoginMsg message = new LoginMsg{account=loginAccount, password=hash, version=Application.version};
+        LoginMsg message = new LoginMsg{account=loginAccount, password=hash, course=loginCourse, registration=registration, version=Application.version};
         conn.Send(LoginMsg.MsgId, message);
         print("login message was sent");
 
@@ -245,7 +245,7 @@ public partial class NetworkManagerMMO : NetworkManager {
             // allowed account name?
             if (IsAllowedAccountName(message.account)) {
                 // validate account info
-                if (Database.IsValidAccount(message.account, message.password, loginCourse, registration)) {
+                if (Database.IsValidAccount(message.account, message.password, message.course, message.registration)) {
                     // not in lobby and not in world yet?
                     if (!AccountLoggedIn(message.account)) {
                         print("login successful: " + message.account);
@@ -269,7 +269,7 @@ public partial class NetworkManagerMMO : NetworkManager {
                         //netMsg.conn.Disconnect();
                     }
                 } else {
-                    print("invalid account or password for: " + message.account);
+                    print("invalid account or password for: " + message.account + " : " + registration);
                     ClientSendPopup(netMsg.conn, "invalid account", true);
                 }
             } else {

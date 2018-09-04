@@ -8,6 +8,8 @@ public partial class LoginMsg : MessageBase {
     public static short MsgId = 1000;
     public string account;
     public string password;
+    public string course;
+    public bool registration;
     public string version;
 }
 

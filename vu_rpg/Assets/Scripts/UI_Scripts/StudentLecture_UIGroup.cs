@@ -243,4 +243,13 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time));
         Database.UpdateLectureAttendToComplete(attend_id);
     }
+
+    public void ExitQuizSelection() {
+        lectureSelectionPanel.gameObject.SetActive(false);
+    }
+
+    public void ExitResultsPanel() {
+        lectureResultsPanel.gameObject.SetActive(false);
+        InitStart();
+    }
 }
