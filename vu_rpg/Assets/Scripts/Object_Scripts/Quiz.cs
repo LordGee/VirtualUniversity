@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class Quiz {
     /// <summary>
     /// Table: Course
     /// </summary>
+    public static short MsgId = 5000;
+
     private string course_name;
     public string CourseName {
         get { return course_name; }

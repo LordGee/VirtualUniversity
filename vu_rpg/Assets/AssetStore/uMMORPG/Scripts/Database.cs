@@ -518,6 +518,8 @@ public partial class Database {
                 LoadBuffs(player);
                 LoadQuests(player);
                 LoadGuild(player);
+                //player.quizes = new List<Quiz>();
+                //GetStudentQuizes(player);
 
                 // assign health / mana after max values were fully loaded
                 // (they depend on equipment, buffs, etc.)

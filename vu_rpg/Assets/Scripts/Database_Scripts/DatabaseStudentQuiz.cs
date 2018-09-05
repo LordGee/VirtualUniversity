@@ -48,7 +48,36 @@ public partial class Database {
                     temp.result_id = Convert.ToInt32(previousAttempt[0][0]);
                     temp.time_elapsed = Convert.ToInt32(previousAttempt[0][1]);
                 }
+                
                 quiz.Add(temp);
+            }
+        }
+    }
+
+    public static void GetStudentQuizes(Player player) {
+        List<List<object>> result = ExecuteReader(
+            "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizes.fk_subject_name " +
+            "FROM Quizes, Subjects, CourseSubjects WHERE Quizes.fk_subject_name = Subjects.subject_name AND " +
+            "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
+            "GROUP BY quiz_name ORDER BY quiz_name",
+            new SqliteParameter("@course", player.course));
+        for (int i = 0; i < result.Count; i++) {
+            if (HasQuizBeenCompleted(player.account, Convert.ToInt32(result[i][0]))) {
+                Quiz temp = new Quiz();
+                temp.QuizId = Convert.ToInt32(result[i][0]);
+                temp.QuizName = (string)result[i][1];
+                temp.QuizTimer = Convert.ToInt32(result[i][2]);
+                temp.CourseName = GetCourseNameFromSubject((string)result[i][5]);
+                temp.SubjectName = (string)result[i][5];
+                List<List<object>> previousAttempt = ExecuteReader(
+                    "SELECT result_id, time_elapsed FROM Results WHERE fk_account = @account AND fk_quiz_id = @quiz",
+                    new SqliteParameter("@account", player.account), new SqliteParameter("@quiz", temp.QuizId));
+                if (previousAttempt.Count > 0) {
+                    temp.result_id = Convert.ToInt32(previousAttempt[0][0]);
+                    temp.time_elapsed = Convert.ToInt32(previousAttempt[0][1]);
+                }
+
+                // player.quizes.Add(temp);
             }
         }
     }
@@ -102,30 +131,7 @@ public partial class Database {
         return questions;
     }
 
-    public static Questions GetQuestionsForChosenLecture(int break_id) {
-        Questions questions = new Questions();
-        List<List<object>> questionResults =
-            ExecuteReader("SELECT question_id, question FROM Questions WHERE fk_break_id = @break_id",
-                new SqliteParameter("@break_id", break_id));
-        for (int i = 0; i < questionResults.Count; i++) {
-            Questions q = new Questions();
-            q.question_id = Convert.ToInt32(questionResults[i][0]);
-            q.question = (string)questionResults[i][1];
-            q.answers = new List<Answers>();
-            List<List<object>> answerResults =
-                ExecuteReader("SELECT answer_id, answer, is_correct FROM Answers WHERE fk_question_id = @question",
-                    new SqliteParameter("@question", q.question_id));
-            for (int j = 0; j < answerResults.Count; j++) {
-                Answers a = new Answers();
-                a.answer_id = Convert.ToInt32(answerResults[j][0]);
-                a.answer = (string)answerResults[j][1];
-                a.isCorrect = Convert.ToInt32(answerResults[j][2]);
-                q.answers.Add(a);
-            }
-            questions = q;
-        }
-        return questions;
-    }
+
 
     public static void UpdateResultsAfterQuestionAnswered(QuestionResults result, bool isLecture) {
         if (!isLecture) {
