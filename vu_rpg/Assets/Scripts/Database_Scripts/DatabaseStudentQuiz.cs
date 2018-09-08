@@ -8,7 +8,7 @@ using UnityEngine;
 public partial class Database {
 
     static void Initialize_StudentQuiz() {
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Results (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Results (
                             result_id INTEGER NOT NULL PRIMARY KEY,
                             result_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                             result_value INTEGER DEFAULT 0,
@@ -17,7 +17,7 @@ public partial class Database {
                             fk_account TEXT NOT NULL,
                             fk_quiz_id INTEGER NOT NULL)");
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS ResultQA (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS ResultQA (
                             result_qa_id INTEGER NOT NULL PRIMARY KEY autoincrement,
                             fk_result_id INTEGER NOT NULL DEFAULT -1,
                             fk_attend_id INTEGER NOT NULL DEFAULT -1,

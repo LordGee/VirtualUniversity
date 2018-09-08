@@ -176,18 +176,21 @@ public partial class Database {
                             PRIMARY KEY(guild, character))");
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
-        
+
 
         /* Custom Implementation for quiz tables */
-        Initialize_User();
-        Initialize_Quiz();
-        Initialize_StudentQuiz();
-        Initialize_Lecture();
+        //Initialize_User();
+        //Initialize_Quiz();
+        //Initialize_StudentQuiz();
+        //Initialize_Lecture();
+        // above not needed anymore, the below invoke many function executes these anyway
+        InitCrud();
 
         // addon system hooks
         Utils.InvokeMany(typeof(Database), null, "Initialize_");
 
         Debug.Log("connected to database");
+        int test = GetNextID_Crud("Questions", "question_id");
     }
 
     // helper functions ////////////////////////////////////////////////////////

@@ -239,7 +239,7 @@ public partial class NetworkManagerMMO : NetworkManager {
     void OnServerLogin(NetworkMessage netMsg) {
         print("OnServerLogin " + netMsg.conn);
         LoginMsg message = netMsg.ReadMessage<LoginMsg>();
-
+        
         // correct version?
         if (message.version == Application.version) {
             // allowed account name?

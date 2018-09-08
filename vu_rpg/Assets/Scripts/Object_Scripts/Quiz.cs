@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
 
+[System.Serializable]
 public class Quiz {
     /// <summary>
     /// Table: Course
@@ -56,6 +57,7 @@ public class Quiz {
     }
 }
 
+[System.Serializable]
 public class Questions {
     /// <summary>
     /// Table: Questions
@@ -69,12 +71,14 @@ public class Questions {
     public List<Answers> answers;
 }
 
+[System.Serializable]
 public class Answers {
     public int answer_id;
     public string answer;
     public int isCorrect; // was boolean, stored as int in database.
 }
 
+[System.Serializable]
 public class QuestionResults {
     public int fk_results_id;
     public int fk_question_id;

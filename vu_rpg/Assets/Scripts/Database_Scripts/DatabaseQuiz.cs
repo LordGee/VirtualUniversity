@@ -3,39 +3,41 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Data.Sqlite;
+using UnityEngine;
 
 public partial class Database {
     static void Initialize_Quiz() {
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Courses (
-                            course_name TEXT NOT NULL PRIMARY KEY)");
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS CourseSubjects (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Courses (
+                            course_name VARCHAR(255) NOT NULL PRIMARY KEY)");
+
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS CourseSubjects (
                             course_subject_id INTEGER NOT NULL PRIMARY KEY autoincrement,
-                            fk_course_name TEXT NOT NULL,
-                            fk_subject_name TEXT NOT NULL)");
+                            fk_course_name VARCHAR(255) NOT NULL,
+                            fk_subject_name VARCHAR(255) NOT NULL)");
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Subjects (
-                            subject_name TEXT NOT NULL PRIMARY KEY)");
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Subjects (
+                            subject_name VARCHAR(255) NOT NULL PRIMARY KEY)");
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Quizes (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Quizzes (
                             quiz_id INTEGER NOT NULL PRIMARY KEY,
-                            quiz_name TEXT NOT NULL,
+                            quiz_name VARCHAR(255) NOT NULL,
                             quiz_timer INTEGER default 1,
                             creation_date DATETIME default CURRENT_TIMESTAMP,
-                            quiz_owner TEXT NOT NULL,                            
-                            fk_subject_name TEXT NOT NULL
+                            quiz_owner VARCHAR(255) NOT NULL,                            
+                            fk_subject_name VARCHAR(255) NOT NULL
                             )");
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Questions (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Questions (
                             question_id INTEGER NOT NULL PRIMARY KEY,
-                            question TEXT NOT NULL,
+                            question VARCHAR(255) NOT NULL,
                             fk_quiz_id INTEGER NOT NULL DEFAULT -1,
                             fk_break_id INTEGER NOT NULL DEFAULT -1)");
 
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Answers (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Answers (
                             answer_id INTEGER NOT NULL PRIMARY KEY autoincrement,
-                            answer TEXT NOT NULL,
+                            answer VARCHAR(255) NOT NULL,
                             is_correct INTEGER NOT NULL,
                             fk_question_id INTEGER NOT NULL)");
     }
@@ -112,19 +114,16 @@ public partial class Database {
     }
 
     public static void AddNewCourse(string course) {
-        ExecuteNoReturn("INSERT INTO Courses (course_name) VALUES (@course)",
-            new SqliteParameter("@course", course));
+        crud.DbCreate("INSERT INTO Courses (course_name) VALUES (" + course + ")") ;
     }
 
     public static void AddNewSubject(string subject) {
-        ExecuteNoReturn("INSERT INTO Subjects (subject_name) VALUES (@subject)",
-            new SqliteParameter("@subject", subject));
+        crud.DbCreate("INSERT INTO Subjects (subject_name) VALUES (" + subject + ")");
     }
 
     public static void AddCourseSubjects(string course, string subject) {
-        ExecuteNoReturn("INSERT INTO CourseSubjects (fk_course_name, fk_subject_name) VALUES (@course, @subject)",
-            new SqliteParameter("@course", course),
-            new SqliteParameter("@subject", subject));
+        crud.DbCreate("INSERT INTO CourseSubjects (fk_course_name, fk_subject_name) VALUES (" + course + ", " +
+                      subject + ")");
     }
 
     public static bool CheckCourseExists(string course) {
@@ -166,26 +165,18 @@ public partial class Database {
     }
 
     public static void CreateNewQuiz(int quiz, string name, int number, string owner, string subject) {
-        ExecuteNoReturn("INSERT INTO Quizes (quiz_id, quiz_name, quiz_timer, quiz_owner, fk_subject_name) VALUES (@quizid, @name ,@number, @owner, @subject)", 
-            new SqliteParameter("@quizid", quiz), 
-            new SqliteParameter("@name", name), 
-            new SqliteParameter("@number", number),
-            new SqliteParameter("@owner", owner),
-            new SqliteParameter("@subject", subject));
+        crud.DbCreate("INSERT INTO Quizes (quiz_id, quiz_name, quiz_timer, quiz_owner, fk_subject_name) VALUES (" +
+                      quiz + ", " + name + ", " + number + ", " + owner + ", " + subject + ")");
     }
 
     public static void AddQuestionToQuiz(int id, string question, int quiz) {
-        ExecuteNoReturn("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (@id, @quest, @quiz)",
-            new SqliteParameter("@id", id),
-            new SqliteParameter("@quest", question),
-            new SqliteParameter("@quiz", quiz));
+        crud.DbCreate("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (" + id + ", " + question +
+                      ", " + quiz + ")");
     }
 
     public static void AddAnswerToQuestion(string answer, int isCorrect, int question) {
-        ExecuteNoReturn("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (@ans, @isCorrect, @question)",
-            new SqliteParameter("@ans", answer),
-            new SqliteParameter("@isCorrect", isCorrect),
-            new SqliteParameter("@question", question));
+        crud.DbCreate("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (" + answer + ", " + isCorrect +
+                      ", " + question + ")");
     }
     /// <summary>
     /// Adds question and answers to the database
@@ -195,20 +186,13 @@ public partial class Database {
     /// <param name="answers">Array of string answers (max 3)</param>
     /// <param name="correct">Correct answer 1 - 3</param>
     public static void AddNewQuestionAndAnswer(string question, string[] answers, int correct) {
-        int QuestionID = GetNextID("Questions", "question_id");
+        int QuestionID = GetNextID_Crud("Questions", "question_id");
         // todo: need to get quiz_id for this insert statement
-        ExecuteNoReturn("INSERT INTO Questions (" +
-                        "question_id, question, fk_quiz_id) VALUES (" +
-                        "@id, @question, 1)",
-            new SqliteParameter("@id", QuestionID),
-            new SqliteParameter("@question", question));
+        crud.DbCreate("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (" + QuestionID + ", " +
+                      question + ", 1)");
         for (int i = 0; i < answers.Length; i++) {
-            ExecuteNoReturn("INSERT INTO Answers (" +
-                            "answer, is_correct, fk_question_id) VALUES (" +
-                            "@ans, @correct, @id)",
-                new SqliteParameter("@ans", answers[i]),
-                new SqliteParameter("@correct", correct),
-                new SqliteParameter("@id", QuestionID));
+            crud.DbCreate("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (" + answers[i] + ", " +
+                          correct + ", " + QuestionID + ")");
         }
     }
 }

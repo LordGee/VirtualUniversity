@@ -12,7 +12,7 @@ public partial class Database {
                             account_type TEXT NOT NULL DEFAULT 'Student',
                             fk_course TEXT)");
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Enrolled (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Enrolled (
                             enrolled_id INTEGER NOT NULL PRIMARY KEY autoincrement,
                             fk_account TEXT NOT NULL,
                             fk_subject TEXT NOT NULL)");

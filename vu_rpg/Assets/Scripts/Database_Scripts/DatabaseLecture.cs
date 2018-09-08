@@ -5,14 +5,14 @@ using Mono.Data.Sqlite;
 public partial class Database {
 
     static void Initialize_Lecture() {
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS Lectures (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Lectures (
                             lecture_id INTEGER NOT NULL PRIMARY KEY,
                             lecture_title TEXT NOT NULL,
                             lecture_url TEXT,
                             lecture_owner TEXT,
                             fk_subject_name TEXT)");
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS LectureAttend (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS LectureAttend (
                             attend_id INTEGER NOT NULL PRIMARY KEY,
                             attend_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                             attend_value INTEGER DEFAULT 0,
@@ -21,7 +21,7 @@ public partial class Database {
                             fk_account TEXT NOT NULL,
                             fk_lecture_id INTEGER NOT NULL)");
 
-        ExecuteNoReturn(@"CREATE TABLE IF NOT EXISTS LectureBreakPoints (
+        crud.DbCreate(@"CREATE TABLE IF NOT EXISTS LectureBreakPoints (
                             break_id INTEGER NOT NULL PRIMARY KEY,
                             break_time INTEGER,
                             fk_lecture_id INTEGER NOT NULL)");
