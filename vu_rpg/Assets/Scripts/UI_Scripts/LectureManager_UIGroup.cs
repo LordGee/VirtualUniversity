@@ -152,8 +152,9 @@ public class LectureManager_UIGroup : MonoBehaviour {
         inputBox.SetActive(false);
         secondaryButton.SetActive(false);
         admin.SetHeadingText("Select a Course");
+        // todo fix
+        var content_1 = Database.GetCourseNames();
         content = new List<string>();
-        content = Database.GetCourseNames();
         PopulateDropbox.Run(ref dropBox, content, "Select Course");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nCourse";
         currentUI = UI_STATE.SetCourse;

@@ -78,10 +78,14 @@ public partial class Database {
 
     static SqliteConnection connection;
 
+
+
     // constructor /////////////////////////////////////////////////////////////
     static Database() {
+
+        
         // create database file if it doesn't exist yet
-        if(!File.Exists(path))
+        if (!File.Exists(path))
             SqliteConnection.CreateFile(path);
 
         // open connection
@@ -177,20 +181,19 @@ public partial class Database {
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
 
-
         /* Custom Implementation for quiz tables */
         //Initialize_User();
         //Initialize_Quiz();
         //Initialize_StudentQuiz();
         //Initialize_Lecture();
         // above not needed anymore, the below invoke many function executes these anyway
-        InitCrud();
 
         // addon system hooks
+        InitCrud();
         Utils.InvokeMany(typeof(Database), null, "Initialize_");
-
+        UpdateNextID();
         Debug.Log("connected to database");
-        int test = GetNextID_Crud("Questions", "question_id");
+
     }
 
     // helper functions ////////////////////////////////////////////////////////
@@ -521,8 +524,8 @@ public partial class Database {
                 LoadBuffs(player);
                 LoadQuests(player);
                 LoadGuild(player);
-                //player.quizes = new List<Quiz>();
-                //GetStudentQuizes(player);
+                //player.Quizzes = new List<Quiz>();
+                //GetStudentQuizzes(player);
 
                 // assign health / mana after max values were fully loaded
                 // (they depend on equipment, buffs, etc.)

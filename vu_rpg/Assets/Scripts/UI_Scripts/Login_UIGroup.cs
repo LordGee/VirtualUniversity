@@ -84,7 +84,9 @@ public partial class UILogin : MonoBehaviour {
             courseDropdown.gameObject.SetActive(true);
             statusText.text = "Select Your Course";
             currentState = UIState.COURSE;
-            List<String> content = Database.GetCourseNames();
+            //todo fix 
+            List<string> content = new List<string>();
+            var content1 = Database.GetCourseNames();
             PopulateDropbox.Run(ref courseDropdown, content, "Select your course");
         } else if (currentState == UIState.COURSE) {
             course = courseDropdown.options[courseDropdown.value].text;

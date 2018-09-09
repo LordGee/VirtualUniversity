@@ -14,8 +14,8 @@ public partial class Database {
 
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Enrolled (
                             enrolled_id INTEGER NOT NULL PRIMARY KEY autoincrement,
-                            fk_account TEXT NOT NULL,
-                            fk_subject TEXT NOT NULL)");
+                            fk_account VARCHAR(255) NOT NULL,
+                            fk_subject VARCHAR(255) NOT NULL)");
     }
 
     public static void RegisterUser(string account, string password, string course) {

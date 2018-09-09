@@ -147,7 +147,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         ActivateAllUi();
         inputBox.GetComponent<InputField>().text = "";
         inputBox.SetActive(false);
-        admin.SetHeadingText("Add / Edit Quizes");
+        admin.SetHeadingText("Add / Edit Quizzes");
         content = new List<string>();
         content = Database.GetQuizNames();
         PopulateDropbox.Run(ref dropBox, content, "Select Quiz");
@@ -161,7 +161,8 @@ public class QuizManager_UIGroup : MonoBehaviour {
         secondaryButton.SetActive(false);
         admin.SetHeadingText("Select a Course");
         content = new List<string>();
-        content = Database.GetCourseNames();
+        //todo fix
+        var content1 = Database.GetCourseNames();
         PopulateDropbox.Run(ref dropBox, content, "Select Course");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nCourse";
         quiz = new Quiz();
@@ -282,7 +283,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
 
     private void AddQuizToDatabase() {
         quiz.QuizTimer = Int32.Parse(inputBox.GetComponent<InputField>().text);
-        quiz.QuizId = Database.GetNextID("Quizes", "quiz_id");
+        quiz.QuizId = Database.GetNextID("Quizzes", "quiz_id");
         Database.CreateNewQuiz(quiz.QuizId, quiz.QuizName, quiz.QuizTimer, FindObjectOfType<Player>().account, quiz.SubjectName);
     }
 

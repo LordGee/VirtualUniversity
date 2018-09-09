@@ -2,12 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Mono.Data.Sqlite;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public partial class Database {
     static void Initialize_Quiz() {
-
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Courses (
                             course_name VARCHAR(255) NOT NULL PRIMARY KEY)");
 
@@ -42,24 +43,6 @@ public partial class Database {
                             fk_question_id INTEGER NOT NULL)");
     }
 
-    /// <summary>
-    /// Added SQL query which takes no parameters
-    /// </summary>
-    /// <param name="sql">SQL QUERY</param>
-    /// <returns>Double Array of type Object</returns>
-    public static List<List<object>> ExecuteReaderNoParams(string sql) {
-        List<List<object>> result = new List<List<object>>();
-        using (SqliteCommand command = new SqliteCommand(sql, connection)) {
-            using (SqliteDataReader reader = command.ExecuteReader()) {
-                while (reader.Read()) {
-                    object[] buffer = new object[reader.FieldCount];
-                    reader.GetValues(buffer);
-                    result.Add(buffer.ToList());
-                }
-            }
-        }
-        return result;
-    }
 
     /// <summary>
     /// Rather then getting the last index of the question table, we get create
@@ -72,7 +55,7 @@ public partial class Database {
     //    return result + 1;
     //}
     //public static int GetNewIDForQuiz() {
-    //    object id     = ExecuteScalar("SELECT quiz_id FROM Quizes ORDER BY quiz_id DESC LIMIT 1");
+    //    object id     = ExecuteScalar("SELECT quiz_id FROM Quizzes ORDER BY quiz_id DESC LIMIT 1");
     //    int    result = Convert.ToInt32(id);
     //    return result + 1;
     //}
@@ -82,20 +65,18 @@ public partial class Database {
     /// Used for selection within the application, prevents typos
     /// </summary>
     /// <returns>Returns list of strings of each course</returns>
-    public static List<string> GetCourseNames() {
-        List<List<object>> results = new List<List<object>>();
-        List<string> stringResults = new List<string>();
-        results = ExecuteReaderNoParams("SELECT course_name FROM Courses ORDER BY course_name ASC");
-        for (int i = 0; i < results.Count; i++) {
-            stringResults.Add(results[i][0].ToString());   
-        }
-        return stringResults;
+    public static async Task<List<string>> GetCourseNames() {
+        int selection = (int) Table.Courses;
+        var result = await crud.GetCourseNames_Go(TableNames[selection], PrimaryKeyID[selection], ModelNames[selection]);
+        return result;
     }
+
+
 
     public static List<string> GetQuizNames() {
         List<List<object>> results       = new List<List<object>>();
         List<string>       stringResults = new List<string>();
-        results = ExecuteReaderNoParams("SELECT quiz_name FROM Quizes ORDER BY quiz_name ASC");
+        results = ExecuteReaderNoParams("SELECT quiz_name FROM Quizzes ORDER BY quiz_name ASC");
         for (int i = 0; i < results.Count; i++) {
             stringResults.Add(results[i][0].ToString());
         }
@@ -156,7 +137,7 @@ public partial class Database {
 
     public static bool CheckQuizExists(string quiz) {
         bool dontExists = false;
-        object result = ExecuteScalar("SELECT quiz_name FROM Quizes WHERE quiz_name = @quiz",
+        object result = ExecuteScalar("SELECT quiz_name FROM Quizzes WHERE quiz_name = @quiz",
             new SqliteParameter("@quiz", quiz));
         if (result == null) {
             dontExists = true;
@@ -165,7 +146,7 @@ public partial class Database {
     }
 
     public static void CreateNewQuiz(int quiz, string name, int number, string owner, string subject) {
-        crud.DbCreate("INSERT INTO Quizes (quiz_id, quiz_name, quiz_timer, quiz_owner, fk_subject_name) VALUES (" +
+        crud.DbCreate("INSERT INTO Quizzes (quiz_id, quiz_name, quiz_timer, quiz_owner, fk_subject_name) VALUES (" +
                       quiz + ", " + name + ", " + number + ", " + owner + ", " + subject + ")");
     }
 
@@ -186,7 +167,7 @@ public partial class Database {
     /// <param name="answers">Array of string answers (max 3)</param>
     /// <param name="correct">Correct answer 1 - 3</param>
     public static void AddNewQuestionAndAnswer(string question, string[] answers, int correct) {
-        int QuestionID = GetNextID_Crud("Questions", "question_id");
+        int QuestionID = NextID[(int)Table.Questions];
         // todo: need to get quiz_id for this insert statement
         crud.DbCreate("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (" + QuestionID + ", " +
                       question + ", 1)");

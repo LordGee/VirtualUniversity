@@ -14,7 +14,7 @@ public partial class Database {
                             result_value INTEGER DEFAULT 0,
                             is_completed INTEGER DEFAULT 0,
                             time_elapsed INTEGER DEFAULT 0,
-                            fk_account TEXT NOT NULL,
+                            fk_account VARCHAR(255) NOT NULL,
                             fk_quiz_id INTEGER NOT NULL)");
 
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS ResultQA (
@@ -25,11 +25,11 @@ public partial class Database {
                             fk_answer_id INTEGER NOT NULL)");
     }
 
-    // get all quizes by course... narrow to subject later
+    // get all Quizzes by course... narrow to subject later
     public static void GetStudentQuizzes(ref List<Quiz> quiz, string account, string course) {
         List<List<object>> result = ExecuteReader(
-            "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizes.fk_subject_name " +
-            "FROM Quizes, Subjects, CourseSubjects WHERE Quizes.fk_subject_name = Subjects.subject_name AND " +
+            "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
+            "FROM Quizzes, Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
             "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
             "GROUP BY quiz_name ORDER BY quiz_name",
             new SqliteParameter("@course", course));
@@ -54,10 +54,10 @@ public partial class Database {
         }
     }
 
-    public static void GetStudentQuizes(Player player) {
+    public static void GetStudentQuizzes(Player player) {
         List<List<object>> result = ExecuteReader(
-            "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizes.fk_subject_name " +
-            "FROM Quizes, Subjects, CourseSubjects WHERE Quizes.fk_subject_name = Subjects.subject_name AND " +
+            "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
+            "FROM Quizzes, Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
             "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
             "GROUP BY quiz_name ORDER BY quiz_name",
             new SqliteParameter("@course", player.course));
@@ -77,7 +77,7 @@ public partial class Database {
                     temp.time_elapsed = Convert.ToInt32(previousAttempt[0][1]);
                 }
 
-                // player.quizes.Add(temp);
+                // player.Quizzes.Add(temp);
             }
         }
     }

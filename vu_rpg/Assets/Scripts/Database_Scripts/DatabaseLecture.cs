@@ -7,10 +7,10 @@ public partial class Database {
     static void Initialize_Lecture() {
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Lectures (
                             lecture_id INTEGER NOT NULL PRIMARY KEY,
-                            lecture_title TEXT NOT NULL,
-                            lecture_url TEXT,
-                            lecture_owner TEXT,
-                            fk_subject_name TEXT)");
+                            lecture_title VARCHAR(255) NOT NULL,
+                            lecture_url VARCHAR(255),
+                            lecture_owner VARCHAR(255),
+                            fk_subject_name VARCHAR(255))");
 
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS LectureAttend (
                             attend_id INTEGER NOT NULL PRIMARY KEY,
@@ -18,7 +18,7 @@ public partial class Database {
                             attend_value INTEGER DEFAULT 0,
                             has_attended INTEGER DEFAULT 0,
                             watch_time INTEGER DEFAULT 0,
-                            fk_account TEXT NOT NULL,
+                            fk_account VARCHAR(255) NOT NULL,
                             fk_lecture_id INTEGER NOT NULL)");
 
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS LectureBreakPoints (

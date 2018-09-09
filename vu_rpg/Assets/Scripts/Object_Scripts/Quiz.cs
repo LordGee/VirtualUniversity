@@ -21,7 +21,7 @@ public class Quiz {
         set { subject_name = value; }
     }
     /// <summary>
-    /// Table: Quizes
+    /// Table: Quizzes
     /// </summary>
     private string quiz_name;
     public string QuizName {

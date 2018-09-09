@@ -12,9 +12,9 @@ public class SelectSubject_UIGroup : MonoBehaviour {
         UpdateCourseData();
     }
 
-    public void UpdateCourseData() {
+    public async void UpdateCourseData() {
         courses = new List<string>();
-        courses = Database.GetCourseNames();
+        courses = (List<string>)await Database.GetCourseNames();
         PopulateCourseData();
     }
 

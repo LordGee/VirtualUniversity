@@ -6,11 +6,11 @@ using UnityEngine;
 
 public partial class Player {
 
-    //[HideInInspector] public List<Quiz> quizes = new List<Quiz>();
+    //[HideInInspector] public List<Quiz> Quizzes = new List<Quiz>();
 
     //void OnStartLocalPlayer_Extra() {
-    //    // Database.GetStudentQuizzes(ref quizes, account, course);
-    //    Debug.Log(quizes.Count);
+    //    // Database.GetStudentQuizzes(ref Quizzes, account, course);
+    //    Debug.Log(Quizzes.Count);
     //}
 
 }
