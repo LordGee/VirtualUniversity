@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 public partial class Database {
 
@@ -10,12 +9,13 @@ public partial class Database {
         LectureBreakPoints,
         LectureAttend,
         Courses,
+        CourseSubjects,
 
         COUNT
     };
 
     public static int[] NextID = {
-        0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0,
     };
     protected static string[] PrimaryKeyID = {
         "quiz_id",
@@ -24,6 +24,7 @@ public partial class Database {
         "break_id",
         "attend_id",
         "course_name",
+        "course_subject_id",
     };
     protected static string[] TableNames = {
         "Quizzes",
@@ -32,6 +33,7 @@ public partial class Database {
         "LectureBreakPoints",
         "LectureAttend",
         "Courses",
+        "CourseSubjects",
     };
     protected static string[] ModelNames = {
         "quizResult",
@@ -40,6 +42,7 @@ public partial class Database {
         "lectureBreakResult",
         "lectureAttendResult",
         "courseResult",
+        "courseSubjectResult",
     };
 
 }

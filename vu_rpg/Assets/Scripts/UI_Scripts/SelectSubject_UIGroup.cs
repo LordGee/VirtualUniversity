@@ -14,7 +14,7 @@ public class SelectSubject_UIGroup : MonoBehaviour {
 
     public async void UpdateCourseData() {
         courses = new List<string>();
-        courses = (List<string>)await Database.GetCourseNames();
+        courses = await Database.GetCourseNames();
         PopulateCourseData();
     }
 

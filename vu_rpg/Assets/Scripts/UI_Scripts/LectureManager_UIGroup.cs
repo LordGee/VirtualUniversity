@@ -147,26 +147,25 @@ public class LectureManager_UIGroup : MonoBehaviour {
         currentUI = UI_STATE.LectureName;
     }
 
-    private void SetCourse() {
+    private async void SetCourse() {
         ActivateAllUi();
         inputBox.SetActive(false);
         secondaryButton.SetActive(false);
         admin.SetHeadingText("Select a Course");
-        // todo fix
-        var content_1 = Database.GetCourseNames();
         content = new List<string>();
+        content = await Database.GetCourseNames();
         PopulateDropbox.Run(ref dropBox, content, "Select Course");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nCourse";
         currentUI = UI_STATE.SetCourse;
     }
 
-    private void SetSubject() {
+    private async void SetSubject() {
         ActivateAllUi();
         inputBox.SetActive(false);
         secondaryButton.SetActive(false);
         admin.SetHeadingText("Select a Subject");
         content = new List<string>();
-        content = Database.GetSubjectsLinkedToCourse(lecture.course_name);
+        content = await Database.GetSubjectsLinkedToCourse(lecture.course_name);
         PopulateDropbox.Run(ref dropBox, content, "Select Subject");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nSubject";
         currentUI = UI_STATE.SetSubject;

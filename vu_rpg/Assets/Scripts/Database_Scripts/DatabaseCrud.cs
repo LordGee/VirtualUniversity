@@ -3,65 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Networking;
-using Task = UnityEditor.VersionControl.Task;
 
 public partial class DatabaseCrud : MonoBehaviour {
 
-    [Serializable]
-    public class JsonResult {
-        public List<ModelQuestion> questionResult;
-        public List<ModelQuiz> quizResult;
-        public List<ModelLecture> lectureResult;
-        public List<ModelLectureBreak> lectureBreakResult;
-        public List<ModelLectureAttend> lectureAttendResult;
-        public List<ModelCourses> courseResult;
-
-        //public JsonResult() {
-        //    questionResult = new List<ModelQuestion>();
-        //    quizResult = new List<ModelQuiz>();
-        //    lectureResult = new List<ModelLecture>();
-        //    lectureBreakResult = new List<ModelLectureBreak>();
-        //    lectureAttendResult = new List<ModelLectureAttend>();
-        //    courseResult = new List<ModelCourses>();
-        //}
-    }
-
-    [Serializable]
-    public class ModelQuestion {
-        public int question_id;
-        public string question;
-        public int fk_quiz_id;
-        public int fk_break_id;
-    }
-
-    [Serializable]
-    public class ModelQuiz {
-        public int quiz_id;
-    }
-
-    [Serializable]
-    public class ModelLecture {
-        public int lecture_id;
-    }
-
-    [Serializable]
-    public class ModelLectureBreak {
-        public int break_id;
-    }
-
-    [Serializable]
-    public class ModelLectureAttend {
-        public int attend_id;
-    }
-
-    [Serializable]
-    public class ModelCourses {
-        public string course_name;
-    }
+   
 
     private static JsonResult value;
     private static string JsonString;
@@ -80,21 +27,17 @@ public partial class DatabaseCrud : MonoBehaviour {
         }
     }
 
-    public void DbRead(string sql) {
-        StartCoroutine(Read(sql));
-    }
-
-    private IEnumerator Read(string sql) {
-        string uri = _CONST.API_URL + sql;
+    public IEnumerator Read(string sql, string model) {
+        string          uri = _CONST.API_URL + sql;
         UnityWebRequest www = UnityWebRequest.Get(uri);
         yield return www.SendWebRequest();
 
         if (www.isNetworkError || www.isHttpError) {
             Debug.LogError(www.error);
         } else {
-            JsonString = ConvertJson("json_result", www.downloadHandler.text);
-            Debug.Log(JsonString);
-            value = JsonUtility.FromJson<JsonResult>(JsonString);
+            JsonString = ConvertJson(model, www.downloadHandler.text);
+
+            yield return JsonString;
         }
     }
 
@@ -127,35 +70,8 @@ public partial class DatabaseCrud : MonoBehaviour {
         }
     }
 
-    private string stringResults;
-
-    public async Task<List<string>> GetCourseNames_Go(string table, string key, string model) {
-        string sql = "SELECT " + key + " FROM " + table + " ORDER BY " + key + " ASC";
-        var newValue = await GetCourseNames_Callback(sql, model);
-        //return VarToStringList((List<string>)newValue);
-        return (List<string>)newValue;
-    }
-
-    private IEnumerator GetCourseNames_Callback(string sql, string model) {
-        string          uri = _CONST.API_URL + sql;
-        UnityWebRequest www = UnityWebRequest.Get(uri);
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError) {
-            Debug.LogError(www.error);
-        } else {
-            JsonString = ConvertJson(model, www.downloadHandler.text);
-            value = JsonUtility.FromJson<JsonResult>(JsonString);
-            List<string> result = new List<string>();
-            for (int i = 0; i < value.courseResult.Count; i++) {
-                result.Add(value.courseResult[i].course_name);
-            }
-            yield return result;
-        }
-    }
-
-
-    private string ConvertJson(string model, String json) {
+ 
+    private string ConvertJson(string model, string json) {
         json.Trim(new char[] { '\uFEFF', '\u200B' }); // don't work
         model.Trim(new char[] { '\uFEFF', '\u200B' }); // don't work
         string result = "{\"" + model + "\":" + json.Trim() + "}";

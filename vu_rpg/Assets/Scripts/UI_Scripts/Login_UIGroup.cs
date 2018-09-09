@@ -65,7 +65,7 @@ public partial class UILogin : MonoBehaviour {
         }
     }
 
-    public void RegNextButtonChecked() {
+    public async void RegNextButtonChecked() {
         if (currentState == UIState.USERNAME) {
             username = accountInput.text;
             accountInput.gameObject.SetActive(false);
@@ -84,9 +84,8 @@ public partial class UILogin : MonoBehaviour {
             courseDropdown.gameObject.SetActive(true);
             statusText.text = "Select Your Course";
             currentState = UIState.COURSE;
-            //todo fix 
             List<string> content = new List<string>();
-            var content1 = Database.GetCourseNames();
+            content = await Database.GetCourseNames();
             PopulateDropbox.Run(ref courseDropdown, content, "Select your course");
         } else if (currentState == UIState.COURSE) {
             course = courseDropdown.options[courseDropdown.value].text;

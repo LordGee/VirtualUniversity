@@ -40,7 +40,7 @@ public partial class Database : MonoBehaviour {
     }
 
     public static void UpdateNextID() {
-        for (int i = 0; i < (int)Table.COUNT; i++) {
+        for (int i = 0; i < 5; i++) {
             string sql = "SELECT " + PrimaryKeyID[i] + " FROM " + TableNames[i] + " ORDER BY " + PrimaryKeyID[i] +
                          " DESC LIMIT 1";
             crud.UpdateID(sql, i, ModelNames[i]);

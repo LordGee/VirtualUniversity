@@ -143,32 +143,31 @@ public class QuizManager_UIGroup : MonoBehaviour {
         }
     }
 
-    private void BeginState() {
+    private async void BeginState() {
         ActivateAllUi();
         inputBox.GetComponent<InputField>().text = "";
         inputBox.SetActive(false);
         admin.SetHeadingText("Add / Edit Quizzes");
         content = new List<string>();
-        content = Database.GetQuizNames();
+        content = await Database.GetQuizNames();
         PopulateDropbox.Run(ref dropBox, content, "Select Quiz");
         primaryButton.GetComponentInChildren<Text>().text = "Manage\nSelected\nQuiz";
         secondaryButton.GetComponentInChildren<Text>().text = "Create\nNew\nQuiz";
     }
 
-    private void SelectCourse() {
+    private async void SelectCourse() {
         ActivateAllUi();
         inputBox.SetActive(false);
         secondaryButton.SetActive(false);
         admin.SetHeadingText("Select a Course");
         content = new List<string>();
-        //todo fix
-        var content1 = Database.GetCourseNames();
+        content = await Database.GetCourseNames();
         PopulateDropbox.Run(ref dropBox, content, "Select Course");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nCourse";
         quiz = new Quiz();
     }
 
-    private void SelectSubject() {
+    private async void SelectSubject() {
         quiz.CourseName = dropBox.GetComponent<Dropdown>().options[dropBox.GetComponent<Dropdown>().value].text;
         Message("Course Added");
         ActivateAllUi();
@@ -176,7 +175,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         secondaryButton.SetActive(false);
         admin.SetHeadingText("Select a Subject");
         content = new List<string>();
-        content = Database.GetSubjectsLinkedToCourse(quiz.CourseName); 
+        content = await Database.GetSubjectsLinkedToCourse(quiz.CourseName); 
         PopulateDropbox.Run(ref dropBox, content, "Select Subject");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nSubject";
         backButton.GetComponentInChildren<Text>().text = "Exit Quiz\nManagement";

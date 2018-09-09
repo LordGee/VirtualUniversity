@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Mono.Data.Sqlite;
 using UnityEngine;
-using UnityEngine.Networking;
 
 public partial class Database {
     static void Initialize_Quiz() {
@@ -13,7 +9,7 @@ public partial class Database {
                             course_name VARCHAR(255) NOT NULL PRIMARY KEY)");
 
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS CourseSubjects (
-                            course_subject_id INTEGER NOT NULL PRIMARY KEY autoincrement,
+                            course_subject_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                             fk_course_name VARCHAR(255) NOT NULL,
                             fk_subject_name VARCHAR(255) NOT NULL)");
 
@@ -37,63 +33,58 @@ public partial class Database {
 
 
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Answers (
-                            answer_id INTEGER NOT NULL PRIMARY KEY autoincrement,
+                            answer_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                             answer VARCHAR(255) NOT NULL,
                             is_correct INTEGER NOT NULL,
                             fk_question_id INTEGER NOT NULL)");
     }
 
-
     /// <summary>
-    /// Rather then getting the last index of the question table, we get create
-    /// the index so it can be reused when inserting the answers.
-    /// </summary>
-    /// <returns>Returns next available index value</returns>
-    //public static int GetNewIDForQuestion() {
-    //    object id     = ExecuteScalar("SELECT question_id FROM Questions ORDER BY question_id DESC LIMIT 1");
-    //    int    result = Convert.ToInt32(id);
-    //    return result + 1;
-    //}
-    //public static int GetNewIDForQuiz() {
-    //    object id     = ExecuteScalar("SELECT quiz_id FROM Quizzes ORDER BY quiz_id DESC LIMIT 1");
-    //    int    result = Convert.ToInt32(id);
-    //    return result + 1;
-    //}
-
-    /// <summary>
-    /// Retrieve all avaiilable course names from the database
+    /// Retrieve all available course names from the database
     /// Used for selection within the application, prevents typos
     /// </summary>
     /// <returns>Returns list of strings of each course</returns>
     public static async Task<List<string>> GetCourseNames() {
         int selection = (int) Table.Courses;
-        var result = await crud.GetCourseNames_Go(TableNames[selection], PrimaryKeyID[selection], ModelNames[selection]);
+        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " ORDER BY " +
+                     PrimaryKeyID[selection] + " ASC";
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        List<string> result = new List<string>();
+        for (int i = 0; i < value.courseResult.Count; i++) {
+            result.Add(value.courseResult[i].course_name);
+        }
         return result;
     }
 
-
-
-    public static List<string> GetQuizNames() {
-        List<List<object>> results       = new List<List<object>>();
-        List<string>       stringResults = new List<string>();
-        results = ExecuteReaderNoParams("SELECT quiz_name FROM Quizzes ORDER BY quiz_name ASC");
-        for (int i = 0; i < results.Count; i++) {
-            stringResults.Add(results[i][0].ToString());
+    public static async Task<List<string>> GetQuizNames() {
+        int selection = (int)Table.Quizzes;
+        //SELECT quiz_name FROM Quizzes ORDER BY quiz_name ASC
+        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " ORDER BY " +
+                     PrimaryKeyID[selection] + " ASC";
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        List<string> result = new List<string>();
+        for (int i = 0; i < value.courseResult.Count; i++) {
+            result.Add(value.quizResult[i].quiz_name);
         }
-        return stringResults;
+        return result;
     }
 
-    public static List<string> GetSubjectsLinkedToCourse(string course) {
-        List<List<object>> results = new List<List<object>>();
-        List<string> stringResults = new List<string>();
-        results = ExecuteReader("SELECT fk_subject_name FROM CourseSubjects WHERE fk_course_name = @course ORDER BY fk_subject_name ASC",
-            new SqliteParameter("@course", course));
-        for (int i = 0; i < results.Count; i++) {
-            stringResults.Add(results[i][0].ToString());
+    public static async Task<List<string>> GetSubjectsLinkedToCourse(string course) {
+        int selection = (int) Table.CourseSubjects;
+        //SELECT fk_subject_name FROM CourseSubjects WHERE fk_course_name = @course ORDER BY fk_subject_name ASC
+        string sql  = "SELECT fk_subject_name FROM " + TableNames[selection] + " WHERE fk_course_name = " + course + " ORDER BY fk_subject_name ASC";
+        string json = (string)await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        List<string> result = new List<string>();
+        for (int i = 0; i < value.courseResult.Count; i++) {
+            result.Add(value.courseSubjectResult[i].fk_subject_name);
         }
-        return stringResults;
+        return result;
     }
 
+ 
     public static void AddNewCourse(string course) {
         crud.DbCreate("INSERT INTO Courses (course_name) VALUES (" + course + ")") ;
     }
@@ -106,6 +97,9 @@ public partial class Database {
         crud.DbCreate("INSERT INTO CourseSubjects (fk_course_name, fk_subject_name) VALUES (" + course + ", " +
                       subject + ")");
     }
+
+
+    // todo
 
     public static bool CheckCourseExists(string course) {
         object result = ExecuteScalar("SELECT course_name FROM Courses WHERE course_name = @course",
