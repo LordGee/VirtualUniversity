@@ -48,7 +48,7 @@ public class LectureManager_UIGroup : MonoBehaviour {
         Debug.Log(currentUI);
     }
 
-    public void PrimaryButton() {
+    public async void PrimaryButton() {
         switch (currentUI) {
             case UI_STATE.LectureName:
                 lecture = new Lecture();
@@ -67,7 +67,7 @@ public class LectureManager_UIGroup : MonoBehaviour {
                 lecture.lecture_url = inputBox.GetComponent<InputField>().text;
                 lecture.break_points = new List<LectureBreakPoint>();
                 // add first step to database.
-                lecture.lecture_id = Database.CreateNewLectureInit(lecture, FindObjectOfType<Player>().account);
+                lecture.lecture_id = await Database.CreateNewLectureInit(lecture, FindObjectOfType<Player>().account);
                 Message("Lecture Details added to Database");
                 SetBreak();
                 break;
@@ -92,7 +92,7 @@ public class LectureManager_UIGroup : MonoBehaviour {
                 answerCount++;
                 if (answerCount > 4) {
                     // add this step to database.
-                    Database.CreateNewBreakForLecture(ref breakPoint, lecture.lecture_id);
+                    breakPoint = await Database.CreateNewBreakForLecture(breakPoint, lecture.lecture_id);
                     // Return to 
                     Message("Question and Answers Added to Database");
                     SetBreak();

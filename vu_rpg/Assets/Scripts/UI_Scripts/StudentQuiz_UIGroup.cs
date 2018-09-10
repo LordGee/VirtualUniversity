@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Messaging;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -52,14 +53,14 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
     private List<QuestionResults> results;
 
-    public void InitStart() {
+    public async void InitStart() {
         choosenQuiz = -1;
         quizSelectionPanel.SetActive(true);
         player = FindObjectOfType<Player>();
         quizzes = new List<Quiz>();
         hasQuestionBeenAllocated = new List<bool>();
         questionIndexOrder = new List<int>();
-        Database.GetStudentQuizzes(ref quizzes, player.account, player.course);
+        quizzes = await Database.GetStudentQuizzes(quizzes, player.account, player.course);
         PopulateQuizzes();
         selectionQuiz = true;
         startQuiz = false;
@@ -98,13 +99,13 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
             QuizSelectionSlot slot = quizContent.GetChild(i).GetComponent<QuizSelectionSlot>();
             slot.nameText.text = quizzes[i].QuizName;
             int count = i;
-            slot.selectButton.onClick.SetListener(() => {
+            slot.selectButton.onClick.SetListener(async () => {
                 choosenQuiz = count;
                 results = new List<QuestionResults>();
                 if (quizzes[choosenQuiz].result_id >= 0) {
                     results_id = quizzes[choosenQuiz].result_id;
                 } else {
-                    results_id = Database.CreateNewResultsForChoosenQuiz(player.account, quizzes[choosenQuiz].QuizId);
+                    results_id = await Database.CreateNewResultsForChosenQuiz(player.account, quizzes[choosenQuiz].QuizId);
                 }
                 SelectedQuiz();
             });
@@ -120,8 +121,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         PrepareQuestionsAndAnswers();
     }
 
-    private void PrepareQuestionsAndAnswers() {
-        quizzes[choosenQuiz].Questions = Database.GetQuestionsForChoosenQuiz(quizzes[choosenQuiz].QuizId);
+    private async void PrepareQuestionsAndAnswers() {
+        quizzes[choosenQuiz].Questions = await Database.GetQuestionsForChosenQuiz(quizzes[choosenQuiz].QuizId);
         hasQuestionBeenAllocated = new List<bool>();
         questionIndexOrder = new List<int>();
         for (int i = 0; i < quizzes[choosenQuiz].Questions.Count; i++) {
@@ -130,7 +131,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         while (!AllocationTest.HasAllocationFinished(hasQuestionBeenAllocated)) {
             int index = Random.Range(0, quizzes[choosenQuiz].Questions.Count);
             if (!hasQuestionBeenAllocated[index]) {
-                if (!Database.HasQuestionBeenAttempted(quizzes[choosenQuiz].Questions[index].question_id, results_id, false)) {
+                if (! await Database.HasQuestionBeenAttempted(quizzes[choosenQuiz].Questions[index].question_id, results_id, false)) {
                     questionIndexOrder.Add(index);
                 }
                 hasQuestionBeenAllocated[index] = true;
@@ -196,7 +197,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         }
     }
 
-    private void EndQuiz() {
+    private async void EndQuiz() {
         // Update Database with result is_completed
         Database.UpdateResultsToIsCompleted(results_id); 
 
@@ -208,7 +209,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
         // Calculate result as percentage
         int totalQuestions = quizzes[choosenQuiz].Questions.Count;
-        int totalCorrect = Database.GetTotalCorrectFromResults(results_id, false);
+        int totalCorrect = await Database.GetTotalCorrectFromResults(results_id, false);
         float percentage = 0;
         if (totalCorrect != 0 || totalQuestions != 0) {
             percentage = (float) (totalCorrect * 100) / totalQuestions;
@@ -221,15 +222,15 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
             QuizResultSlot slot = resultContent.GetChild(i).GetComponent<QuizResultSlot>();
             slot.nameText.text = "Q" + (i + 1) + ". " + quizzes[choosenQuiz].Questions[i].question;
             slot.correctAnswerText.text = "Correct Answer: " + Database.GetCorrectAnswer(quizzes[choosenQuiz].Questions[i].question_id);
-            if (Database.GetWasAnswerCorrect(results_id, quizzes[choosenQuiz].Questions[i].question_id, false)) {
+            if (await Database.GetWasAnswerCorrect(results_id, quizzes[choosenQuiz].Questions[i].question_id, false)) {
                 slot.selectButton.GetComponentInChildren<Text>().text = "CORRECT";
                 slot.selectButton.GetComponent<Image>().color = Color.green;
             } else {
                 slot.selectButton.GetComponentInChildren<Text>().text = "Incorrect";
                 slot.selectButton.GetComponent<Image>().color = Color.yellow;
                 slot.wrongAnswerText.text = "You Answered: " +
-                                            Database.GetActualAnswer(Database.GetStudentsAnswerId(results_id,
-                                                quizzes[choosenQuiz].Questions[i].question_id, false));
+                                            await Database.GetActualAnswer(await Database.GetStudentsAnswerId(
+                                                results_id, quizzes[choosenQuiz].Questions[i].question_id, false));
             }
         }
     }

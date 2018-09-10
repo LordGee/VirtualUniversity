@@ -191,7 +191,6 @@ public partial class Database {
         // addon system hooks
         InitCrud();
         Utils.InvokeMany(typeof(Database), null, "Initialize_");
-        UpdateNextID();
         Debug.Log("connected to database");
 
     }

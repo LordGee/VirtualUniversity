@@ -98,45 +98,56 @@ public partial class Database {
                       subject + ")");
     }
 
-
-    // todo
-
-    public static bool CheckCourseExists(string course) {
-        object result = ExecuteScalar("SELECT course_name FROM Courses WHERE course_name = @course",
-            new SqliteParameter("@course", course));
-        if (result == null) {
+    public static async Task<bool> CheckCourseExists(string course) {
+        int selection = (int) Table.Courses;
+        // "SELECT course_name FROM Courses WHERE course_name = @course"
+        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " WHERE " +
+                     PrimaryKeyID[selection] + " = " + course;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        if (value.courseResult.Count == 0) {
             return false;
         }
         return true;
     }
 
-    public static bool CheckSubjectExists(string subject) {
-        object result = ExecuteScalar("SELECT subject_name FROM Subjects WHERE subject_name = @subject",
-            new SqliteParameter("@subject", subject));
-        if (result == null) {
+    public static async Task<bool> CheckSubjectExists(string subject) {
+        int selection = (int)Table.Subjects;
+        // "SELECT subject_name FROM Subjects WHERE subject_name = @subject"
+        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " WHERE " +
+                     PrimaryKeyID[selection] + " = " + subject;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        if (value.subjectResult.Count == 0) {
             return false;
         }
         return true;
     }
 
-    public static bool CheckSubjectLinkedToCourseExists(string subject, string course) {
-        object result = ExecuteScalar("SELECT fk_subject_name, fk_course_name FROM CourseSubjects WHERE fk_subject_name = @subject AND fk_course_name = @course",
-            new SqliteParameter("@subject", subject),
-            new SqliteParameter("@course", course));
-        if (result == null) {
+    public static async Task<bool> CheckSubjectLinkedToCourseExists(string subject, string course) {
+        int selection = (int)Table.CourseSubjects;
+        // "SELECT fk_subject_name, fk_course_name FROM CourseSubjects
+        // WHERE fk_subject_name = @subject AND fk_course_name = @course"
+        string sql = "SELECT fk_subject_name, fk_course_name FROM " + TableNames[selection] +
+                     " WHERE fk_subject_name = " + subject + " AND fk_course_name = " + course;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        if (value.courseSubjectResult.Count == 0) {
             return false;
         }
         return true;
     }
 
-    public static bool CheckQuizExists(string quiz) {
-        bool dontExists = false;
-        object result = ExecuteScalar("SELECT quiz_name FROM Quizzes WHERE quiz_name = @quiz",
-            new SqliteParameter("@quiz", quiz));
-        if (result == null) {
-            dontExists = true;
+    public static async Task<bool> CheckQuizExists(string quiz) {
+        int selection = (int)Table.Quizzes;
+        // "SELECT quiz_name FROM Quizzes WHERE quiz_name = @quiz"
+        string sql = "SELECT quiz_name FROM " + TableNames[selection] + " WHERE quiz_name = " + quiz;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        if (value.quizResult.Count == 0) {
+            return true;
         }
-        return dontExists;
+        return false;
     }
 
     public static void CreateNewQuiz(int quiz, string name, int number, string owner, string subject) {
@@ -155,19 +166,18 @@ public partial class Database {
     }
     /// <summary>
     /// Adds question and answers to the database
-    /// todo: answers needs to be more dynamic, one answer per row.
     /// </summary>
     /// <param name="question">Single string question</param>
     /// <param name="answers">Array of string answers (max 3)</param>
     /// <param name="correct">Correct answer 1 - 3</param>
-    public static void AddNewQuestionAndAnswer(string question, string[] answers, int correct) {
-        int QuestionID = NextID[(int)Table.Questions];
-        // todo: need to get quiz_id for this insert statement
-        crud.DbCreate("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (" + QuestionID + ", " +
-                      question + ", 1)");
-        for (int i = 0; i < answers.Length; i++) {
-            crud.DbCreate("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (" + answers[i] + ", " +
-                          correct + ", " + QuestionID + ")");
-        }
-    }
+    //public static void AddNewQuestionAndAnswer(string question, string[] answers, int correct) {
+    //    int QuestionID = NextID[(int)Table.Questions];
+    //    // todo: need to get quiz_id for this insert statement
+    //    crud.DbCreate("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (" + QuestionID + ", " +
+    //                  question + ", 1)");
+    //    for (int i = 0; i < answers.Length; i++) {
+    //        crud.DbCreate("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (" + answers[i] + ", " +
+    //                      correct + ", " + QuestionID + ")");
+    //    }
+    //}
 }

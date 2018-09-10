@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -49,12 +50,12 @@ public class StudentLecture_UIGroup : MonoBehaviour {
 
     void OnApplicationQuit() { Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time)); }
 
-    public void InitStart() {
+    public async void InitStart() {
         chosenLecture = -1;
         lectureSelectionPanel.SetActive(true);
         player = FindObjectOfType<Player>();
         lectures = new List<Lecture>();
-        Database.GetStudentLectures(ref lectures, player.account, player.course);
+        await Database.GetStudentLectures(lectures, player.account, player.course);
         PopulateLectures();
         startLecture = false;
     }
@@ -99,13 +100,13 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         }
     }
 
-    private void SelectedLecture() {
-        if (LoadChosenLecture()) {
+    private async void SelectedLecture() {
+        if (await LoadChosenLecture()) {
             lectureCamera.gameObject.SetActive(true);
             breakComplete = new List<bool>();
             // Loop through number of breakpoints and set boolean value to determine if break has already been completed
             for (int i = 0; i < lectures[chosenLecture].break_points.Count; i++) {
-                if (Database.HasQuestionBeenAttempted(
+                if (await Database.HasQuestionBeenAttempted(
                     lectures[chosenLecture].break_points[i].break_question.question_id, attend_id, true)) {
                     breakComplete.Add(true);
                 } else {
@@ -117,7 +118,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         }
     }
 
-    private bool LoadChosenLecture() {
+    private async Task<bool> LoadChosenLecture() {
         try {
             video.Stop();
             video.url = lectures[chosenLecture].lecture_url;
@@ -132,7 +133,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
             if (lectures[chosenLecture].attend_id >= 0) {
                 attend_id = lectures[chosenLecture].attend_id;
             } else {
-                attend_id = Database.CreateNewLectureAttend(player.account, lectures[chosenLecture].lecture_id);
+                attend_id = await Database.CreateNewLectureAttend(player.account, lectures[chosenLecture].lecture_id);
             }
             return true;
         } catch (Exception e) {
@@ -204,7 +205,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         video.Play();
     }
 
-    private void EndLecture() {
+    private async void EndLecture() {
         lectureCamera.gameObject.SetActive(false);
         lectureResultsPanel.gameObject.SetActive(true);
         video.Stop();
@@ -214,7 +215,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
 
         // Calculate result as percentage
         int totalQuestions = lectures[chosenLecture].break_points.Count;
-        int totalCorrect = Database.GetTotalCorrectFromResults(attend_id, true);
+        int totalCorrect = await Database.GetTotalCorrectFromResults(attend_id, true);
         float percentage = 0;
         if (totalCorrect != 0 || totalQuestions != 0) {
             percentage = (float)(totalCorrect * 100) / totalQuestions;
@@ -227,14 +228,14 @@ public class StudentLecture_UIGroup : MonoBehaviour {
             QuizResultSlot slot = resultContent.GetChild(i).GetComponent<QuizResultSlot>();
             slot.nameText.text = "Q" + (i + 1) + ". " + lectures[chosenLecture].break_points[i].break_question.question;
             slot.correctAnswerText.text = "Correct Answer: " + Database.GetCorrectAnswer(lectures[chosenLecture].break_points[i].break_question.question_id);
-            if (Database.GetWasAnswerCorrect(attend_id, lectures[chosenLecture].break_points[i].break_question.question_id, true)) {
+            if (await Database.GetWasAnswerCorrect(attend_id, lectures[chosenLecture].break_points[i].break_question.question_id, true)) {
                 slot.selectButton.GetComponentInChildren<Text>().text = "CORRECT";
                 slot.selectButton.GetComponent<Image>().color = Color.green;
             } else {
                 slot.selectButton.GetComponentInChildren<Text>().text = "Incorrect";
                 slot.selectButton.GetComponent<Image>().color = Color.yellow;
                 slot.wrongAnswerText.text = "You Answered: " +
-                                            Database.GetActualAnswer(Database.GetStudentsAnswerId(attend_id,
+                                            await Database.GetActualAnswer(await Database.GetStudentsAnswerId(attend_id,
                                                 lectures[chosenLecture].break_points[i].break_question.question_id, true));
             }
         }

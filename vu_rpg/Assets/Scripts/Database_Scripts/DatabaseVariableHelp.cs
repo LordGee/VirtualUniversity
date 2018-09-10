@@ -10,13 +10,14 @@ public partial class Database {
         LectureAttend,
         Courses,
         CourseSubjects,
+        Subjects,
+        Results,
+        Answers,
+        ResultQA,
 
         COUNT
     };
 
-    public static int[] NextID = {
-        0, 0, 0, 0, 0, 0, 0,
-    };
     protected static string[] PrimaryKeyID = {
         "quiz_id",
         "question_id",
@@ -25,6 +26,11 @@ public partial class Database {
         "attend_id",
         "course_name",
         "course_subject_id",
+        "subject_name",
+        "result_id",
+        "answer_id",
+        "result_qa_id",
+
     };
     protected static string[] TableNames = {
         "Quizzes",
@@ -34,6 +40,11 @@ public partial class Database {
         "LectureAttend",
         "Courses",
         "CourseSubjects",
+        "Subjects",
+        "Results",
+        "Answers",
+        "ResultQA",
+
     };
     protected static string[] ModelNames = {
         "quizResult",
@@ -43,6 +54,11 @@ public partial class Database {
         "lectureAttendResult",
         "courseResult",
         "courseSubjectResult",
+        "subjectResult",
+        "resultResult",
+        "answerResult",
+        "resultQaResult",
+
     };
 
 }

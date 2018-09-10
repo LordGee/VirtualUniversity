@@ -28,7 +28,7 @@ public partial class DatabaseCrud : MonoBehaviour {
     }
 
     public IEnumerator Read(string sql, string model) {
-        string          uri = _CONST.API_URL + sql;
+        string uri = _CONST.API_URL + sql;
         UnityWebRequest www = UnityWebRequest.Get(uri);
         yield return www.SendWebRequest();
 
@@ -36,40 +36,9 @@ public partial class DatabaseCrud : MonoBehaviour {
             Debug.LogError(www.error);
         } else {
             JsonString = ConvertJson(model, www.downloadHandler.text);
-
             yield return JsonString;
         }
     }
-
-    public void UpdateID(string sql, int index, string model) {
-        StartCoroutine(GetNewIDs(sql, index, model));        
-    }
-    private IEnumerator GetNewIDs(string sql, int index, string model) {
-        string uri = _CONST.API_URL + sql;
-        UnityWebRequest www = UnityWebRequest.Get(uri);
-
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError) {
-            Debug.LogError(www.error);
-        } else {
-            JsonString = ConvertJson(model, www.downloadHandler.text);
-            Debug.Log(JsonString);
-            value = JsonUtility.FromJson<JsonResult>(JsonString);
-            if (index == (int) Database.Table.Questions && value.questionResult.Count > 0) {
-                Database.NextID[index] = value.questionResult[0].question_id + 1;
-            } else if (index == (int) Database.Table.Quizzes && value.quizResult.Count > 0) {
-                Database.NextID[index] = value.quizResult[0].quiz_id + 1;
-            } else if (index == (int) Database.Table.Lectures && value.lectureResult.Count > 0) {
-                Database.NextID[index] = value.lectureResult[0].lecture_id + 1;
-            } else if (index == (int)Database.Table.LectureBreakPoints && value.lectureBreakResult.Count > 0) {
-                Database.NextID[index] = value.lectureBreakResult[0].break_id + 1;
-            } else if (index == (int)Database.Table.LectureAttend && value.lectureAttendResult.Count > 0) {
-                Database.NextID[index] = value.lectureAttendResult[0].attend_id + 1;
-            }
-        }
-    }
-
  
     private string ConvertJson(string model, string json) {
         json.Trim(new char[] { '\uFEFF', '\u200B' }); // don't work

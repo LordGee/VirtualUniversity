@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Mono.Data.Sqlite;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -18,6 +19,49 @@ public partial class Database : MonoBehaviour {
     public static int GetNextID(string tableName, string primaryKey) {
         object result = ExecuteScalar("SELECT " + primaryKey + " FROM " + tableName + " ORDER BY " + primaryKey + " DESC LIMIT 1");
         return Convert.ToInt32(result) + 1;
+    }
+
+    public static async Task<int> GetNextID_Crud(Table table) {
+        int selection = (int) table;
+        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " ORDER BY " +
+                     PrimaryKeyID[selection] + " DESC LIMIT 1";
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        int id;
+        switch (table) {
+            case Table.Answers:
+                id = value.answerResult[0].answer_id;
+                break;
+            case Table.CourseSubjects:
+                id = value.courseSubjectResult[0].course_subject_id;
+                break;
+            case Table.LectureAttend:
+                id = value.lectureAttendResult[0].attend_id;
+                break;
+            case Table.LectureBreakPoints:
+                id = value.lectureBreakResult[0].break_id;
+                break;
+            case Table.Lectures:
+                id = value.lectureResult[0].lecture_id;
+                break;
+            case Table.Questions:
+                id = value.questionResult[0].question_id;
+                break;
+            case Table.Quizzes:
+                id = value.quizResult[0].quiz_id;
+                break;
+            case Table.ResultQA:
+                id = value.resultQaResult[0].result_qa_id;
+                break;
+            case Table.Results:
+                id = value.resultResult[0].result_id;
+                break;
+            default:
+                id = 1;
+                break;
+        }
+        return id + 1;
+
     }
 
     /// <summary>
@@ -37,14 +81,6 @@ public partial class Database : MonoBehaviour {
             }
         }
         return result;
-    }
-
-    public static void UpdateNextID() {
-        for (int i = 0; i < 5; i++) {
-            string sql = "SELECT " + PrimaryKeyID[i] + " FROM " + TableNames[i] + " ORDER BY " + PrimaryKeyID[i] +
-                         " DESC LIMIT 1";
-            crud.UpdateID(sql, i, ModelNames[i]);
-        }
     }
 
     public static DatabaseCrud crud;

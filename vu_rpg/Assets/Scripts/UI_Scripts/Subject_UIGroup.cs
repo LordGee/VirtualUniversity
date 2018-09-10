@@ -52,10 +52,10 @@ public class Subject_UIGroup : MonoBehaviour {
         FindObjectOfType<SelectSubject_UIGroup>().UpdateCourseData();
     }
 
-    public void btn_AddNewCourse() {
+    public async void btn_AddNewCourse() {
         selectedCourse = FindObjectOfType<AddCourse_UIGroup>().GetNewCourse();
         if (selectedCourse.Length >= 3) {
-            if (!Database.CheckCourseExists(selectedCourse)) {
+            if (!await Database.CheckCourseExists(selectedCourse)) {
                 Database.AddNewCourse(selectedCourse);
                 DeactivateActivateGroup(subGroupManageCourse);
             } else {
@@ -70,17 +70,17 @@ public class Subject_UIGroup : MonoBehaviour {
         }
     }
 
-    public void btn_AddNewSubject() {
+    public async void btn_AddNewSubject() {
         selectedSubject = FindObjectOfType<AddSubject_UIGroup>().GetNewSubject();
         string message = "";
         if (selectedCourse.Length >= 3) {
-            if (!Database.CheckSubjectExists(selectedSubject)) {
+            if (!await Database.CheckSubjectExists(selectedSubject)) {
                 Database.AddNewSubject(selectedSubject);
                 message = message + "You have successfully added  " + selectedSubject + ". ";
             } else {
                 message = message + "The subject you have entered already exists.";
             }
-            if (!Database.CheckSubjectLinkedToCourseExists(selectedSubject, selectedCourse)) {
+            if (!await Database.CheckSubjectLinkedToCourseExists(selectedSubject, selectedCourse)) {
                 Database.AddCourseSubjects(selectedCourse, selectedSubject);
                 message = message + "\nThis subject has been linked to " + selectedCourse;
             } else {

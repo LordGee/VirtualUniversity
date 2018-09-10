@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Mono.Data.Sqlite;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ public partial class Database {
                             fk_quiz_id INTEGER NOT NULL)");
 
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS ResultQA (
-                            result_qa_id INTEGER NOT NULL PRIMARY KEY autoincrement,
+                            result_qa_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                             fk_result_id INTEGER NOT NULL DEFAULT -1,
                             fk_attend_id INTEGER NOT NULL DEFAULT -1,
                             fk_question_id INTEGER NOT NULL,
@@ -26,104 +27,127 @@ public partial class Database {
     }
 
     // get all Quizzes by course... narrow to subject later
-    public static void GetStudentQuizzes(ref List<Quiz> quiz, string account, string course) {
-        List<List<object>> result = ExecuteReader(
-            "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
-            "FROM Quizzes, Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
-            "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
-            "GROUP BY quiz_name ORDER BY quiz_name",
-            new SqliteParameter("@course", course));
-        for (int i = 0; i < result.Count; i++) {
-            if (HasQuizBeenCompleted(account, Convert.ToInt32(result[i][0]))) {
+    public static async Task<List<Quiz>> GetStudentQuizzes(List<Quiz> quiz, string account, string course) {
+        int selection = (int)Table.Quizzes;
+        // "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
+        // "FROM Quizzes, Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
+        // "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
+        // "GROUP BY quiz_name ORDER BY quiz_name"
+        string sql = "SELECT " + PrimaryKeyID[selection] + ", quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
+                     "FROM " + TableNames[selection] + ", Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
+                     "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = " + course +
+                     "GROUP BY quiz_name ORDER BY quiz_name";
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        for (int i = 0; i < value.quizResult.Count; i++) {
+            if (await HasQuizBeenCompleted(account, value.quizResult[i].quiz_id)) {
                 Quiz temp = new Quiz();
-                temp.QuizId = Convert.ToInt32(result[i][0]);
-                temp.QuizName = (string) result[i][1];
-                temp.QuizTimer = Convert.ToInt32(result[i][2]);
-                temp.CourseName = GetCourseNameFromSubject((string)result[i][5]);
-                temp.SubjectName = (string)result[i][5];
-                List<List<object>> previousAttempt = ExecuteReader(
-                    "SELECT result_id, time_elapsed FROM Results WHERE fk_account = @account AND fk_quiz_id = @quiz",
-                    new SqliteParameter("@account", account), new SqliteParameter("@quiz", temp.QuizId));
-                if (previousAttempt.Count > 0) {
-                    temp.result_id = Convert.ToInt32(previousAttempt[0][0]);
-                    temp.time_elapsed = Convert.ToInt32(previousAttempt[0][1]);
+                temp.QuizId = value.quizResult[i].quiz_id;
+                temp.QuizName = value.quizResult[i].quiz_name;
+                temp.QuizTimer = value.quizResult[i].quiz_timer;
+                temp.CourseName = await GetCourseNameFromSubject(value.quizResult[i].fk_subject_name);
+                temp.SubjectName = value.quizResult[i].fk_subject_name;
+                selection = (int) Table.Results;
+                sql = "SELECT " + PrimaryKeyID[selection] + ", time_elapsed FROM " + TableNames[selection] +
+                      " WHERE fk_account = " + account + " AND fk_quiz_id = " + temp.QuizId;
+                string previousAttemptJson = (string) await crud.Read(sql, ModelNames[selection]);
+                DatabaseCrud.JsonResult previousAttempt = JsonUtility.FromJson<DatabaseCrud.JsonResult>(previousAttemptJson);
+                if (previousAttempt.resultResult.Count > 0) {
+                    temp.result_id = previousAttempt.resultResult[0].result_id;
+                    temp.time_elapsed = previousAttempt.resultResult[0].time_elapsed;
                 }
-                
                 quiz.Add(temp);
             }
         }
+        return quiz;
     }
 
-    public static void GetStudentQuizzes(Player player) {
-        List<List<object>> result = ExecuteReader(
-            "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
-            "FROM Quizzes, Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
-            "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
-            "GROUP BY quiz_name ORDER BY quiz_name",
-            new SqliteParameter("@course", player.course));
-        for (int i = 0; i < result.Count; i++) {
-            if (HasQuizBeenCompleted(player.account, Convert.ToInt32(result[i][0]))) {
-                Quiz temp = new Quiz();
-                temp.QuizId = Convert.ToInt32(result[i][0]);
-                temp.QuizName = (string)result[i][1];
-                temp.QuizTimer = Convert.ToInt32(result[i][2]);
-                temp.CourseName = GetCourseNameFromSubject((string)result[i][5]);
-                temp.SubjectName = (string)result[i][5];
-                List<List<object>> previousAttempt = ExecuteReader(
-                    "SELECT result_id, time_elapsed FROM Results WHERE fk_account = @account AND fk_quiz_id = @quiz",
-                    new SqliteParameter("@account", player.account), new SqliteParameter("@quiz", temp.QuizId));
-                if (previousAttempt.Count > 0) {
-                    temp.result_id = Convert.ToInt32(previousAttempt[0][0]);
-                    temp.time_elapsed = Convert.ToInt32(previousAttempt[0][1]);
-                }
+    //public static void GetStudentQuizzes(Player player) {
+    //    List<List<object>> result = ExecuteReader(
+    //        "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
+    //        "FROM Quizzes, Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
+    //        "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
+    //        "GROUP BY quiz_name ORDER BY quiz_name",
+    //        new SqliteParameter("@course", player.course));
+    //    for (int i = 0; i < result.Count; i++) {
+    //        if (HasQuizBeenCompleted(player.account, Convert.ToInt32(result[i][0]))) {
+    //            Quiz temp = new Quiz();
+    //            temp.QuizId = Convert.ToInt32(result[i][0]);
+    //            temp.QuizName = (string)result[i][1];
+    //            temp.QuizTimer = Convert.ToInt32(result[i][2]);
+    //            temp.CourseName = GetCourseNameFromSubject((string)result[i][5]);
+    //            temp.SubjectName = (string)result[i][5];
+    //            List<List<object>> previousAttempt = ExecuteReader(
+    //                "SELECT result_id, time_elapsed FROM Results WHERE fk_account = @account AND fk_quiz_id = @quiz",
+    //                new SqliteParameter("@account", player.account), new SqliteParameter("@quiz", temp.QuizId));
+    //            if (previousAttempt.Count > 0) {
+    //                temp.result_id = Convert.ToInt32(previousAttempt[0][0]);
+    //                temp.time_elapsed = Convert.ToInt32(previousAttempt[0][1]);
+    //            }
+    //            // player.Quizzes.Add(temp);
+    //        }
+    //    }
+    //}
 
-                // player.Quizzes.Add(temp);
-            }
-        }
-    }
-
-    private static bool HasQuizBeenCompleted(string account, int quiz) {
-        int count =
-            Convert.ToInt32(ExecuteScalar("SELECT COUNT(*) FROM Results WHERE fk_quiz_id = @quiz AND fk_account = @account AND is_completed = 1",
-                new SqliteParameter("@quiz", quiz), new SqliteParameter("@account", account)));
-        if (count == 0) {
+    private static async Task<bool> HasQuizBeenCompleted(string account, int quiz) {
+        int selection = (int)Table.Results;
+        // "SELECT COUNT(*) FROM Results WHERE fk_quiz_id = @quiz AND fk_account = @account AND is_completed = 1"
+        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " WHERE fk_quiz_id = " +
+                     quiz + " AND fk_account = " + account + " AND is_completed = 1";
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        if (value.quizResult.Count == 0) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
-    private static string GetCourseNameFromSubject(string subject) {
-        return (string) ExecuteScalar("SELECT fk_course_name FROM CourseSubjects WHERE fk_subject_name = @subject",
-            new SqliteParameter("@subject", subject));
+    private static async Task<string> GetCourseNameFromSubject(string subject) {
+        int selection = (int)Table.CourseSubjects;
+        // "SELECT fk_course_name FROM CourseSubjects WHERE fk_subject_name = @subject"
+        string sql = "SELECT fk_course_name FROM " + TableNames[selection] + " WHERE fk_subject_name = " + subject;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        return value.courseSubjectResult[0].fk_course_name;
     }
 
-    public static int CreateNewResultsForChoosenQuiz(string account, int quiz) {
-        object id = ExecuteScalar("SELECT result_id FROM Results ORDER BY result_id DESC LIMIT 1");
-        int result = Convert.ToInt32(id) + 1;
-        ExecuteNoReturn("INSERT INTO Results (result_id, fk_account, fk_quiz_id) VALUES (@id, @account, @quiz)",
-            new SqliteParameter("@id", result), new SqliteParameter("@account", account),
-            new SqliteParameter("@quiz", quiz));
-        return result;
+    public static async Task<int> CreateNewResultsForChosenQuiz(string account, int quiz) {
+        int selection = (int)Table.Results;
+        // "SELECT result_id FROM Results ORDER BY result_id DESC LIMIT 1"
+        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " ORDER BY " +
+                     PrimaryKeyID[selection] + " DESC LIMIT 1";
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        int id = value.resultResult[0].result_id + 1;
+        // "INSERT INTO Results (result_id, fk_account, fk_quiz_id) VALUES (@id, @account, @quiz)"
+        crud.DbCreate("INSERT INTO "+TableNames[selection]+" ("+PrimaryKeyID[selection]+", fk_account, fk_quiz_id) VALUES ("+id+", "+account+", "+quiz+")");
+        return id;
     }
 
-    public static List<Questions> GetQuestionsForChoosenQuiz(int quiz) {
+    public static async Task<List<Questions>> GetQuestionsForChosenQuiz(int quiz) {
+        int selection = (int)Table.Questions;
+        // "SELECT question_id, question FROM Questions WHERE fk_quiz_id = @quiz"
+        string sql = "SELECT " + PrimaryKeyID[selection] + ", question FROM " + TableNames[selection] +
+                     " WHERE fk_quiz_id = " + quiz;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         List<Questions> questions = new List<Questions>();
-
-        List<List<object>> questionResults = ExecuteReader("SELECT question_id, question FROM Questions WHERE fk_quiz_id = @quiz", new SqliteParameter("@quiz", quiz));
-        for (int i = 0; i < questionResults.Count; i++) {
+        for (int i = 0; i < value.questionResult.Count; i++) {
             Questions q = new Questions();
-            q.question_id = Convert.ToInt32(questionResults[i][0]);
-            q.question = (string) questionResults[i][1];
+            q.question_id = value.questionResult[i].question_id;
+            q.question = value.questionResult[i].question;
             q.answers = new List<Answers>();
-            List<List<object>> answerResults =
-                ExecuteReader("SELECT answer_id, answer, is_correct FROM Answers WHERE fk_question_id = @question",
-                    new SqliteParameter("@question", q.question_id));
-            for (int j = 0; j < answerResults.Count; j++) {
+            selection = (int)Table.Answers;
+            // "SELECT answer_id, answer, is_correct FROM Answers WHERE fk_question_id = @question"
+            sql = "SELECT " + PrimaryKeyID[selection] + ", answer, is_correct FROM " + TableNames[selection] +
+                         " WHERE fk_question_id = " + q.question_id;
+            json = (string) await crud.Read(sql, ModelNames[selection]);
+            DatabaseCrud.JsonResult answerResults = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+            for (int j = 0; j < answerResults.answerResult.Count; j++) {
                 Answers a = new Answers();
-                a.answer_id = Convert.ToInt32(answerResults[j][0]);
-                a.answer = (string) answerResults[j][1];
-                a.isCorrect = Convert.ToInt32(answerResults[j][2]);
+                a.answer_id = answerResults.answerResult[j].answer_id;
+                a.answer = answerResults.answerResult[j].answer;
+                a.isCorrect = answerResults.answerResult[j].is_correct;
                 q.answers.Add(a);
             }
             questions.Add(q);
@@ -136,93 +160,109 @@ public partial class Database {
     public static void UpdateResultsAfterQuestionAnswered(QuestionResults result, bool isLecture) {
         if (!isLecture) {
             if (result.isCorrect == 1) {
-                ExecuteNoReturn("UPDATE Results SET result_value = result_value + 1 WHERE result_id = @id",
-                    new SqliteParameter("@id", result.fk_results_id));
+                crud.DbCreate("UPDATE Results SET result_value = result_value + 1 WHERE result_id = " + result.fk_results_id);
             }
-            ExecuteNoReturn(
-                "INSERT INTO ResultQA (fk_result_id, fk_question_id, fk_answer_id) VALUES (@result, @question, @answer)",
-                new SqliteParameter("@result", result.fk_results_id),
-                new SqliteParameter("@question", result.fk_question_id),
-                new SqliteParameter("@answer", result.fk_answer_id));
+            crud.DbCreate(
+                "INSERT INTO ResultQA (fk_result_id, fk_question_id, fk_answer_id) VALUES (" + result.fk_results_id +
+                ", " + result.fk_question_id + ", " + result.fk_answer_id + ")");
         } else {
             if (result.isCorrect == 1) {
-                ExecuteNoReturn("UPDATE LectureAttend SET attend_value = attend_value + 1 WHERE attend_id = @id",
-                    new SqliteParameter("@id", result.fk_attend_id));
+                crud.DbCreate("UPDATE LectureAttend SET attend_value = attend_value + 1 WHERE attend_id = " + result.fk_attend_id);
             }
-            ExecuteNoReturn(
-                "INSERT INTO ResultQA (fk_attend_id, fk_question_id, fk_answer_id) VALUES (@result, @question, @answer)",
-                new SqliteParameter("@result", result.fk_attend_id),
-                new SqliteParameter("@question", result.fk_question_id),
-                new SqliteParameter("@answer", result.fk_answer_id));
+            crud.DbCreate(
+                "INSERT INTO ResultQA (fk_attend_id, fk_question_id, fk_answer_id) VALUES (" + result.fk_attend_id +
+                ", " + result.fk_question_id + ", " + result.fk_answer_id + ")");
         }
     }
 
     public static void UpdateResultsToIsCompleted(int result) {
-        ExecuteNoReturn("UPDATE Results SET is_completed = 1 WHERE result_id = @id",
-            new SqliteParameter("@id", result));
+        crud.DbCreate("UPDATE Results SET is_completed = 1 WHERE result_id = " + result);
     }
 
-    public static int GetTotalCorrectFromResults(int id, bool isLecture) {
-        int value = -1;
+    public static async Task<int> GetTotalCorrectFromResults(int id, bool isLecture) {
+        string returnValue;
+        int selection;
+        int result = 0;
         if (!isLecture) {
-            value = Convert.ToInt32(ExecuteScalar("SELECT result_value FROM Results WHERE result_id = @id",
-                new SqliteParameter("@id", id)));
+            selection = (int)Table.Results;
+            returnValue = "result_value";
+            // "SELECT result_value FROM Results WHERE result_id = @id"
         } else {
-            value = Convert.ToInt32(ExecuteScalar("SELECT attend_value FROM LectureAttend WHERE attend_id = @id",
-                new SqliteParameter("@id", id)));
+            selection = (int)Table.LectureAttend;
+            returnValue = "attend_value";
+            // "SELECT attend_value FROM LectureAttend WHERE attend_id = @id"
         }
-        return value;
-
+        string sql = "SELECT " + returnValue + " FROM " + TableNames[selection] +
+                     " WHERE " + PrimaryKeyID[selection] + " = " + id;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        if (!isLecture) {
+            return value.resultResult[0].result_value;
+        }
+        return value.lectureAttendResult[0].attend_value;
     }
 
-    public static bool GetWasAnswerCorrect(int id, int question, bool isLecture) {
-        int value = -1;
+    public static async Task<bool> GetWasAnswerCorrect(int id, int question, bool isLecture) {
+        int selection = (int)Table.Answers;
+        string selectValue;
         if (!isLecture) {
-            value = Convert.ToInt32(ExecuteScalar(
-                "SELECT is_correct FROM Answers, ResultQA WHERE ResultQA.fk_result_id = @result AND " +
-                "ResultQA.fk_question_id = @question AND ResultQA.fk_answer_id = Answers.answer_id",
-                new SqliteParameter("@result", id), new SqliteParameter("@question", question)));
+            selectValue = "fk_result_id";
+            // "SELECT is_correct FROM Answers, ResultQA WHERE ResultQA.fk_result_id = @result AND " +
+            // "ResultQA.fk_question_id = @question AND ResultQA.fk_answer_id = Answers.answer_id",
         } else {
-            value = Convert.ToInt32(ExecuteScalar(
-                "SELECT is_correct FROM Answers, ResultQA WHERE ResultQA.fk_attend_id = @result AND " +
-                "ResultQA.fk_question_id = @question AND ResultQA.fk_answer_id = Answers.answer_id",
-                new SqliteParameter("@result", id), new SqliteParameter("@question", question)));
+            selectValue = "fk_attend_id";
+            // "SELECT is_correct FROM Answers, ResultQA WHERE ResultQA.fk_attend_id = @result AND " +
+            // "ResultQA.fk_question_id = @question AND ResultQA.fk_answer_id = Answers.answer_id",
         }
-        if (value == 1) {
+        string sql = "SELECT is_correct FROM " + TableNames[selection] + ", ResultQA WHERE ResultQA." + selectValue +
+                     " = " + id + " AND ResultQA.fk_question_id = " + question +
+                     " AND ResultQA.fk_answer_id = Answers.answer_id";
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        if (value.answerResult[0].is_correct == 1) {
             return true;
         }
         return false;
     }
 
-    public static string GetCorrectAnswer(int question) {
-        object text = ExecuteScalar("SELECT answer FROM Answers WHERE fk_question_id = @id AND is_correct = 1",
-            new SqliteParameter("@id", question));
-        return text.ToString();
+    public static async Task<string> GetCorrectAnswer(int question) {
+        int selection = (int)Table.Answers;
+        // "SELECT answer FROM Answers WHERE fk_question_id = @id AND is_correct = 1"
+        string sql = "SELECT answer FROM " + TableNames[selection] + " WHERE fk_question_id = " + question +
+                     "AND is_correct = 1";
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        return value.answerResult[0].answer;
     }
 
-    public static int GetStudentsAnswerId(int result, int question, bool isLecture) {
-        int id = -1;
+    public static async Task<int> GetStudentsAnswerId(int result, int question, bool isLecture) {
+        int selection = (int)Table.ResultQA;
+        string selectValue;
         if (!isLecture) {
-            id = Convert.ToInt32(ExecuteScalar(
-                "SELECT fk_answer_id FROM ResultQA WHERE fk_result_id = @result AND fk_question_id = @question",
-                new SqliteParameter("@result", result), new SqliteParameter("@question", question)));
+            selectValue = "fk_result_id";
+           // "SELECT fk_answer_id FROM ResultQA WHERE fk_result_id = @result AND fk_question_id = @question",
         } else {
-            id = Convert.ToInt32(ExecuteScalar(
-                "SELECT fk_answer_id FROM ResultQA WHERE fk_attend_id = @result AND fk_question_id = @question",
-                new SqliteParameter("@result", result), new SqliteParameter("@question", question)));
+            selectValue = "fk_attend_id";
+           // "SELECT fk_answer_id FROM ResultQA WHERE fk_attend_id = @result AND fk_question_id = @question",
         }
-        return id;
+        string sql = "SELECT fk_answer_id FROM " + TableNames[selection] + " WHERE " + selectValue + " = " + result +
+                     "AND fk_question_id = " + question;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        return value.resultQaResult[0].fk_answer_id;
     }
 
-    public static string GetActualAnswer(int answer) {
-        object text = ExecuteScalar("SELECT answer FROM Answers WHERE answer_id = @id",
-            new SqliteParameter("@id", answer));
-        return (text == null) ? "" : text.ToString();
+    public static async Task<string> GetActualAnswer(int answer) {
+        int selection = (int) Table.Answers;
+        // "SELECT answer FROM Answers WHERE answer_id = @id"
+        string sql = "SELECT answer FROM Answers WHERE answer_id = " + answer;
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        string text = value.answerResult[0].answer;
+        return (text == null) ? "" : text;
     }
 
     public static void UpdateTimeElapsed(int result, int time) {
-        ExecuteNoReturn("UPDATE Results SET time_elapsed = @time WHERE result_id = @result",
-            new SqliteParameter("@time", time), new SqliteParameter("@result", result));
-        Debug.Log("Update timer");
+        crud.DbCreate("UPDATE Results SET time_elapsed = "+time +" WHERE result_id = " + result);
     }
 }
