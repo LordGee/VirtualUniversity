@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -78,7 +79,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
         }
     }
 
-    public void PrimaryButton() {
+    public async void PrimaryButton() {
         switch (currentUI) {
             case UI_STATE.Begin:
                 currentUI = UI_STATE.QuestionManager;
@@ -98,7 +99,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
                 NumberOfQuestions();
                 break;
             case UI_STATE.NumberOfQuestions:
-                AddQuizToDatabase();
+                await AddQuizToDatabase();
                 currentUI = UI_STATE.AddQuestion;
                 SetQuestion();
                 break;
@@ -115,7 +116,7 @@ public class QuizManager_UIGroup : MonoBehaviour {
                         AddAnswer();
                     }
                     if (answerCount == MAX_ANSWER + 1) {
-                        AddQuestionToDatabase();
+                        await AddQuestionToDatabase();
                         AddAnswersToDatabase();
                         answerCount = -1;
                         Message("Add another question?");
@@ -175,7 +176,8 @@ public class QuizManager_UIGroup : MonoBehaviour {
         secondaryButton.SetActive(false);
         admin.SetHeadingText("Select a Subject");
         content = new List<string>();
-        content = await Database.GetSubjectsLinkedToCourse(quiz.CourseName); 
+        content = await Database.GetSubjectsLinkedToCourse(quiz.CourseName);
+
         PopulateDropbox.Run(ref dropBox, content, "Select Subject");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nSubject";
         backButton.GetComponentInChildren<Text>().text = "Exit Quiz\nManagement";
@@ -280,14 +282,14 @@ public class QuizManager_UIGroup : MonoBehaviour {
         Message("Answer Added");
     }
 
-    private void AddQuizToDatabase() {
+    private async Task AddQuizToDatabase() {
         quiz.QuizTimer = Int32.Parse(inputBox.GetComponent<InputField>().text);
-        quiz.QuizId = Database.GetNextID("Quizzes", "quiz_id");
+        quiz.QuizId = await Database.GetNextID_Crud(Database.Table.Quizzes);
         Database.CreateNewQuiz(quiz.QuizId, quiz.QuizName, quiz.QuizTimer, FindObjectOfType<Player>().account, quiz.SubjectName);
     }
 
-    private void AddQuestionToDatabase() {
-        tempQuestion.question_id = Database.GetNextID("Questions", "question_id");
+    private async Task AddQuestionToDatabase() {
+        tempQuestion.question_id = await Database.GetNextID_Crud(Database.Table.Questions);
         Database.AddQuestionToQuiz(tempQuestion.question_id, tempQuestion.question, quiz.QuizId);
     }
 

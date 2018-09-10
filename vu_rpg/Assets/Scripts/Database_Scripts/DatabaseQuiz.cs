@@ -60,12 +60,11 @@ public partial class Database {
     public static async Task<List<string>> GetQuizNames() {
         int selection = (int)Table.Quizzes;
         //SELECT quiz_name FROM Quizzes ORDER BY quiz_name ASC
-        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " ORDER BY " +
-                     PrimaryKeyID[selection] + " ASC";
+        string sql = "SELECT quiz_name FROM " + TableNames[selection] + " ORDER BY quiz_name ASC";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         List<string> result = new List<string>();
-        for (int i = 0; i < value.courseResult.Count; i++) {
+        for (int i = 0; i < value.quizResult.Count; i++) {
             result.Add(value.quizResult[i].quiz_name);
         }
         return result;
@@ -74,11 +73,11 @@ public partial class Database {
     public static async Task<List<string>> GetSubjectsLinkedToCourse(string course) {
         int selection = (int) Table.CourseSubjects;
         //SELECT fk_subject_name FROM CourseSubjects WHERE fk_course_name = @course ORDER BY fk_subject_name ASC
-        string sql  = "SELECT fk_subject_name FROM " + TableNames[selection] + " WHERE fk_course_name = " + course + " ORDER BY fk_subject_name ASC";
+        string sql  = "SELECT fk_subject_name FROM " + TableNames[selection] + " WHERE fk_course_name = " + PrepareString(course) + " ORDER BY fk_subject_name ASC";
         string json = (string)await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         List<string> result = new List<string>();
-        for (int i = 0; i < value.courseResult.Count; i++) {
+        for (int i = 0; i < value.courseSubjectResult.Count; i++) {
             result.Add(value.courseSubjectResult[i].fk_subject_name);
         }
         return result;
@@ -86,23 +85,23 @@ public partial class Database {
 
  
     public static void AddNewCourse(string course) {
-        crud.DbCreate("INSERT INTO Courses (course_name) VALUES (" + course + ")") ;
+        crud.DbCreate("INSERT INTO Courses (course_name) VALUES (" + PrepareString(course) + ")") ;
     }
 
     public static void AddNewSubject(string subject) {
-        crud.DbCreate("INSERT INTO Subjects (subject_name) VALUES (" + subject + ")");
+        crud.DbCreate("INSERT INTO Subjects (subject_name) VALUES (" + PrepareString(subject) + ")");
     }
 
     public static void AddCourseSubjects(string course, string subject) {
-        crud.DbCreate("INSERT INTO CourseSubjects (fk_course_name, fk_subject_name) VALUES (" + course + ", " +
-                      subject + ")");
+        crud.DbCreate("INSERT INTO CourseSubjects (fk_course_name, fk_subject_name) VALUES (" + PrepareString(course) + ", " +
+                      PrepareString(subject) + ")");
     }
 
     public static async Task<bool> CheckCourseExists(string course) {
         int selection = (int) Table.Courses;
         // "SELECT course_name FROM Courses WHERE course_name = @course"
         string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " WHERE " +
-                     PrimaryKeyID[selection] + " = " + course;
+                     PrimaryKeyID[selection] + " = " + PrepareString(course);
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         if (value.courseResult.Count == 0) {
@@ -115,7 +114,7 @@ public partial class Database {
         int selection = (int)Table.Subjects;
         // "SELECT subject_name FROM Subjects WHERE subject_name = @subject"
         string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " WHERE " +
-                     PrimaryKeyID[selection] + " = " + subject;
+                     PrimaryKeyID[selection] + " = " + PrepareString(subject);
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         if (value.subjectResult.Count == 0) {
@@ -129,7 +128,7 @@ public partial class Database {
         // "SELECT fk_subject_name, fk_course_name FROM CourseSubjects
         // WHERE fk_subject_name = @subject AND fk_course_name = @course"
         string sql = "SELECT fk_subject_name, fk_course_name FROM " + TableNames[selection] +
-                     " WHERE fk_subject_name = " + subject + " AND fk_course_name = " + course;
+                     " WHERE fk_subject_name = " + PrepareString(subject) + " AND fk_course_name = " + PrepareString(course);
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         if (value.courseSubjectResult.Count == 0) {
@@ -141,7 +140,7 @@ public partial class Database {
     public static async Task<bool> CheckQuizExists(string quiz) {
         int selection = (int)Table.Quizzes;
         // "SELECT quiz_name FROM Quizzes WHERE quiz_name = @quiz"
-        string sql = "SELECT quiz_name FROM " + TableNames[selection] + " WHERE quiz_name = " + quiz;
+        string sql = "SELECT quiz_name FROM " + TableNames[selection] + " WHERE quiz_name = " + PrepareString(quiz);
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         if (value.quizResult.Count == 0) {
@@ -152,16 +151,16 @@ public partial class Database {
 
     public static void CreateNewQuiz(int quiz, string name, int number, string owner, string subject) {
         crud.DbCreate("INSERT INTO Quizzes (quiz_id, quiz_name, quiz_timer, quiz_owner, fk_subject_name) VALUES (" +
-                      quiz + ", " + name + ", " + number + ", " + owner + ", " + subject + ")");
+                      quiz + ", " + PrepareString(name) + ", " + number + ", " + PrepareString(owner) + ", " + PrepareString(subject) + ")");
     }
 
     public static void AddQuestionToQuiz(int id, string question, int quiz) {
-        crud.DbCreate("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (" + id + ", " + question +
+        crud.DbCreate("INSERT INTO Questions (question_id, question, fk_quiz_id) VALUES (" + id + ", " + PrepareString(question) +
                       ", " + quiz + ")");
     }
 
     public static void AddAnswerToQuestion(string answer, int isCorrect, int question) {
-        crud.DbCreate("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (" + answer + ", " + isCorrect +
+        crud.DbCreate("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (" + PrepareString(answer) + ", " + isCorrect +
                       ", " + question + ")");
     }
     /// <summary>

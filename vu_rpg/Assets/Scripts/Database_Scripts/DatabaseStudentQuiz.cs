@@ -35,7 +35,7 @@ public partial class Database {
         // "GROUP BY quiz_name ORDER BY quiz_name"
         string sql = "SELECT " + PrimaryKeyID[selection] + ", quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
                      "FROM " + TableNames[selection] + ", Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
-                     "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = " + course +
+                     "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = " + PrepareString(course) +
                      "GROUP BY quiz_name ORDER BY quiz_name";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
@@ -49,7 +49,7 @@ public partial class Database {
                 temp.SubjectName = value.quizResult[i].fk_subject_name;
                 selection = (int) Table.Results;
                 sql = "SELECT " + PrimaryKeyID[selection] + ", time_elapsed FROM " + TableNames[selection] +
-                      " WHERE fk_account = " + account + " AND fk_quiz_id = " + temp.QuizId;
+                      " WHERE fk_account = " + PrepareString(account) + " AND fk_quiz_id = " + temp.QuizId;
                 string previousAttemptJson = (string) await crud.Read(sql, ModelNames[selection]);
                 DatabaseCrud.JsonResult previousAttempt = JsonUtility.FromJson<DatabaseCrud.JsonResult>(previousAttemptJson);
                 if (previousAttempt.resultResult.Count > 0) {
@@ -93,19 +93,19 @@ public partial class Database {
         int selection = (int)Table.Results;
         // "SELECT COUNT(*) FROM Results WHERE fk_quiz_id = @quiz AND fk_account = @account AND is_completed = 1"
         string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " WHERE fk_quiz_id = " +
-                     quiz + " AND fk_account = " + account + " AND is_completed = 1";
+                     quiz + " AND fk_account = " + PrepareString(account) + " AND is_completed = 1";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
-        if (value.quizResult.Count == 0) {
-            return true;
+        if (value.resultResult.Count > 0) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     private static async Task<string> GetCourseNameFromSubject(string subject) {
         int selection = (int)Table.CourseSubjects;
         // "SELECT fk_course_name FROM CourseSubjects WHERE fk_subject_name = @subject"
-        string sql = "SELECT fk_course_name FROM " + TableNames[selection] + " WHERE fk_subject_name = " + subject;
+        string sql = "SELECT fk_course_name FROM " + TableNames[selection] + " WHERE fk_subject_name = " + PrepareString(subject);
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         return value.courseSubjectResult[0].fk_course_name;
@@ -113,14 +113,10 @@ public partial class Database {
 
     public static async Task<int> CreateNewResultsForChosenQuiz(string account, int quiz) {
         int selection = (int)Table.Results;
-        // "SELECT result_id FROM Results ORDER BY result_id DESC LIMIT 1"
-        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " ORDER BY " +
-                     PrimaryKeyID[selection] + " DESC LIMIT 1";
-        string json = (string) await crud.Read(sql, ModelNames[selection]);
-        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
-        int id = value.resultResult[0].result_id + 1;
+        int id = await GetNextID_Crud(Table.Results);
         // "INSERT INTO Results (result_id, fk_account, fk_quiz_id) VALUES (@id, @account, @quiz)"
-        crud.DbCreate("INSERT INTO "+TableNames[selection]+" ("+PrimaryKeyID[selection]+", fk_account, fk_quiz_id) VALUES ("+id+", "+account+", "+quiz+")");
+        crud.DbCreate("INSERT INTO " + TableNames[selection] + " (" + PrimaryKeyID[selection] +
+                      ", fk_account, fk_quiz_id) VALUES (" + id + ", " + PrepareString(account) + ", " + quiz + ")");
         return id;
     }
 
@@ -157,17 +153,29 @@ public partial class Database {
 
 
 
-    public static void UpdateResultsAfterQuestionAnswered(QuestionResults result, bool isLecture) {
+    public static async void UpdateResultsAfterQuestionAnswered(QuestionResults result, bool isLecture) {
         if (!isLecture) {
             if (result.isCorrect == 1) {
-                crud.DbCreate("UPDATE Results SET result_value = result_value + 1 WHERE result_id = " + result.fk_results_id);
+                int selection = (int) Table.Results;
+                string sql = "SELECT result_value FROM Results WHERE result_id = " + result.fk_results_id;
+                string json = (string) await crud.Read(sql, ModelNames[selection]);
+                DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+                int resultValue = value.resultResult[0].result_value + 1;
+                crud.DbCreate("UPDATE Results SET result_value = " + resultValue + " WHERE result_id = " +
+                              result.fk_results_id);
             }
             crud.DbCreate(
                 "INSERT INTO ResultQA (fk_result_id, fk_question_id, fk_answer_id) VALUES (" + result.fk_results_id +
                 ", " + result.fk_question_id + ", " + result.fk_answer_id + ")");
         } else {
             if (result.isCorrect == 1) {
-                crud.DbCreate("UPDATE LectureAttend SET attend_value = attend_value + 1 WHERE attend_id = " + result.fk_attend_id);
+                int selection = (int) Table.LectureAttend;
+                string sql = "SELECT attend_value FROM LectureAttend WHERE attend_id = " + result.fk_attend_id;
+                string json = (string) await crud.Read(sql, ModelNames[selection]);
+                DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+                int attendValue = value.lectureAttendResult[0].attend_value + 1;
+                crud.DbCreate("UPDATE LectureAttend SET attend_value = " + attendValue + " WHERE attend_id = " +
+                              result.fk_attend_id);
             }
             crud.DbCreate(
                 "INSERT INTO ResultQA (fk_attend_id, fk_question_id, fk_answer_id) VALUES (" + result.fk_attend_id +
@@ -182,7 +190,6 @@ public partial class Database {
     public static async Task<int> GetTotalCorrectFromResults(int id, bool isLecture) {
         string returnValue;
         int selection;
-        int result = 0;
         if (!isLecture) {
             selection = (int)Table.Results;
             returnValue = "result_value";
@@ -229,7 +236,7 @@ public partial class Database {
         int selection = (int)Table.Answers;
         // "SELECT answer FROM Answers WHERE fk_question_id = @id AND is_correct = 1"
         string sql = "SELECT answer FROM " + TableNames[selection] + " WHERE fk_question_id = " + question +
-                     "AND is_correct = 1";
+                     " AND is_correct = 1";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         return value.answerResult[0].answer;
@@ -246,7 +253,7 @@ public partial class Database {
            // "SELECT fk_answer_id FROM ResultQA WHERE fk_attend_id = @result AND fk_question_id = @question",
         }
         string sql = "SELECT fk_answer_id FROM " + TableNames[selection] + " WHERE " + selectValue + " = " + result +
-                     "AND fk_question_id = " + question;
+                     " AND fk_question_id = " + question;
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         return value.resultQaResult[0].fk_answer_id;
@@ -263,6 +270,6 @@ public partial class Database {
     }
 
     public static void UpdateTimeElapsed(int result, int time) {
-        crud.DbCreate("UPDATE Results SET time_elapsed = "+time +" WHERE result_id = " + result);
+        crud.DbCreate("UPDATE Results SET time_elapsed = " + time + " WHERE result_id = " + result);
     }
 }

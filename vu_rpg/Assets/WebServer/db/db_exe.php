@@ -18,7 +18,7 @@
 				$result = $statement->fetchAll(PDO::FETCH_ASSOC);
 				return json_encode($result);
 			} 
-			return true;
+			return 1;
 		}
 	}
 

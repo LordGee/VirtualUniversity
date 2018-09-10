@@ -33,8 +33,8 @@ public partial class Database {
         int id = await GetNextID_Crud(Table.Lectures);
         crud.DbCreate(
             "INSERT INTO Lectures (lecture_id, lecture_title, lecture_url, lecture_owner, fk_subject_name) VALUES (" +
-            id + ", " + lecture.lecture_title + ", " + lecture.lecture_url + ", " + account + ", " +
-            lecture.fk_subject_name + ")");
+            id + ", " + PrepareString(lecture.lecture_title) + ", " + PrepareString(lecture.lecture_url) + ", " + PrepareString(account) + ", " +
+            PrepareString(lecture.fk_subject_name) + ")");
         return id;
     }
 
@@ -44,11 +44,11 @@ public partial class Database {
                       point.break_time + ", " + lectureId + ")");
         point.break_question.question_id = await GetNextID_Crud(Table.Questions);
         crud.DbCreate("INSERT INTO Questions (question_id, question, fk_break_id) VALUES (" +
-                      point.break_question.question_id + ", " + point.break_question.question + ", " + point.break_id +
+                      point.break_question.question_id + ", " + PrepareString(point.break_question.question) + ", " + point.break_id +
                       ")");
         for (int i = 0; i < point.break_question.answers.Count; i++) {
             crud.DbCreate("INSERT INTO Answers (answer, is_correct, fk_question_id) VALUES (" +
-                          point.break_question.answers[i].answer + ", " + point.break_question.answers[i].isCorrect +
+                          PrepareString(point.break_question.answers[i].answer) + ", " + point.break_question.answers[i].isCorrect +
                           ", " + point.break_question.question_id + ")");
         }
         return point;
@@ -56,10 +56,10 @@ public partial class Database {
 
     public static async Task<List<Lecture>> GetStudentLectures(List<Lecture> lectures, string account, string course) {
         int selection = (int) Table.Lectures;
-        string sql = "SELECT " + PrimaryKeyID + ", lecture_title, lecture_url, Lectures.fk_subject_name FROM " +
+        string sql = "SELECT " + PrimaryKeyID[selection] + ", lecture_title, lecture_url, Lectures.fk_subject_name FROM " +
                      TableNames[selection] + ", Subjects, CourseSubjects WHERE Lectures.fk_subject_name = Subjects.subject_name AND " +
                      "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = " +
-                     course + "GROUP BY lecture_title ORDER BY lecture_title";
+                     PrepareString(course) + "GROUP BY lecture_title ORDER BY lecture_title";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         for (int i = 0; i < value.lectureResult.Count; i++) {
@@ -72,7 +72,7 @@ public partial class Database {
                 temp.fk_subject_name = value.lectureResult[i].fk_subject_name;
                 selection = (int) Table.LectureAttend;
                 sql = "SELECT " + PrimaryKeyID[selection] + ", watch_time FROM " + TableNames[selection] +
-                      " WHERE fk_account = " + account + " AND fk_lecture_id = " + temp.lecture_id;
+                      " WHERE fk_account = " + PrepareString(account) + " AND fk_lecture_id = " + temp.lecture_id;
                 json = (string)await crud.Read(sql, ModelNames[selection]);
                 DatabaseCrud.JsonResult previousWatch = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
                 if (previousWatch.lectureAttendResult.Count > 0) {
@@ -105,7 +105,8 @@ public partial class Database {
     public static async Task<Questions> GetQuestionsForChosenLecture(int break_id) {
         Questions questions = new Questions();
         int selection = (int) Table.Questions;
-        string sql = "SELECT "+PrimaryKeyID[selection]+", question FROM "+TableNames[selection]+" WHERE fk_break_id = " + break_id;
+        string sql = "SELECT " + PrimaryKeyID[selection] + ", question FROM " + TableNames[selection] +
+                     " WHERE fk_break_id = " + break_id;
         string json = (string)await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult questionResults = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         for (int i = 0; i < questionResults.questionResult.Count; i++) {
@@ -133,14 +134,14 @@ public partial class Database {
     public static async Task<int> CreateNewLectureAttend(string account, int lecture) {
         int attend_id = await GetNextID_Crud(Table.LectureAttend);
         crud.DbCreate("INSERT INTO LectureAttend (attend_id, fk_account, fk_lecture_ID) VALUES (" + attend_id + ", " +
-                      account + ", " + lecture + ")");
+                      PrepareString(account) + ", " + lecture + ")");
         return attend_id;
     }
 
     private static async Task<bool> HasLectureBeenCompleted(string account, int lecture) {
         int selection = (int)Table.LectureAttend;
         string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] +
-                     " WHERE fk_lecture_id = " + lecture + " AND fk_account = " + account + " AND has_attended = 1";
+                     " WHERE fk_lecture_id = " + lecture + " AND fk_account = " + PrepareString(account) + " AND has_attended = 1";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         if (value.lectureAttendResult.Count == 0) { return true; }
@@ -152,7 +153,7 @@ public partial class Database {
     }
 
     public static void UpdateLectureTime(int id, int time) {
-        crud.DbCreate("UPDATE LectureAttend SET watch_time = "+time+" WHERE attend_id = " + id);
+        crud.DbCreate("UPDATE LectureAttend SET watch_time = " + time + " WHERE attend_id = " + id);
     }
 
     public static async Task<bool> HasQuestionBeenAttempted(int question, int id, bool isLecture) {

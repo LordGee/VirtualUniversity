@@ -13,7 +13,7 @@ public partial class Database {
                             fk_course TEXT)");
 
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Enrolled (
-                            enrolled_id INTEGER NOT NULL PRIMARY KEY autoincrement,
+                            enrolled_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                             fk_account VARCHAR(255) NOT NULL,
                             fk_subject VARCHAR(255) NOT NULL)");
     }

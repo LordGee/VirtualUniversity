@@ -30,38 +30,42 @@ public partial class Database : MonoBehaviour {
         int id;
         switch (table) {
             case Table.Answers:
-                id = value.answerResult[0].answer_id;
+                id = (value.answerResult.Count > 0) ? value.answerResult[0].answer_id : 0;
                 break;
             case Table.CourseSubjects:
-                id = value.courseSubjectResult[0].course_subject_id;
+                id = (value.courseSubjectResult.Count > 0) ? value.courseSubjectResult[0].course_subject_id : 0;
                 break;
             case Table.LectureAttend:
-                id = value.lectureAttendResult[0].attend_id;
+                id = (value.lectureAttendResult.Count > 0) ? value.lectureAttendResult[0].attend_id : 0;
                 break;
             case Table.LectureBreakPoints:
-                id = value.lectureBreakResult[0].break_id;
+                id = (value.lectureBreakResult.Count > 0) ? value.lectureBreakResult[0].break_id : 0;
                 break;
             case Table.Lectures:
-                id = value.lectureResult[0].lecture_id;
+                id = (value.lectureResult.Count > 0) ? value.lectureResult[0].lecture_id : 0;
                 break;
             case Table.Questions:
-                id = value.questionResult[0].question_id;
+                id = (value.questionResult.Count > 0) ? value.questionResult[0].question_id : 0;
                 break;
             case Table.Quizzes:
-                id = value.quizResult[0].quiz_id;
+                id = (value.quizResult.Count > 0) ? value.quizResult[0].quiz_id : 0;
                 break;
             case Table.ResultQA:
-                id = value.resultQaResult[0].result_qa_id;
+                id = (value.resultQaResult.Count > 0) ? value.resultQaResult[0].result_qa_id : 0;
                 break;
             case Table.Results:
-                id = value.resultResult[0].result_id;
+                id = (value.resultResult.Count > 0) ? value.resultResult[0].result_id : 0;
                 break;
             default:
-                id = 1;
+                id = 0;
                 break;
         }
         return id + 1;
+    }
 
+    public static string PrepareString(string value) {
+        string result = "\"" + value + "\"";
+        return result;
     }
 
     /// <summary>

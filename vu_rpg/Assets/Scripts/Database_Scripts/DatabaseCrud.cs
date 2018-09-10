@@ -8,8 +8,6 @@ using UnityEngine.Networking;
 
 public partial class DatabaseCrud : MonoBehaviour {
 
-   
-
     private static JsonResult value;
     private static string JsonString;
 
@@ -18,12 +16,16 @@ public partial class DatabaseCrud : MonoBehaviour {
     }
 
     private IEnumerator Create(string sql) {
-        string          uri = _CONST.API_URL + sql;
+        string uri = _CONST.API_URL + sql;
         UnityWebRequest www = UnityWebRequest.Get(uri);
         yield return www.SendWebRequest();
 
         if (www.isNetworkError || www.isHttpError) {
-            Debug.LogError(www.error);
+            Debug.LogError(www.error + "\n" + sql);
+        } else {
+#if UNITY_EDITOR
+            Debug.Log("Create Result: " + www.downloadHandler.text + " SQL: " + sql);
+#endif
         }
     }
 
@@ -36,6 +38,9 @@ public partial class DatabaseCrud : MonoBehaviour {
             Debug.LogError(www.error);
         } else {
             JsonString = ConvertJson(model, www.downloadHandler.text);
+#if UNITY_EDITOR
+            Debug.Log("JSON: " + JsonString + "\nSQL: " + sql);
+#endif
             yield return JsonString;
         }
     }

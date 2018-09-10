@@ -72,7 +72,6 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
             PopulateQuizzes();
             if (choosenQuiz != -1) {
                 selectionQuiz = false;
-
             }
         } else if (startQuiz) {
             if (quizTimer < 0) {
@@ -83,7 +82,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
                 questionSubHeading.text = UpdateSubHeading();
                 lastUpdate = quizTimer;
                 questionHeading.text = UpdateHeading();
-                if (Random.Range(0,10) > 5.0f) {
+                if (Random.Range(0,10) > 9.0f) {
                     Database.UpdateTimeElapsed(results_id, (quizzes[choosenQuiz].QuizTimer * _CONST.SECONDS_IN_MINUTE) - (int)quizTimer);
                 }
             }
@@ -221,7 +220,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         for (int i = 0; i < totalQuestions; i++) {
             QuizResultSlot slot = resultContent.GetChild(i).GetComponent<QuizResultSlot>();
             slot.nameText.text = "Q" + (i + 1) + ". " + quizzes[choosenQuiz].Questions[i].question;
-            slot.correctAnswerText.text = "Correct Answer: " + Database.GetCorrectAnswer(quizzes[choosenQuiz].Questions[i].question_id);
+            slot.correctAnswerText.text = "Correct Answer: " + await Database.GetCorrectAnswer(quizzes[choosenQuiz].Questions[i].question_id);
             if (await Database.GetWasAnswerCorrect(results_id, quizzes[choosenQuiz].Questions[i].question_id, false)) {
                 slot.selectButton.GetComponentInChildren<Text>().text = "CORRECT";
                 slot.selectButton.GetComponent<Image>().color = Color.green;

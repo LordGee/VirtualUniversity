@@ -227,7 +227,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         for (int i = 0; i < totalQuestions; i++) {
             QuizResultSlot slot = resultContent.GetChild(i).GetComponent<QuizResultSlot>();
             slot.nameText.text = "Q" + (i + 1) + ". " + lectures[chosenLecture].break_points[i].break_question.question;
-            slot.correctAnswerText.text = "Correct Answer: " + Database.GetCorrectAnswer(lectures[chosenLecture].break_points[i].break_question.question_id);
+            slot.correctAnswerText.text = "Correct Answer: " + await Database.GetCorrectAnswer(lectures[chosenLecture].break_points[i].break_question.question_id);
             if (await Database.GetWasAnswerCorrect(attend_id, lectures[chosenLecture].break_points[i].break_question.question_id, true)) {
                 slot.selectButton.GetComponentInChildren<Text>().text = "CORRECT";
                 slot.selectButton.GetComponent<Image>().color = Color.green;
