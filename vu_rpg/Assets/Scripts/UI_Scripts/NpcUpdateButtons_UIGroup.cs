@@ -17,14 +17,26 @@ public partial class UINpcDialogue {
     public GameObject studentQuizPanel;
     public GameObject studentLecturePanel;
 
+    private bool isAdmin, isChecked;
+
+
+    async void checkAdminState() {
+        if (!isChecked && panel.activeSelf) {
+            isChecked = true;
+            isAdmin = await Database.IsPlayerAdmin(FindObjectOfType<NetworkManagerMMO>().loginAccount);
+        }
+    }
+
     private void UpdateButtons(Npc npc, Player player) {
+
+        checkAdminState();
 
         teleportButton.gameObject.SetActive(npc.teleportTo != null);
         if (npc.teleportTo != null)
             teleportButton.GetComponentInChildren<Text>().text = "Teleport: " + npc.teleportTo.name;
         teleportButton.onClick.SetListener(() => { player.CmdNpcTeleport(); });
 
-        if (!player.IsAdmin()) {
+        if (!isAdmin) {
             // quiz
             quizButton.gameObject.SetActive(true);
             quizButton.onClick.SetListener(() => {
@@ -47,10 +59,11 @@ public partial class UINpcDialogue {
         }
 
         // Admin Option
-        if (player.IsAdmin()) {
+        if (isAdmin) {
             adminButton.gameObject.SetActive(true);
             adminButton.onClick.SetListener(() => { OpenAdminPanel(); });
         } else {
+
             adminButton.gameObject.SetActive(false);
         }
     }
@@ -60,5 +73,8 @@ public partial class UINpcDialogue {
         Hide();
     }
 
-    public void Hide() { panel.SetActive(false); }
+    public void Hide() {
+        panel.SetActive(false);
+        isChecked = false;
+    }
 }

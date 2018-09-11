@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Mono.Data.Sqlite;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ public partial class Database {
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Enrolled (
                             enrolled_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                             fk_account VARCHAR(255) NOT NULL,
-                            fk_subject VARCHAR(255) NOT NULL)");
+                            fk_course_name VARCHAR(255) NOT NULL)");
     }
 
     public static void RegisterUser(string account, string password, string course) {
@@ -27,13 +28,39 @@ public partial class Database {
 
     public static string GetAccountType(string account) {
         object value = ExecuteScalar("SELECT account_type FROM accounts WHERE name = @value", new SqliteParameter("@value", account));
-        string result = value.ToString();
-        return result;
+        return value.ToString();
     }
 
-    public static string GetCourseName(string course) {
-        object value = ExecuteScalar("SELECT fk_course FROM accounts WHERE name = @value", new SqliteParameter("@value", course));
-        string result = value.ToString();
-        return result;
+    public static string GetCourseName(string account) {
+        object value = ExecuteScalar("SELECT fk_course FROM accounts WHERE name = @value", new SqliteParameter("@value", account));
+        return value.ToString();
+    }
+
+    public static void InsertPlayerDetails(string account, string course) {
+        if (course != "") {
+            string sql = "INSERT INTO Enrolled (fk_account, fk_course_name) VALUES (" + PrepareString(account) + ", " +
+                         PrepareString(course) + ")";
+            crud.DbCreate(sql);
+        }
+    }
+
+    public static async Task<string> GetPlayerCourseName(string account) {
+        int selection = (int)Table.Enrolled;
+        string sql = "SELECT fk_course_name FROM " + TableNames[selection] + " WHERE fk_account = " + PrepareString(account);
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        return value.enrolledResult[0].fk_course_name;
+    }
+
+    public static async Task<bool> IsPlayerAdmin(string account) {
+        int selection = (int) Table.Enrolled;
+        string sql = "SELECT account_type FROM " + TableNames[selection] + " WHERE fk_account = " +
+                     PrepareString(account);
+        string json = (string) await crud.Read(sql, ModelNames[selection]);
+        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        if (value.enrolledResult[0].account_type == "Admin") {
+            return true;
+        }
+        return false;
     }
 }

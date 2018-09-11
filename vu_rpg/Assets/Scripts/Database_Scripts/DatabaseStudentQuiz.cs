@@ -35,8 +35,8 @@ public partial class Database {
         // "GROUP BY quiz_name ORDER BY quiz_name"
         string sql = "SELECT " + PrimaryKeyID[selection] + ", quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
                      "FROM " + TableNames[selection] + ", Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
-                     "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = " + PrepareString(course) +
-                     "GROUP BY quiz_name ORDER BY quiz_name";
+                     "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = " + PrepareString(await GetPlayerCourseName(account)) +
+                     " GROUP BY quiz_name ORDER BY quiz_name";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         for (int i = 0; i < value.quizResult.Count; i++) {

@@ -60,7 +60,8 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
         quizzes = new List<Quiz>();
         hasQuestionBeenAllocated = new List<bool>();
         questionIndexOrder = new List<int>();
-        quizzes = await Database.GetStudentQuizzes(quizzes, player.account, player.course);
+        quizzes = await Database.GetStudentQuizzes(quizzes, FindObjectOfType<NetworkManagerMMO>().loginAccount,
+            await Database.GetPlayerCourseName(FindObjectOfType<NetworkManagerMMO>().loginAccount));
         PopulateQuizzes();
         selectionQuiz = true;
         startQuiz = false;
@@ -104,7 +105,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
                 if (quizzes[choosenQuiz].result_id >= 0) {
                     results_id = quizzes[choosenQuiz].result_id;
                 } else {
-                    results_id = await Database.CreateNewResultsForChosenQuiz(player.account, quizzes[choosenQuiz].QuizId);
+                    results_id = await Database.CreateNewResultsForChosenQuiz(FindObjectOfType<NetworkManagerMMO>().loginAccount, quizzes[choosenQuiz].QuizId);
                 }
                 SelectedQuiz();
             });

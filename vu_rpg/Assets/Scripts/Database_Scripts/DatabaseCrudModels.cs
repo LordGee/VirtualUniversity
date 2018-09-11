@@ -16,6 +16,7 @@ public partial class DatabaseCrud {
         public List<ModelResults> resultResult;
         public List<ModelAnswer> answerResult;
         public List<ModelResultQA> resultQaResult;
+        public List<ModelEnrolled> enrolledResult;
     }
 
     [Serializable]
@@ -106,5 +107,13 @@ public partial class DatabaseCrud {
         public int fk_attend_id;
         public int fk_question_id;
         public int fk_answer_id;
+    }
+
+    [Serializable]
+    public class ModelEnrolled {
+        public int enrolled_id;
+        public string fk_account;
+        public string fk_course_name;
+        public string account_type;
     }
 }

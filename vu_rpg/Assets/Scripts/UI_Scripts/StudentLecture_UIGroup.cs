@@ -55,7 +55,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         lectureSelectionPanel.SetActive(true);
         player = FindObjectOfType<Player>();
         lectures = new List<Lecture>();
-        await Database.GetStudentLectures(lectures, player.account, player.course);
+        await Database.GetStudentLectures(lectures, FindObjectOfType<NetworkManagerMMO>().loginAccount, await Database.GetPlayerCourseName(FindObjectOfType<NetworkManagerMMO>().loginAccount));
         PopulateLectures();
         startLecture = false;
     }
@@ -133,7 +133,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
             if (lectures[chosenLecture].attend_id >= 0) {
                 attend_id = lectures[chosenLecture].attend_id;
             } else {
-                attend_id = await Database.CreateNewLectureAttend(player.account, lectures[chosenLecture].lecture_id);
+                attend_id = await Database.CreateNewLectureAttend(FindObjectOfType<NetworkManagerMMO>().loginAccount, lectures[chosenLecture].lecture_id);
             }
             return true;
         } catch (Exception e) {

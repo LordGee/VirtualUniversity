@@ -62,7 +62,7 @@ public partial class Administration : MonoBehaviour {
     /// </summary>
     /// <returns>Player Account Name</returns>
     public string GetPlayerName() {
-        return player.account;
+        return FindObjectOfType<NetworkManagerMMO>().loginAccount;
     }
 
 }

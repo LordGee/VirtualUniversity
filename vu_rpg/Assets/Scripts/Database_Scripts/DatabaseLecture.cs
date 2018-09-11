@@ -59,7 +59,7 @@ public partial class Database {
         string sql = "SELECT " + PrimaryKeyID[selection] + ", lecture_title, lecture_url, Lectures.fk_subject_name FROM " +
                      TableNames[selection] + ", Subjects, CourseSubjects WHERE Lectures.fk_subject_name = Subjects.subject_name AND " +
                      "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = " +
-                     PrepareString(course) + "GROUP BY lecture_title ORDER BY lecture_title";
+                     PrepareString(course) + " GROUP BY lecture_title ORDER BY lecture_title";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
         DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         for (int i = 0; i < value.lectureResult.Count; i++) {

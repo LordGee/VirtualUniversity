@@ -23,9 +23,7 @@ public partial class DatabaseCrud : MonoBehaviour {
         if (www.isNetworkError || www.isHttpError) {
             Debug.LogError(www.error + "\n" + sql);
         } else {
-#if UNITY_EDITOR
             Debug.Log("Create Result: " + www.downloadHandler.text + " SQL: " + sql);
-#endif
         }
     }
 
@@ -38,9 +36,7 @@ public partial class DatabaseCrud : MonoBehaviour {
             Debug.LogError(www.error);
         } else {
             JsonString = ConvertJson(model, www.downloadHandler.text);
-#if UNITY_EDITOR
             Debug.Log("JSON: " + JsonString + "\nSQL: " + sql);
-#endif
             yield return JsonString;
         }
     }

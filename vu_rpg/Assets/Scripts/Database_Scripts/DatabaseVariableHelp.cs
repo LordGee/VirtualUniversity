@@ -14,6 +14,7 @@ public partial class Database {
         Results,
         Answers,
         ResultQA,
+        Enrolled,
 
         COUNT
     };
@@ -30,6 +31,7 @@ public partial class Database {
         "result_id",
         "answer_id",
         "result_qa_id",
+        "enrolled_id"
 
     };
     protected static string[] TableNames = {
@@ -44,6 +46,7 @@ public partial class Database {
         "Results",
         "Answers",
         "ResultQA",
+        "Enrolled",
 
     };
     protected static string[] ModelNames = {
@@ -58,6 +61,7 @@ public partial class Database {
         "resultResult",
         "answerResult",
         "resultQaResult",
+        "enrolledResult",
 
     };
 

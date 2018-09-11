@@ -293,6 +293,7 @@ public partial class Database {
                 // account doesn't exist. create it.
                 if (reg) {
                     RegisterUser(account, password, course);
+                    InsertPlayerDetails(account,course);
                     return true;
                 }
                 // ExecuteNoReturn("INSERT INTO accounts VALUES (@name, @password, 0)", new SqliteParameter("@name", account), new SqliteParameter("@password", password));
@@ -502,9 +503,9 @@ public partial class Database {
                 player.skillExperience    = (long)mainrow[12];
                 player.gold               = (long)mainrow[13];
                 player.coins              = (long)mainrow[14];
-                player.course = Database.GetCourseName(player.account);
-                player.accountType = Database.GetAccountType(player.account);
-
+                player.course = GetCourseName(player.account);
+                player.accountType = GetAccountType(player.account);
+                //todo amend player.accounttype
                 // try to warp to loaded position.
                 // => agent.warp is recommended over transform.position and
                 //    avoids all kinds of weird bugs
