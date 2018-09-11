@@ -21,7 +21,6 @@ public class SelectSubject_UIGroup : MonoBehaviour {
     private void PopulateCourseData() {
         courseDropdown.ClearOptions();
         courseDropdown.AddOptions(courses);
-        courseDropdown.captionText.text = "Existing Subjects";
     }
 
     public string GetSelectedCourse() {
