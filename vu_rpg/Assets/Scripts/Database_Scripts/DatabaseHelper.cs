@@ -1,17 +1,19 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Mono.Data.Sqlite;
 using UnityEngine;
-using UnityEngine.Networking;
 
+/// <summary>
+/// Extension of the Database Class, dedicated to holding helper methods
+/// that can be reused throughout the class.
+/// </summary>
 public partial class Database : MonoBehaviour {
 
     /// <summary>
-    /// Helper function to get the next available ID from a given table that does not autoincrement
+    /// Helper function to get the next available ID from a given table that does
+    /// not autoincrement, this is for the Game Server database.
     /// </summary>
     /// <param name="tableName">Name of the target table</param>
     /// <param name="primaryKey">Primary Key for the target table</param>
@@ -21,6 +23,12 @@ public partial class Database : MonoBehaviour {
         return Convert.ToInt32(result) + 1;
     }
 
+    /// <summary>
+    /// Helper function to get the next available ID from a given table that does
+    /// not autoincrement, this is for the Web API database.
+    /// </summary>
+    /// <param name="table">Enum table value.</param>
+    /// <returns>Integer value of the next available ID for the given table</returns>
     public static async Task<int> GetNextID_Crud(Table table) {
         int selection = (int) table;
         string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " ORDER BY " +
@@ -63,13 +71,18 @@ public partial class Database : MonoBehaviour {
         return id + 1;
     }
 
+    /// <summary>
+    /// Prepends and appends an escaped quote for the given string.
+    /// </summary>
+    /// <param name="value">Sting value</param>
+    /// <returns>Escaped quoted string</returns>
     public static string PrepareString(string value) {
         string result = "\"" + value + "\"";
         return result;
     }
 
     /// <summary>
-    /// Added SQL query which takes no parameters
+    /// Added SQL query which takes no parameters, game server only.
     /// </summary>
     /// <param name="sql">SQL QUERY</param>
     /// <returns>Double Array of type Object</returns>
@@ -87,12 +100,16 @@ public partial class Database : MonoBehaviour {
         return result;
     }
 
+    /// <summary>
+    /// Instance of the DatabaseCrud class.
+    /// </summary>
     public static DatabaseCrud crud;
 
+    /// <summary>
+    /// Instantiates the instance of the DatabaseCrud variable
+    /// used throughout the Database class
+    /// </summary>
     private static void InitCrud() {
         crud = FindObjectOfType<DatabaseCrud>();
     }
-
-
 }
-

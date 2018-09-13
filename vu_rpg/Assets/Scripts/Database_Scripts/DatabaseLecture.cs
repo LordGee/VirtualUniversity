@@ -1,11 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Mono.Data.Sqlite;
 using UnityEngine;
 
+/// <summary>
+/// Extension of the Database class, dedicated to queries related
+/// to the Lecture functionality.
+/// </summary>
 public partial class Database {
 
+    /// <summary>
+    /// Creates if not exists the database structure
+    /// Invoked by the main initialise.
+    /// </summary>
     static void Initialize_Lecture() {
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Lectures (
                             lecture_id INTEGER NOT NULL PRIMARY KEY,
@@ -29,6 +35,12 @@ public partial class Database {
                             fk_lecture_id INTEGER NOT NULL)");
     }
 
+    /// <summary>
+    /// Inserts the values for a newly created lecture.
+    /// </summary>
+    /// <param name="lecture">Copy of the Lecture class to be inserted</param>
+    /// <param name="account">Account name of the owner</param>
+    /// <returns>Returns an Integer value of the New Lecture ID</returns>
     public static async Task<int> CreateNewLectureInit(Lecture lecture, string account) {
         int id = await GetNextID_Crud(Table.Lectures);
         crud.DbCreate(

@@ -1,25 +1,34 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
+/// <summary>
+/// This class is dedicated to the execution of the sql query's via the web api 
+/// </summary>
 public partial class DatabaseCrud : MonoBehaviour {
 
-    private static JsonResult value;
-    private static string JsonString;
+    // holds the converted json after conversion
+    private static string jsonString;
 
+    /// <summary>
+    /// Public entry point for executing Create, Update or Delete queries
+    /// These commands to not normally require a return value.
+    /// </summary>
+    /// <param name="sql">A prepared SQL statement</param>
     public void DbCreate(string sql) {
         StartCoroutine(Create(sql));
     }
 
+    /// <summary>
+    /// Prepares and execute the given SQL statement 
+    /// </summary>
+    /// <param name="sql">A prepared SQL statement</param>
+    /// <returns>IEnumerator</returns>
     private IEnumerator Create(string sql) {
         string uri = _CONST.API_URL + sql;
         UnityWebRequest www = UnityWebRequest.Get(uri);
         yield return www.SendWebRequest();
-
         if (www.isNetworkError || www.isHttpError) {
             Debug.LogError(www.error + "\n" + sql);
         } else {
@@ -27,26 +36,38 @@ public partial class DatabaseCrud : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Dedicated to Read (SELECT) statements that will always return a value.
+    /// In this instance a formated json string is returned which will require
+    /// to be dealt with on an individual basis. 
+    /// </summary>
+    /// <param name="sql">A prepared SQL statement</param>
+    /// <param name="model">the name of the model value for the required class</param>
+    /// <returns>JSON String as an ASYNC Method</returns>
     public IEnumerator Read(string sql, string model) {
         string uri = _CONST.API_URL + sql;
         UnityWebRequest www = UnityWebRequest.Get(uri);
         yield return www.SendWebRequest();
-
         if (www.isNetworkError || www.isHttpError) {
             Debug.LogError(www.error);
         } else {
-            JsonString = ConvertJson(model, www.downloadHandler.text);
-            Debug.Log("JSON: " + JsonString + "\nSQL: " + sql);
-            yield return JsonString;
+            jsonString = ConvertJson(model, www.downloadHandler.text);
+            Debug.Log("JSON: " + jsonString + "\nSQL: " + sql);
+            yield return jsonString;
         }
     }
  
+    /// <summary>
+    /// Prepares the Json string with the model as a prefix
+    /// </summary>
+    /// <param name="model">Reference to the variable name of the desired model</param>
+    /// <param name="json">Un-converted json string</param>
+    /// <returns>Returns the converted json string to be used with JsonUtility</returns>
     private string ConvertJson(string model, string json) {
         json.Trim(new char[] { '\uFEFF', '\u200B' }); // don't work
         model.Trim(new char[] { '\uFEFF', '\u200B' }); // don't work
         string result = "{\"" + model + "\":" + json.Trim() + "}";
         result.Trim(new char[] { '\uFEFF', '\u200B' }); // don't work
-
         return RemoveBadChar(result);
     }
 
@@ -59,7 +80,7 @@ public partial class DatabaseCrud : MonoBehaviour {
     /// <returns>A fixed string with no \uFEFF char</returns>
     private string RemoveBadChar(string value) {
         char[] test = value.ToCharArray();
-        int    badCharIndex = -1;
+        int badCharIndex = -1;
         for (int i = 0; i < test.Length; i++) {
             if (test[i] == '\uFEFF') {
                 badCharIndex = i;
@@ -75,15 +96,6 @@ public partial class DatabaseCrud : MonoBehaviour {
         } else {
             newValue.Append(value);
         }
-
         return newValue.ToString();
-    }
-
-    private List<string> VarToStringList(List<string> value) {
-        List<string> result = new List<string>();
-        for (int i = 0; i < value.Count; i++) {
-            result.Add(value[i]);
-        }
-        return result;
     }
 }

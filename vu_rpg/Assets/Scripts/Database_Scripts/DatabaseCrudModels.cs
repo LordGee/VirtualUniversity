@@ -1,8 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// Extension of the Crud class dedicated to storing the models used in the database.
+/// </summary>
 public partial class DatabaseCrud {
 
+    /// <summary>
+    /// The Json Result combines all the models into one class.
+    /// These can then be selected when required.
+    /// This sounds extreme but reduces the amount of class that need to be written
+    /// to hold each model.
+    /// </summary>
     [Serializable]
     public class JsonResult {
         public List<ModelQuestion> questionResult;
@@ -19,6 +28,9 @@ public partial class DatabaseCrud {
         public List<ModelEnrolled> enrolledResult;
     }
 
+    /// <summary>
+    /// Model of the Questions table
+    /// </summary>
     [Serializable]
     public class ModelQuestion {
         public int question_id;
@@ -27,6 +39,9 @@ public partial class DatabaseCrud {
         public int fk_break_id;
     }
 
+    /// <summary>
+    /// Model of the Quizzes table
+    /// </summary>
     [Serializable]
     public class ModelQuiz {
         public int quiz_id;
@@ -37,6 +52,9 @@ public partial class DatabaseCrud {
         public string fk_subject_name;
     }
 
+    /// <summary>
+    /// Model of the Lecture table
+    /// </summary>
     [Serializable]
     public class ModelLecture {
         public int lecture_id;
@@ -46,6 +64,9 @@ public partial class DatabaseCrud {
         public string fk_subject_name;
     }
 
+    /// <summary>
+    /// Model of the LectureBreakPoint table
+    /// </summary>
     [Serializable]
     public class ModelLectureBreak {
         public int break_id;
@@ -53,6 +74,9 @@ public partial class DatabaseCrud {
         public int fk_lecture_id;
     }
 
+    /// <summary>
+    /// Model of the LectureAttend table
+    /// </summary>
     [Serializable]
     public class ModelLectureAttend {
         public int attend_id;
@@ -64,11 +88,17 @@ public partial class DatabaseCrud {
         public int fk_lecture_id;
     }
 
+    /// <summary>
+    /// Model of the Courses table
+    /// </summary>
     [Serializable]
     public class ModelCourses {
         public string course_name;
     }
 
+    /// <summary>
+    /// Model of the CourseSubject table
+    /// </summary>
     [Serializable]
     public class ModelCourseSubject {
         public int course_subject_id;
@@ -76,11 +106,17 @@ public partial class DatabaseCrud {
         public string fk_subject_name;
     }
 
+    /// <summary>
+    /// Model of the Subject table
+    /// </summary>
     [Serializable]
     public class ModelSubject {
         public string subject_name;
     }
 
+    /// <summary>
+    /// Model of the Results table
+    /// </summary>
     [Serializable]
     public class ModelResults {
         public int result_id;
@@ -92,6 +128,9 @@ public partial class DatabaseCrud {
         public int fk_quiz_id;
     }
 
+    /// <summary>
+    /// Model of the Answers table
+    /// </summary>
     [Serializable]
     public class ModelAnswer {
         public int answer_id;
@@ -100,6 +139,9 @@ public partial class DatabaseCrud {
         public int fk_question_id;
     }
 
+    /// <summary>
+    /// Model of the ResultQA table
+    /// </summary>
     [Serializable]
     public class ModelResultQA {
         public int result_qa_id;
@@ -109,6 +151,9 @@ public partial class DatabaseCrud {
         public int fk_answer_id;
     }
 
+    /// <summary>
+    /// Model of the Enrolled table
+    /// </summary>
     [Serializable]
     public class ModelEnrolled {
         public int enrolled_id;
