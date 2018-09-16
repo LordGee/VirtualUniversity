@@ -50,6 +50,13 @@ public partial class Database {
         return id;
     }
 
+    /// <summary>
+    /// Adds aa new breakpoint to the corresponding tables
+    /// (LectureBreakPoints, Questions, Answers) 
+    /// </summary>
+    /// <param name="point">A copy of the completed Break Point class</param>
+    /// <param name="lectureId">The relevant Lecture ID</param>
+    /// <returns>The original BreakPoint class with Update ID information</returns>
     public static async Task<LectureBreakPoint> CreateNewBreakForLecture(LectureBreakPoint point, int lectureId) {
         point.break_id = await GetNextID_Crud(Table.LectureBreakPoints);
         crud.DbCreate("INSERT INTO LectureBreakPoints (break_id, break_time, fk_lecture_id) VALUES (" + point.break_id + ", " +
