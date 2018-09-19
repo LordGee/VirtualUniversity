@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Add new subject UI
+/// </summary>
 public class AddSubject_UIGroup : MonoBehaviour {
 
     public GameObject newSubjectText;
@@ -11,8 +12,11 @@ public class AddSubject_UIGroup : MonoBehaviour {
 	    newSubjectText.GetComponent<InputField>().text = "";
 	}
 
+    /// <summary>
+    /// Returns the new subject enter in the input field as a string
+    /// </summary>
+    /// <returns>Returns the subject</returns>
     public string GetNewSubject() {
         return newSubjectText.GetComponent<InputField>().text;
     }
-	
 }

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Xml.Serialization;
-using UnityEngine;
+﻿using UnityEngine;
 
 public partial class Administration {
     public void Subject_Admin() {
@@ -9,6 +6,9 @@ public partial class Administration {
     }
 }
 
+/// <summary>
+/// The subject UI class manages the administration of courses and their subject
+/// </summary>
 public class Subject_UIGroup : MonoBehaviour {
 
     private Administration admin;
@@ -21,11 +21,6 @@ public class Subject_UIGroup : MonoBehaviour {
 
     private string selectedCourse;
     private string selectedSubject;
-
-    //public string SelectedCourse {
-    //    set { selectedCourse = value; }
-    //    get { return selectedCourse; }
-    //}
 
     void Start () {
 	    admin = FindObjectOfType<Administration>();
@@ -52,6 +47,9 @@ public class Subject_UIGroup : MonoBehaviour {
         FindObjectOfType<SelectSubject_UIGroup>().UpdateCourseData();
     }
 
+    /// <summary>
+    /// Adds and inserts new course into the database
+    /// </summary>
     public async void btn_AddNewCourse() {
         selectedCourse = FindObjectOfType<AddCourse_UIGroup>().GetNewCourse();
         if (selectedCourse.Length >= 3) {
@@ -70,6 +68,10 @@ public class Subject_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Add and inserts new subject into the database and
+    /// links the subject with the chosen course
+    /// </summary>
     public async void btn_AddNewSubject() {
         selectedSubject = FindObjectOfType<AddSubject_UIGroup>().GetNewSubject();
         string message = "";

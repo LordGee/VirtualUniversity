@@ -1,14 +1,10 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Networking;
 
+/// <summary>
+/// Object model of typ Quiz
+/// </summary>
 [System.Serializable]
 public class Quiz {
-    /// <summary>
-    /// Table: Course
-    /// </summary>
-    public static short MsgId = 5000;
-
     private string course_name;
     public string CourseName {
         get { return course_name; }
@@ -20,9 +16,7 @@ public class Quiz {
         get { return subject_name; }
         set { subject_name = value; }
     }
-    /// <summary>
-    /// Table: Quizzes
-    /// </summary>
+
     private string quiz_name;
     public string QuizName {
         get { return quiz_name; }
@@ -37,7 +31,6 @@ public class Quiz {
 
     public int result_id = -1;
     public int time_elapsed = 0;
-
     private string quiz_owner;
 
     private List<Questions> questions;
@@ -57,20 +50,19 @@ public class Quiz {
     }
 }
 
+/// <summary>
+/// Object model of type Question
+/// </summary>
 [System.Serializable]
 public class Questions {
-    /// <summary>
-    /// Table: Questions
-    /// </summary>
     public int question_id;
     public string question;
-
-    /// <summary>
-    /// Table: Answers
-    /// </summary>
     public List<Answers> answers;
 }
 
+/// <summary>
+/// Object model of type Answers
+/// </summary>
 [System.Serializable]
 public class Answers {
     public int answer_id;
@@ -78,6 +70,9 @@ public class Answers {
     public int isCorrect; // was boolean, stored as int in database.
 }
 
+/// <summary>
+/// Object model of type Question Results
+/// </summary>
 [System.Serializable]
 public class QuestionResults {
     public int fk_results_id;

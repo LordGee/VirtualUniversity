@@ -9,6 +9,9 @@ public partial class Administration {
     }
 }
 
+/// <summary>
+/// The lecture manager class manages the implementation of new lectures
+/// </summary>
 public class LectureManager_UIGroup : MonoBehaviour {
 
     public GameObject inputBox;
@@ -44,10 +47,10 @@ public class LectureManager_UIGroup : MonoBehaviour {
         BeginState();
     }
 
-    void Update() {
-        Debug.Log(currentUI);
-    }
-
+    /// <summary>
+    /// Handles all destinations of the primary button press,
+    /// depending on the current workflow (state)
+    /// </summary>
     public async void PrimaryButton() {
         switch (currentUI) {
             case UI_STATE.LectureName:
@@ -103,6 +106,10 @@ public class LectureManager_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Handles all destinations of the secondary button press,
+    /// depending on the current workflow (state)
+    /// </summary>
     public void SecondaryButton() {
         switch (currentUI) {
             case UI_STATE.SetURL:
@@ -115,6 +122,10 @@ public class LectureManager_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Handles all destinations of the back button press,
+    /// depending on the current workflow (state)
+    /// </summary>
     public void BackButton() {
         switch (currentUI) {
             case UI_STATE.LectureName:
@@ -138,6 +149,9 @@ public class LectureManager_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an initial starting state
+    /// </summary>
     private void BeginState() {
         ActivateAllUi();
         dropBox.gameObject.SetActive(false);
@@ -147,6 +161,9 @@ public class LectureManager_UIGroup : MonoBehaviour {
         currentUI = UI_STATE.LectureName;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an set a course state
+    /// </summary>
     private async void SetCourse() {
         ActivateAllUi();
         inputBox.SetActive(false);
@@ -159,6 +176,9 @@ public class LectureManager_UIGroup : MonoBehaviour {
         currentUI = UI_STATE.SetCourse;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an set a subject state
+    /// </summary>
     private async void SetSubject() {
         ActivateAllUi();
         inputBox.SetActive(false);
@@ -171,6 +191,9 @@ public class LectureManager_UIGroup : MonoBehaviour {
         currentUI = UI_STATE.SetSubject;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an set a URL state
+    /// </summary>
     private void SetURL() {
         ActivateAllUi();
         dropBox.gameObject.SetActive(false);
@@ -180,6 +203,9 @@ public class LectureManager_UIGroup : MonoBehaviour {
         currentUI = UI_STATE.SetURL;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an set a break point state
+    /// </summary>
     private void SetBreak() {
         ActivateAllUi();
         dropBox.gameObject.SetActive(false);
@@ -189,6 +215,11 @@ public class LectureManager_UIGroup : MonoBehaviour {
         currentUI = UI_STATE.SetBreak;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an add a question state
+    /// This function gets called numerous times depending
+    /// on how many answers have been recorded
+    /// </summary>
     private void SetQuestion() {
         ActivateAllUi();
         admin.SetHeadingText("Set your question");
@@ -199,6 +230,9 @@ public class LectureManager_UIGroup : MonoBehaviour {
         currentUI = UI_STATE.SetQuestion;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an set an answer state
+    /// </summary>
     private void SetAnswer() {
         ActivateAllUi();
         string heading = "";
@@ -224,10 +258,11 @@ public class LectureManager_UIGroup : MonoBehaviour {
         currentUI = UI_STATE.SetAnswer;
     }
 
-    /// <summary>
-    /// HELPER Functions Below
-    /// </summary>
+    // HELPER Functions Below
 
+    /// <summary>
+    /// Activates the UI to a default state 
+    /// </summary>
     private void ActivateAllUi() {
         inputBox.SetActive(true);
         dropBox.gameObject.SetActive(true);
@@ -241,8 +276,11 @@ public class LectureManager_UIGroup : MonoBehaviour {
         inputBox.GetComponent<InputField>().text = "";
     }
 
+    /// <summary>
+    /// Passes a user feedback message to be displayed
+    /// </summary>
+    /// <param name="message">The message to display</param>
     private void Message(string message) {
         FindObjectOfType<UISystemMessage>().NewTextAndDisplay(message);
     }
-
 }

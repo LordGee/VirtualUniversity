@@ -10,6 +10,9 @@ public partial class Administration {
     }
 }
 
+/// <summary>
+/// The quiz manager class manages the implementation and amendment of quizzes
+/// </summary>
 public class QuizManager_UIGroup : MonoBehaviour {
 
     public GameObject inputBox;
@@ -48,6 +51,10 @@ public class QuizManager_UIGroup : MonoBehaviour {
         BeginState();
     }
 
+    /// <summary>
+    /// Handles all destinations of the back button press,
+    /// depending on the current workflow (state)
+    /// </summary>
     public void BackButton() {
         switch (currentUI) {
             case UI_STATE.Begin:
@@ -79,6 +86,10 @@ public class QuizManager_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Handles all destinations of the primary button press,
+    /// depending on the current workflow (state)
+    /// </summary>
     public async void PrimaryButton() {
         switch (currentUI) {
             case UI_STATE.Begin:
@@ -131,6 +142,10 @@ public class QuizManager_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Handles all destinations of the secondary button press,
+    /// depending on the current workflow (state)
+    /// </summary>
     public void SecondaryButton() {
         switch (currentUI) {
             case UI_STATE.Begin:
@@ -144,6 +159,9 @@ public class QuizManager_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an initial starting state
+    /// </summary>
     private async void BeginState() {
         ActivateAllUi();
         inputBox.GetComponent<InputField>().text = "";
@@ -156,6 +174,9 @@ public class QuizManager_UIGroup : MonoBehaviour {
         secondaryButton.GetComponentInChildren<Text>().text = "Create\nNew\nQuiz";
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an select course state
+    /// </summary>
     private async void SelectCourse() {
         ActivateAllUi();
         inputBox.SetActive(false);
@@ -168,6 +189,10 @@ public class QuizManager_UIGroup : MonoBehaviour {
         quiz = new Quiz();
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an select subject state
+    /// Records the previous state selection.
+    /// </summary>
     private async void SelectSubject() {
         quiz.CourseName = dropBox.GetComponent<Dropdown>().options[dropBox.GetComponent<Dropdown>().value].text;
         Message("Course Added");
@@ -177,12 +202,15 @@ public class QuizManager_UIGroup : MonoBehaviour {
         admin.SetHeadingText("Select a Subject");
         content = new List<string>();
         content = await Database.GetSubjectsLinkedToCourse(quiz.CourseName);
-
         PopulateDropbox.Run(ref dropBox, content, "Select Subject");
         primaryButton.GetComponentInChildren<Text>().text = "Select\nSubject";
         backButton.GetComponentInChildren<Text>().text = "Exit Quiz\nManagement";
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an set quiz name state
+    /// Records the previous state selection.
+    /// </summary>
     private void NameQuiz() {
         quiz.SubjectName = dropBox.GetComponent<Dropdown>().options[dropBox.GetComponent<Dropdown>().value].text;
         Message("Subject Added");
@@ -198,6 +226,11 @@ public class QuizManager_UIGroup : MonoBehaviour {
         primaryButton.GetComponentInChildren<Text>().text = buttonName;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an set the number of question state
+    /// Records the previous state selection.
+    /// UPDATE: this has now changed to how many minutes the quiz timer will be set
+    /// </summary>
     private void NumberOfQuestions() {
         quiz.QuizName = inputBox.GetComponent<InputField>().text;
         Message("Quiz Name Added");
@@ -215,7 +248,9 @@ public class QuizManager_UIGroup : MonoBehaviour {
         primaryButton.GetComponentInChildren<Text>().text = buttonName;
     }
 
-
+    /// <summary>
+    /// Sets the UI and variable to an set a question state
+    /// </summary>
     private void SetQuestion()
     {
         // moved adding of last component to add quiz to database function
@@ -232,6 +267,12 @@ public class QuizManager_UIGroup : MonoBehaviour {
         primaryButton.GetComponentInChildren<Text>().text = buttonName;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an add a question state
+    /// Records the previous state selection.
+    /// This function gets called numerous times depending
+    /// on how many answers have been recorded
+    /// </summary>
     private void AddAnswer() {
         string heading = "";
         if (answerCount < 1) {
@@ -269,6 +310,10 @@ public class QuizManager_UIGroup : MonoBehaviour {
         primaryButton.GetComponentInChildren<Text>().text = buttonName;
     }
 
+    /// <summary>
+    /// Sets the UI and variable to an set an answer state
+    /// Records the previous selection.
+    /// </summary>
     private void SetAnswer() {
         Answers answer = new Answers();
         answer.answer = inputBox.GetComponent<InputField>().text;
@@ -282,27 +327,39 @@ public class QuizManager_UIGroup : MonoBehaviour {
         Message("Answer Added");
     }
 
+    /// <summary>
+    /// Adds a completed Quiz to the database
+    /// </summary>
+    /// <returns>void</returns>
     private async Task AddQuizToDatabase() {
         quiz.QuizTimer = Int32.Parse(inputBox.GetComponent<InputField>().text);
         quiz.QuizId = await Database.GetNextID_Crud(Database.Table.Quizzes);
         Database.CreateNewQuiz(quiz.QuizId, quiz.QuizName, quiz.QuizTimer, FindObjectOfType<Player>().account, quiz.SubjectName);
     }
 
+    /// <summary>
+    /// Adds a question to the database
+    /// </summary>
+    /// <returns>void</returns>
     private async Task AddQuestionToDatabase() {
         tempQuestion.question_id = await Database.GetNextID_Crud(Database.Table.Questions);
         Database.AddQuestionToQuiz(tempQuestion.question_id, tempQuestion.question, quiz.QuizId);
     }
 
+    /// <summary>
+    /// Adds all the answers for a given question to the database
+    /// </summary>
     private void AddAnswersToDatabase() {
         for (int i = 0; i < tempQuestion.answers.Count; i++) {
             Database.AddAnswerToQuestion(tempQuestion.answers[i].answer, tempQuestion.answers[i].isCorrect, tempQuestion.question_id);
         }
     }
 
-    /// <summary>
-    /// HELPER Functions Below
-    /// </summary>
+    // HELPER Functions Below
 
+    /// <summary>
+    /// Activates the UI to a default state 
+    /// </summary>
     private void ActivateAllUi() {
         inputBox.SetActive(true);
         dropBox.gameObject.SetActive(true);
@@ -316,6 +373,10 @@ public class QuizManager_UIGroup : MonoBehaviour {
         inputBox.GetComponent<InputField>().text = "";
     }
 
+    /// <summary>
+    /// Passes a user feedback message to be displayed
+    /// </summary>
+    /// <param name="message">The message to display</param>
     private void Message(string message) {
         FindObjectOfType<UISystemMessage>().NewTextAndDisplay(message);
     }

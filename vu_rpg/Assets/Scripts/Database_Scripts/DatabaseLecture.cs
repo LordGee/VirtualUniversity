@@ -73,6 +73,14 @@ public partial class Database {
         return point;
     }
 
+    /// <summary>
+    /// Get all lectures which are incomplete for a given
+    /// student based on the course enrolled in
+    /// </summary>
+    /// <param name="lectures">New List of Lectures</param>
+    /// <param name="account">Account name of the user</param>
+    /// <param name="course">Course of the user</param>
+    /// <returns>Returns a list of lectures</returns>
     public static async Task<List<Lecture>> GetStudentLectures(List<Lecture> lectures, string account, string course) {
         int selection = (int) Table.Lectures;
         string sql = "SELECT " + PrimaryKeyID[selection] + ", lecture_title, lecture_url, Lectures.fk_subject_name FROM " +
@@ -121,6 +129,11 @@ public partial class Database {
         return lectures;
     }
 
+    /// <summary>
+    /// Get question for the given break point
+    /// </summary>
+    /// <param name="break_id">Break ID</param>
+    /// <returns>Returns a question and its possible answers</returns>
     public static async Task<Questions> GetQuestionsForChosenLecture(int break_id) {
         Questions questions = new Questions();
         int selection = (int) Table.Questions;
@@ -150,6 +163,12 @@ public partial class Database {
         return questions;
     }
 
+    /// <summary>
+    /// Inserts a new entry in the Lecture attend table
+    /// </summary>
+    /// <param name="account">Account name of the user</param>
+    /// <param name="lecture">Lecture ID</param>
+    /// <returns>Returns new LectureAttend ID</returns>
     public static async Task<int> CreateNewLectureAttend(string account, int lecture) {
         int attend_id = await GetNextID_Crud(Table.LectureAttend);
         crud.DbCreate("INSERT INTO LectureAttend (attend_id, fk_account, fk_lecture_ID) VALUES (" + attend_id + ", " +
@@ -157,6 +176,12 @@ public partial class Database {
         return attend_id;
     }
 
+    /// <summary>
+    /// Checks if the lecture has already been completed or not
+    /// </summary>
+    /// <param name="account">Account name of the user</param>
+    /// <param name="lecture">Lecture ID</param>
+    /// <returns>Returns true if the lecture has NOT been completed already</returns>
     private static async Task<bool> HasLectureBeenCompleted(string account, int lecture) {
         int selection = (int)Table.LectureAttend;
         string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] +
@@ -167,14 +192,30 @@ public partial class Database {
         return false;
     }
 
+    /// <summary>
+    /// Update the Lecture Attend details to be completed
+    /// </summary>
+    /// <param name="id">Lecture Attend ID</param>
     public static void UpdateLectureAttendToComplete(int id) {
         crud.DbCreate("UPDATE LectureAttend SET has_attended = 1 WHERE attend_id = " + id);
     }
 
+    /// <summary>
+    /// Updates the lecture elapsed time
+    /// </summary>
+    /// <param name="id">Lecture Attend ID</param>
+    /// <param name="time">Elapsed time</param>
     public static void UpdateLectureTime(int id, int time) {
         crud.DbCreate("UPDATE LectureAttend SET watch_time = " + time + " WHERE attend_id = " + id);
     }
 
+    /// <summary>
+    /// Checks if a question has already been attempted
+    /// </summary>
+    /// <param name="question">Question ID</param>
+    /// <param name="id">Result or Attend ID</param>
+    /// <param name="isLecture">Is this a lecture</param>
+    /// <returns>Returns true if the lecture has been attempted</returns>
     public static async Task<bool> HasQuestionBeenAttempted(int question, int id, bool isLecture) {
         int selection = (int) Table.ResultQA;
         string selectValue;

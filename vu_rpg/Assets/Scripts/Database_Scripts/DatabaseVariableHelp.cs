@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public partial class Database {
+﻿public partial class Database {
 
     public enum Table {
         Quizzes,

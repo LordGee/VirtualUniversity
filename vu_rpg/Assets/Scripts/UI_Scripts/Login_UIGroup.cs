@@ -1,8 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// An extension of the UILogin class from uMMORPG
+/// Addition functionality had to be written inside the original class
+/// </summary>
 public partial class UILogin : MonoBehaviour {
 
     public GameObject nextButton;
@@ -25,12 +28,18 @@ public partial class UILogin : MonoBehaviour {
 
     private UIState currentState;
 
+    /// <summary>
+    /// Sets addition values at start
+    /// </summary>
     private void InitStart() {
         currentState = UIState.USERNAME;
         registration = false;
         statusText.text = "Login - Enter Username";
     }
 
+    /// <summary>
+    /// Perform actions based on current UI state
+    /// </summary>
     public void NextButtonChecked() {
         if (currentState == UIState.USERNAME) {
             username = accountInput.text;
@@ -55,6 +64,9 @@ public partial class UILogin : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Set path to be a registration workflow
+    /// </summary>
     private void ProceedRegistration() {
         if (accountInput.text != "") {
             currentState = UIState.USERNAME;
@@ -65,6 +77,9 @@ public partial class UILogin : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Perform actions based on current UI state
+    /// </summary>
     public async void RegNextButtonChecked() {
         if (currentState == UIState.USERNAME) {
             username = accountInput.text;
@@ -100,6 +115,9 @@ public partial class UILogin : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Resets UI 
+    /// </summary>
     public void BackButtonChecked() {
         accountInput.gameObject.SetActive(true);
         passwordInput.gameObject.SetActive(false);
@@ -111,6 +129,4 @@ public partial class UILogin : MonoBehaviour {
         quitButton.gameObject.SetActive(true);
         currentState = UIState.USERNAME;
     }
-
-    private void Activate(GameObject game, bool active) { game.SetActive(active); }
 }

@@ -1,13 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Mono.Data.Sqlite;
 using UnityEngine;
 
+/// <summary>
+/// Extension of the Database class, dedicated to queries related
+/// to the Student Quiz functionality.
+/// </summary>
 public partial class Database {
-
+    /// <summary>
+    /// Creates if not exists the database structure
+    /// Invoked by the main initialise.
+    /// </summary>
     static void Initialize_StudentQuiz() {
         crud.DbCreate(@"CREATE TABLE IF NOT EXISTS Results (
                             result_id INTEGER NOT NULL PRIMARY KEY,
@@ -26,7 +29,14 @@ public partial class Database {
                             fk_answer_id INTEGER NOT NULL)");
     }
 
-    // get all Quizzes by course... narrow to subject later
+    /// <summary>
+    /// Get all incomplete quizzes for a given student, based on the course the student
+    /// is registered on. If partial complete then get information to allow continuation.
+    /// </summary>
+    /// <param name="quiz">List of current quiz data</param>
+    /// <param name="account">Account name of the user</param>
+    /// <param name="course">The course of the current user</param>
+    /// <returns>Complete list of appropriate quizzes</returns>
     public static async Task<List<Quiz>> GetStudentQuizzes(List<Quiz> quiz, string account, string course) {
         int selection = (int)Table.Quizzes;
         // "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
@@ -62,33 +72,12 @@ public partial class Database {
         return quiz;
     }
 
-    //public static void GetStudentQuizzes(Player player) {
-    //    List<List<object>> result = ExecuteReader(
-    //        "SELECT quiz_id, quiz_name, quiz_timer, creation_date, quiz_owner, Quizzes.fk_subject_name " +
-    //        "FROM Quizzes, Subjects, CourseSubjects WHERE Quizzes.fk_subject_name = Subjects.subject_name AND " +
-    //        "Subjects.subject_name = CourseSubjects.fk_subject_name AND CourseSubjects.fk_course_name = @course " +
-    //        "GROUP BY quiz_name ORDER BY quiz_name",
-    //        new SqliteParameter("@course", player.course));
-    //    for (int i = 0; i < result.Count; i++) {
-    //        if (HasQuizBeenCompleted(player.account, Convert.ToInt32(result[i][0]))) {
-    //            Quiz temp = new Quiz();
-    //            temp.QuizId = Convert.ToInt32(result[i][0]);
-    //            temp.QuizName = (string)result[i][1];
-    //            temp.QuizTimer = Convert.ToInt32(result[i][2]);
-    //            temp.CourseName = GetCourseNameFromSubject((string)result[i][5]);
-    //            temp.SubjectName = (string)result[i][5];
-    //            List<List<object>> previousAttempt = ExecuteReader(
-    //                "SELECT result_id, time_elapsed FROM Results WHERE fk_account = @account AND fk_quiz_id = @quiz",
-    //                new SqliteParameter("@account", player.account), new SqliteParameter("@quiz", temp.QuizId));
-    //            if (previousAttempt.Count > 0) {
-    //                temp.result_id = Convert.ToInt32(previousAttempt[0][0]);
-    //                temp.time_elapsed = Convert.ToInt32(previousAttempt[0][1]);
-    //            }
-    //            // player.Quizzes.Add(temp);
-    //        }
-    //    }
-    //}
-
+    /// <summary>
+    /// Checks if a given quiz has already been completed by the user
+    /// </summary>
+    /// <param name="account">Account name of the user</param>
+    /// <param name="quiz">Quiz ID</param>
+    /// <returns>Returns true if quiz has NOT been completed</returns>
     private static async Task<bool> HasQuizBeenCompleted(string account, int quiz) {
         int selection = (int)Table.Results;
         // "SELECT COUNT(*) FROM Results WHERE fk_quiz_id = @quiz AND fk_account = @account AND is_completed = 1"
@@ -102,6 +91,11 @@ public partial class Database {
         return true;
     }
 
+    /// <summary>
+    /// Gets the linked course name for a given subject
+    /// </summary>
+    /// <param name="subject">Subject name</param>
+    /// <returns>Course name linked to subject</returns>
     private static async Task<string> GetCourseNameFromSubject(string subject) {
         int selection = (int)Table.CourseSubjects;
         // "SELECT fk_course_name FROM CourseSubjects WHERE fk_subject_name = @subject"
@@ -111,6 +105,12 @@ public partial class Database {
         return value.courseSubjectResult[0].fk_course_name;
     }
 
+    /// <summary>
+    /// Create a new result entry when the quiz begins
+    /// </summary>
+    /// <param name="account">Account name of the user</param>
+    /// <param name="quiz">Quiz ID</param>
+    /// <returns>Returns the new ID for the results entry</returns>
     public static async Task<int> CreateNewResultsForChosenQuiz(string account, int quiz) {
         int selection = (int)Table.Results;
         int id = await GetNextID_Crud(Table.Results);
@@ -120,6 +120,11 @@ public partial class Database {
         return id;
     }
 
+    /// <summary>
+    /// Get all questions and their answers for the chosen quiz
+    /// </summary>
+    /// <param name="quiz">Quiz ID</param>
+    /// <returns>Returns a list of questions and their respective answers</returns>
     public static async Task<List<Questions>> GetQuestionsForChosenQuiz(int quiz) {
         int selection = (int)Table.Questions;
         // "SELECT question_id, question FROM Questions WHERE fk_quiz_id = @quiz"
@@ -151,8 +156,12 @@ public partial class Database {
         return questions;
     }
 
-
-
+    /// <summary>
+    /// After question completion the results are inserts into the ResultsQA table
+    /// and the Results or LecturesAttend table is updated with the users current score
+    /// </summary>
+    /// <param name="result">Copy of the QuestionResults class</param>
+    /// <param name="isLecture">Is this a lecture</param>
     public static async void UpdateResultsAfterQuestionAnswered(QuestionResults result, bool isLecture) {
         if (!isLecture) {
             if (result.isCorrect == 1) {
@@ -183,10 +192,20 @@ public partial class Database {
         }
     }
 
+    /// <summary>
+    /// Once completed the results table is set to complete
+    /// </summary>
+    /// <param name="result">Result ID</param>
     public static void UpdateResultsToIsCompleted(int result) {
         crud.DbCreate("UPDATE Results SET is_completed = 1 WHERE result_id = " + result);
     }
 
+    /// <summary>
+    /// Get the overall results from the database
+    /// </summary>
+    /// <param name="id">Results ID or LectureAttend ID</param>
+    /// <param name="isLecture">Is this a lecture</param>
+    /// <returns></returns>
     public static async Task<int> GetTotalCorrectFromResults(int id, bool isLecture) {
         string returnValue;
         int selection;
@@ -209,6 +228,13 @@ public partial class Database {
         return value.lectureAttendResult[0].attend_value;
     }
 
+    /// <summary>
+    /// Check is an answer to a question is correct or not
+    /// </summary>
+    /// <param name="id">Result or LectureAttend ID</param>
+    /// <param name="question">Question ID</param>
+    /// <param name="isLecture">Is this a lecture</param>
+    /// <returns>Returns true is the question was answered correctly</returns>
     public static async Task<bool> GetWasAnswerCorrect(int id, int question, bool isLecture) {
         int selection = (int)Table.Answers;
         string selectValue;
@@ -232,6 +258,11 @@ public partial class Database {
         return false;
     }
 
+    /// <summary>
+    /// Get the correct answer for a given question
+    /// </summary>
+    /// <param name="question">Question ID</param>
+    /// <returns>Returns the correct answer</returns>
     public static async Task<string> GetCorrectAnswer(int question) {
         int selection = (int)Table.Answers;
         // "SELECT answer FROM Answers WHERE fk_question_id = @id AND is_correct = 1"
@@ -242,6 +273,13 @@ public partial class Database {
         return value.answerResult[0].answer;
     }
 
+    /// <summary>
+    /// Get the answer the user gave for a given question
+    /// </summary>
+    /// <param name="result">Result ID</param>
+    /// <param name="question">Question ID</param>
+    /// <param name="isLecture">Is this a lecture</param>
+    /// <returns></returns>
     public static async Task<int> GetStudentsAnswerId(int result, int question, bool isLecture) {
         int selection = (int)Table.ResultQA;
         string selectValue;
@@ -259,6 +297,11 @@ public partial class Database {
         return value.resultQaResult[0].fk_answer_id;
     }
 
+    /// <summary>
+    /// Get the actual answer of a given Answer ID
+    /// </summary>
+    /// <param name="answer">Answer ID</param>
+    /// <returns>Returns the actual answer</returns>
     public static async Task<string> GetActualAnswer(int answer) {
         int selection = (int) Table.Answers;
         // "SELECT answer FROM Answers WHERE answer_id = @id"
@@ -269,6 +312,11 @@ public partial class Database {
         return (text == null) ? "" : text;
     }
 
+    /// <summary>
+    /// Update the time elapsed during a quiz
+    /// </summary>
+    /// <param name="result">Result ID</param>
+    /// <param name="time">Time Elapsed</param>
     public static void UpdateTimeElapsed(int result, int time) {
         crud.DbCreate("UPDATE Results SET time_elapsed = " + time + " WHERE result_id = " + result);
     }

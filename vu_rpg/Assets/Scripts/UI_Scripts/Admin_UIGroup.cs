@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Extends the administration class, however these one liners could be refactored inline
+/// </summary>
 public partial class Administration {
 
     public void Admin_Subject() {
@@ -20,6 +23,9 @@ public partial class Administration {
 
 }
 
+/// <summary>
+/// Manages the button presses for the Admin UI
+/// </summary>
 public class Admin_UIGroup : MonoBehaviour {
     private Administration admin;
 

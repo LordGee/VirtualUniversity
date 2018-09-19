@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -7,6 +6,10 @@ using UnityEngine.UI;
 using UnityEngine.Video;
 using Random = UnityEngine.Random;
 
+/// <summary>
+/// The StudentLecture_UIGroup handles all the functionality from a
+/// student selecting a lecture through to completion
+/// </summary>
 public class StudentLecture_UIGroup : MonoBehaviour {
 
     [Header("Panels")]
@@ -33,7 +36,6 @@ public class StudentLecture_UIGroup : MonoBehaviour {
     public QuizResultSlot resultSlot;
 
     private int chosenLecture;
-    private Player player;
     private List<Lecture> lectures;
     private int attend_id;
     private List<QuestionResults> results;
@@ -44,22 +46,38 @@ public class StudentLecture_UIGroup : MonoBehaviour {
     private int selectedAnswer;
     private bool isPaused, isQuestion;
 
+    /// <summary>
+    /// If the application loses focus the lecture will pause
+    /// </summary>
+    /// <param name="hasFocus">Focus status</param>
     void OnApplicationFocus(bool hasFocus) { isPaused = !hasFocus; }
 
+    /// <summary>
+    /// If the application pauses this ensures the lecture also pauses
+    /// </summary>
+    /// <param name="pauseStatus">Pause status</param>
     void OnApplicationPause(bool pauseStatus) { isPaused = pauseStatus; }
 
+    /// <summary>
+    /// Upon application quiz this ensures that the current watch time is recorded
+    /// </summary>
     void OnApplicationQuit() { Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time)); }
 
+    /// <summary>
+    /// Sets the initial UI for the Lecture Selection screen
+    /// </summary>
     public async void InitStart() {
         chosenLecture = -1;
         lectureSelectionPanel.SetActive(true);
-        player = FindObjectOfType<Player>();
         lectures = new List<Lecture>();
         await Database.GetStudentLectures(lectures, FindObjectOfType<NetworkManagerMMO>().loginAccount, await Database.GetPlayerCourseName(FindObjectOfType<NetworkManagerMMO>().loginAccount));
         PopulateLectures();
         startLecture = false;
     }
 
+    /// <summary>
+    /// Update function handles the video timers
+    /// </summary>
     void Update() {
         if (startLecture) {
             if (video.isPlaying) {
@@ -85,8 +103,10 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         }
     }
 
-
-
+    /// <summary>
+    /// All available lectures are obtained from the
+    /// database and loaded into the UI for lecture selection.
+    /// </summary>
     private void PopulateLectures() {
         UIUtils.BalancePrefabs(slotPrefab.gameObject, lectures.Count, lectureContent);
         for (int i = 0; i < lectures.Count; i++) {
@@ -100,6 +120,9 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Once the lecture has been selected the UI is prepared
+    /// </summary>
     private async void SelectedLecture() {
         if (await LoadChosenLecture()) {
             lectureCamera.gameObject.SetActive(true);
@@ -118,6 +141,11 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Once the lecture has been selected the lecture video
+    /// is then loaded into the video player component
+    /// </summary>
+    /// <returns>Returns true if load is successful</returns>
     private async Task<bool> LoadChosenLecture() {
         try {
             video.Stop();
@@ -142,6 +170,11 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Handles break point preparation by pausing
+    /// video and preparing question
+    /// </summary>
+    /// <param name="index">Break Point Index value</param>
     private void BreakPoint(int index) {
         currentBreakIndex = index;
         video.Pause();
@@ -152,6 +185,9 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time));
     }
 
+    /// <summary>
+    /// Prepares the question and answers are loaded into memory.
+    /// </summary>
     private void PrepareQuestion() {
         questionText.text = lectures[chosenLecture].break_points[currentBreakIndex].break_question.question;
         List<bool> hasAnswerBeenAllocated = new List<bool>();
@@ -168,6 +204,10 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Once answer buttons have been allocated the following
+    /// sets up the button listeners and sets the answer value
+    /// </summary>
     private void SetupAnswerButton() {
         for (int i = 0; i < lectures[chosenLecture].break_points[currentBreakIndex].break_question.answers.Count; i++) {
             answerButtons[i].GetComponentInChildren<Text>().text = lectures[chosenLecture].break_points[currentBreakIndex]
@@ -180,6 +220,11 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Handles the process after a question has been answered by the user.
+    /// These value are recorded and the database is updated.
+    /// Feedback is given to the user whether correct or wrong.
+    /// </summary>
     private void ConfirmAnswer() {
         QuestionResults result = new QuestionResults();
         result.fk_attend_id = attend_id; 
@@ -198,6 +243,9 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         ResumeLecture();
     }
 
+    /// <summary>
+    /// Resumes the lecture after a break point
+    /// </summary>
     private void ResumeLecture() {
         lectureCamera.gameObject.SetActive(true);
         lectureQuestionPanel.gameObject.SetActive(false);
@@ -205,6 +253,10 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         video.Play();
     }
 
+    /// <summary>
+    /// Once the lecture has concluded the results are
+    /// calculated and the lecture results UI is displayed
+    /// </summary>
     private async void EndLecture() {
         lectureCamera.gameObject.SetActive(false);
         lectureResultsPanel.gameObject.SetActive(true);
@@ -212,7 +264,6 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         isQuestion = true;
         startLecture = false;
         resultsHeadingText.text = "Results for " + lectures[chosenLecture].lecture_title;
-
         // Calculate result as percentage
         int totalQuestions = lectures[chosenLecture].break_points.Count;
         int totalCorrect = await Database.GetTotalCorrectFromResults(attend_id, true);
@@ -221,7 +272,6 @@ public class StudentLecture_UIGroup : MonoBehaviour {
             percentage = (float)(totalCorrect * 100) / totalQuestions;
         }
         resultsSubHeadingText.text = "Your Result is " + Math.Ceiling(percentage) + "%";
-
         // Show each question and define correct and wrong answers.
         UIUtils.BalancePrefabs(resultSlot.gameObject, totalQuestions, resultContent);
         for (int i = 0; i < totalQuestions; i++) {
@@ -239,16 +289,21 @@ public class StudentLecture_UIGroup : MonoBehaviour {
                                                 lectures[chosenLecture].break_points[i].break_question.question_id, true));
             }
         }
-
         // update lecture attend table to be completed.
         Database.UpdateLectureTime(attend_id, Mathf.FloorToInt((float)video.time));
         Database.UpdateLectureAttendToComplete(attend_id);
     }
 
+    /// <summary>
+    /// Deactivated lecture selection panel
+    /// </summary>
     public void ExitQuizSelection() {
         lectureSelectionPanel.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Deactivated quiz results panel and sets the starting values for quiz selection
+    /// </summary>
     public void ExitResultsPanel() {
         lectureResultsPanel.gameObject.SetActive(false);
         InitStart();
