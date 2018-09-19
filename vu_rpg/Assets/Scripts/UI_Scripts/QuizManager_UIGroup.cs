@@ -42,7 +42,6 @@ public class QuizManager_UIGroup : MonoBehaviour {
         AddAnswer,
         COUNT
     };
-
     private UI_STATE currentUI;
 
     void Start() {
@@ -95,7 +94,6 @@ public class QuizManager_UIGroup : MonoBehaviour {
             case UI_STATE.Begin:
                 currentUI = UI_STATE.QuestionManager;
                 isNew = false;
-                // Todo: add question manager function
                 break;
             case UI_STATE.SelectCourse:
                 currentUI = UI_STATE.SelectSubject;

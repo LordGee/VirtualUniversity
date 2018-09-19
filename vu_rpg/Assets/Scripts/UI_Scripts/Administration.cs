@@ -25,7 +25,6 @@ public partial class Administration : MonoBehaviour {
     public UIAdminGroups groupLecture;
 
     private UIAdminGroups current;
-    private Player player;
 
     /// <summary>
     /// Sets the UI to the start position
@@ -35,7 +34,6 @@ public partial class Administration : MonoBehaviour {
         current = groupAdmin;
         current.groupObject.SetActive(true);
         SetHeadingText(current.title);
-        player = FindObjectOfType<Player>();
     }
 
     /// <summary>

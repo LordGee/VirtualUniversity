@@ -35,6 +35,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
     public Transform resultContent;
     public QuizResultSlot resultSlot;
 
+    private string player;
     private int chosenLecture;
     private List<Lecture> lectures;
     private int attend_id;
@@ -67,10 +68,11 @@ public class StudentLecture_UIGroup : MonoBehaviour {
     /// Sets the initial UI for the Lecture Selection screen
     /// </summary>
     public async void InitStart() {
+        player = FindObjectOfType<NetworkManagerMMO>().loginAccount;
         chosenLecture = -1;
         lectureSelectionPanel.SetActive(true);
         lectures = new List<Lecture>();
-        await Database.GetStudentLectures(lectures, FindObjectOfType<NetworkManagerMMO>().loginAccount, await Database.GetPlayerCourseName(FindObjectOfType<NetworkManagerMMO>().loginAccount));
+        await Database.GetStudentLectures(lectures, player, await Database.GetPlayerCourseName(player));
         PopulateLectures();
         startLecture = false;
     }
@@ -127,7 +129,8 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         if (await LoadChosenLecture()) {
             lectureCamera.gameObject.SetActive(true);
             breakComplete = new List<bool>();
-            // Loop through number of breakpoints and set boolean value to determine if break has already been completed
+            // Loop through number of breakpoints and set boolean value to
+            // determine if break has already been completed
             for (int i = 0; i < lectures[chosenLecture].break_points.Count; i++) {
                 if (await Database.HasQuestionBeenAttempted(
                     lectures[chosenLecture].break_points[i].break_question.question_id, attend_id, true)) {
@@ -135,7 +138,6 @@ public class StudentLecture_UIGroup : MonoBehaviour {
                 } else {
                     breakComplete.Add(false);
                 }
-                
             }
             startLecture = true;
         }
@@ -161,7 +163,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
             if (lectures[chosenLecture].attend_id >= 0) {
                 attend_id = lectures[chosenLecture].attend_id;
             } else {
-                attend_id = await Database.CreateNewLectureAttend(FindObjectOfType<NetworkManagerMMO>().loginAccount, lectures[chosenLecture].lecture_id);
+                attend_id = await Database.CreateNewLectureAttend(player, lectures[chosenLecture].lecture_id);
             }
             return true;
         } catch (Exception e) {
@@ -233,13 +235,11 @@ public class StudentLecture_UIGroup : MonoBehaviour {
         result.isCorrect = lectures[chosenLecture].break_points[currentBreakIndex].break_question.answers[selectedAnswer].isCorrect;
         results.Add(result);
         Database.UpdateResultsAfterQuestionAnswered(result, true);
-        
         if (result.isCorrect == 1) {
             FindObjectOfType<UISystemMessage>().NewTextAndDisplay("CORRECT");
         } else {
             FindObjectOfType<UISystemMessage>().NewTextAndDisplay("Wrong");
         }
-
         ResumeLecture();
     }
 
@@ -284,9 +284,7 @@ public class StudentLecture_UIGroup : MonoBehaviour {
             } else {
                 slot.selectButton.GetComponentInChildren<Text>().text = "Incorrect";
                 slot.selectButton.GetComponent<Image>().color = Color.yellow;
-                slot.wrongAnswerText.text = "You Answered: " +
-                                            await Database.GetActualAnswer(await Database.GetStudentsAnswerId(attend_id,
-                                                lectures[chosenLecture].break_points[i].break_question.question_id, true));
+                slot.wrongAnswerText.text = "You Answered: " + await Database.GetActualAnswer(await Database.GetStudentsAnswerId(attend_id,lectures[chosenLecture].break_points[i].break_question.question_id,true));
             }
         }
         // update lecture attend table to be completed.

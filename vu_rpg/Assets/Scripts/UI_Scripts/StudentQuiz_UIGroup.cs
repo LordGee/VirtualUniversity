@@ -33,6 +33,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
 
     private List<Quiz> quizzes;
 
+    private string player;
     private int chosenQuiz = -1;
     private bool selectionQuiz = false;
     private int results_id;
@@ -56,13 +57,13 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     /// Sets the initial UI for the Quiz Selection screen
     /// </summary>
     public async void InitStart() {
+        player = FindObjectOfType<NetworkManagerMMO>().loginAccount;
         chosenQuiz = -1;
         quizSelectionPanel.SetActive(true);
         quizzes = new List<Quiz>();
         hasQuestionBeenAllocated = new List<bool>();
         questionIndexOrder = new List<int>();
-        quizzes = await Database.GetStudentQuizzes(quizzes, FindObjectOfType<NetworkManagerMMO>().loginAccount,
-            await Database.GetPlayerCourseName(FindObjectOfType<NetworkManagerMMO>().loginAccount));
+        quizzes = await Database.GetStudentQuizzes(quizzes, player, await Database.GetPlayerCourseName(player));
         PopulateQuizzes();
         selectionQuiz = true;
         startQuiz = false;
@@ -113,7 +114,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
                 if (quizzes[chosenQuiz].result_id >= 0) {
                     results_id = quizzes[chosenQuiz].result_id;
                 } else {
-                    results_id = await Database.CreateNewResultsForChosenQuiz(FindObjectOfType<NetworkManagerMMO>().loginAccount, quizzes[chosenQuiz].QuizId);
+                    results_id = await Database.CreateNewResultsForChosenQuiz(player, quizzes[chosenQuiz].QuizId);
                 }
                 SelectedQuiz();
             });
@@ -188,8 +189,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
     /// </summary>
     private void SetupAnswerButton() {
         for (int i = 0; i < quizzes[chosenQuiz].Questions[questionIndexOrder[currentQuestion]].answers.Count; i++) {
-            answerButtons[i].GetComponentInChildren<Text>().text = quizzes[chosenQuiz]
-                .Questions[questionIndexOrder[currentQuestion]].answers[answerIndexOrder[i]].answer;
+            answerButtons[i].GetComponentInChildren<Text>().text = quizzes[chosenQuiz].Questions[questionIndexOrder[currentQuestion]].answers[answerIndexOrder[i]].answer;
             int count = i;
             answerButtons[i].onClick.SetListener(() => {
                 selectedAnswer = answerIndexOrder[count];
@@ -258,9 +258,7 @@ public class StudentQuiz_UIGroup : MonoBehaviour {
             } else {
                 slot.selectButton.GetComponentInChildren<Text>().text = "Incorrect";
                 slot.selectButton.GetComponent<Image>().color = Color.yellow;
-                slot.wrongAnswerText.text = "You Answered: " +
-                                            await Database.GetActualAnswer(await Database.GetStudentsAnswerId(
-                                                results_id, quizzes[chosenQuiz].Questions[i].question_id, false));
+                slot.wrongAnswerText.text = "You Answered: " + await Database.GetActualAnswer(await Database.GetStudentsAnswerId(results_id, quizzes[chosenQuiz].Questions[i].question_id, false));
             }
         }
     }
