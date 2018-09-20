@@ -8,9 +8,9 @@ public partial class UIExperienceBar : MonoBehaviour {
 
     void Update() {
         Player player = Utils.ClientLocalPlayer();
-        panel.SetActive(player != null); // hide while not in the game world
+        // panel.SetActive(player != null); // hide while not in the game world
         if (!player) return;
-
+        return;
         slider.value = player.ExperiencePercent();
         statusText.text = "Lv." + player.level + " (" + (player.ExperiencePercent() * 100).ToString("F2") + "%)";
 

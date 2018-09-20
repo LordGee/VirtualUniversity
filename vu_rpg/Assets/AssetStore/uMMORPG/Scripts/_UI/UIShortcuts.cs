@@ -35,8 +35,13 @@ public partial class UIShortcuts : MonoBehaviour {
 
     void Update() {
         Player player = Utils.ClientLocalPlayer();
-        panel.SetActive(player != null); // hide while not in the game world
+        // panel.SetActive(player != null); // hide while not in the game world
         if (!player) return;
+
+        quitButton.onClick.SetListener(() => {
+            NetworkManagerMMO.Quit();
+        });
+        return;
 
         inventoryButton.onClick.SetListener(() => {
             inventoryPanel.SetActive(!inventoryPanel.activeSelf);

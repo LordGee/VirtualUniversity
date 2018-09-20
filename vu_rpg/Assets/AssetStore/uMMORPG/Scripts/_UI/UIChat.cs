@@ -13,9 +13,9 @@ public partial class UIChat : MonoBehaviour {
 
     void Update() {
         Player player = Utils.ClientLocalPlayer();
-        panel.SetActive(player != null); // hide while not in the game world
+        // panel.SetActive(player != null); // hide while not in the game world
         if (!player) return;
-
+        
         // character limit
         Chat chat = player.GetComponent<Chat>();
         messageInput.characterLimit = chat.maxLength;

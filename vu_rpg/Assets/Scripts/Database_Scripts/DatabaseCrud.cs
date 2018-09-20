@@ -32,7 +32,10 @@ public partial class DatabaseCrud : MonoBehaviour {
         if (www.isNetworkError || www.isHttpError) {
             Debug.LogError(www.error + "\n" + sql);
         } else {
-            Debug.Log("Create Result: " + www.downloadHandler.text + " SQL: " + sql);
+#if UNITY_EDITOR
+            Debug.Log("Create Result: " + www.downloadHandler.text 
+                                        + " SQL: " + sql);
+#endif
         }
     }
 
@@ -52,7 +55,9 @@ public partial class DatabaseCrud : MonoBehaviour {
             Debug.LogError(www.error);
         } else {
             jsonString = ConvertJson(model, www.downloadHandler.text);
+#if UNITY_EDITOR
             Debug.Log("JSON: " + jsonString + "\nSQL: " + sql);
+#endif
             yield return jsonString;
         }
     }
@@ -72,7 +77,7 @@ public partial class DatabaseCrud : MonoBehaviour {
     }
 
     /// <summary>
-    /// Todo Ref: https://stackoverflow.com/questions/1317700/strip-byte-order-mark-from-string-in-c-sharp
+    /// Ref: https://stackoverflow.com/questions/1317700/strip-byte-order-mark-from-string-in-c-sharp
     /// Removes a bad character from the string, the above trim methods do not work as presented in the ref
     /// This still gave me the idea of what to look for and manually stripe out the character.
     /// </summary>

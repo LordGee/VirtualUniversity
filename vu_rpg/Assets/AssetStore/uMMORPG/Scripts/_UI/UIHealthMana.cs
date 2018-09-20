@@ -10,9 +10,9 @@ public partial class UIHealthMana : MonoBehaviour {
 
     void Update() {
         Player player = Utils.ClientLocalPlayer();
-        panel.SetActive(player != null); // hide while not in the game world
+        // panel.SetActive(player != null); // hide while not in the game world
         if (!player) return;
-
+        return;
         healthSlider.value = player.HealthPercent();
         healthStatus.text = player.health + " / " + player.healthMax;
 

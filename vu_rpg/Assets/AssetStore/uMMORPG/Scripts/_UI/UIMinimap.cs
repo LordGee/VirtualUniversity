@@ -19,11 +19,12 @@ public partial class UIMinimap : MonoBehaviour {
         minusButton.onClick.SetListener(() => {
             minimapCamera.orthographicSize = Mathf.Min(minimapCamera.orthographicSize + zoomStepSize, zoomMax);
         });
+        InitStart();
     }
 
     void Update() {
         Player player = Utils.ClientLocalPlayer();
-        panel.SetActive(player != null); // hide while not in the game world
+        // panel.SetActive(player != null); // hide while not in the game world
         if (!player) return;
 
         sceneText.text = SceneManager.GetActiveScene().name;

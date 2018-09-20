@@ -116,7 +116,8 @@ public partial class Database {
         int id = await GetNextID_Crud(Table.Results);
         // "INSERT INTO Results (result_id, fk_account, fk_quiz_id) VALUES (@id, @account, @quiz)"
         crud.DbCreate("INSERT INTO " + TableNames[selection] + " (" + PrimaryKeyID[selection] +
-                      ", fk_account, fk_quiz_id) VALUES (" + id + ", " + PrepareString(account) + ", " + quiz + ")");
+                      ", fk_account, fk_quiz_id" + ") VALUES (" + id + ", " + PrepareString(account) 
+                      + ", " + quiz + ")");
         return id;
     }
 
@@ -166,10 +167,11 @@ public partial class Database {
         if (!isLecture) {
             if (result.isCorrect == 1) {
                 int selection = (int) Table.Results;
-                string sql = "SELECT result_value FROM Results WHERE result_id = " + result.fk_results_id;
-                string json = (string) await crud.Read(sql, ModelNames[selection]);
-                DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
-                int resultValue = value.resultResult[0].result_value + 1;
+                string sql =
+                    "SELECT result_value FROM Results WHERE result_id = " + result.fk_results_id;
+                string                  json        = (string) await crud.Read(sql, ModelNames[selection]);
+                DatabaseCrud.JsonResult value       = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+                int                     resultValue = value.resultResult[0].result_value + 1;
                 crud.DbCreate("UPDATE Results SET result_value = " + resultValue + " WHERE result_id = " +
                               result.fk_results_id);
             }
@@ -179,10 +181,11 @@ public partial class Database {
         } else {
             if (result.isCorrect == 1) {
                 int selection = (int) Table.LectureAttend;
-                string sql = "SELECT attend_value FROM LectureAttend WHERE attend_id = " + result.fk_attend_id;
-                string json = (string) await crud.Read(sql, ModelNames[selection]);
-                DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
-                int attendValue = value.lectureAttendResult[0].attend_value + 1;
+                string sql =
+                    "SELECT attend_value FROM LectureAttend WHERE attend_id = " + result.fk_attend_id;
+                string                  json        = (string) await crud.Read(sql, ModelNames[selection]);
+                DatabaseCrud.JsonResult value       = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+                int                     attendValue = value.lectureAttendResult[0].attend_value + 1;
                 crud.DbCreate("UPDATE LectureAttend SET attend_value = " + attendValue + " WHERE attend_id = " +
                               result.fk_attend_id);
             }

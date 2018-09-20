@@ -53,10 +53,12 @@ public partial class Database {
     /// <returns>Returns list of strings of each course</returns>
     public static async Task<List<string>> GetCourseNames() {
         int selection = (int) Table.Courses;
-        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " + TableNames[selection] + " ORDER BY " +
-                     PrimaryKeyID[selection] + " ASC";
+        string sql = "SELECT " + PrimaryKeyID[selection] + " FROM " 
+                     + TableNames[selection] + " ORDER BY " 
+                     + PrimaryKeyID[selection] + " ASC";
         string json = (string) await crud.Read(sql, ModelNames[selection]);
-        DatabaseCrud.JsonResult value = JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
+        DatabaseCrud.JsonResult value = 
+            JsonUtility.FromJson<DatabaseCrud.JsonResult>(json);
         List<string> result = new List<string>();
         for (int i = 0; i < value.courseResult.Count; i++) {
             result.Add(value.courseResult[i].course_name);
