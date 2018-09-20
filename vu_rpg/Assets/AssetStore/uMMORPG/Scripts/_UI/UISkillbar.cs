@@ -8,9 +8,9 @@ public partial class UISkillbar : MonoBehaviour {
 
     void Update() {
         Player player = Utils.ClientLocalPlayer();
-        panel.SetActive(player != null); // hide while not in the game world
+        // panel.SetActive(player != null); // hide while not in the game world
         if (!player) return;
-
+        return;
         // instantiate/destroy enough slots
         UIUtils.BalancePrefabs(slotPrefab.gameObject, player.skillbar.Length, content);
 

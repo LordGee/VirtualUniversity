@@ -16,6 +16,8 @@ public partial class UINpcDialogue {
     [Header("Custom Panels")]
     public GameObject studentQuizPanel;
     public GameObject studentLecturePanel;
+    public GameObject game;
+    private GameObject tempGamePanel;
 
     private bool isAdmin, isChecked;
 
@@ -55,6 +57,11 @@ public partial class UINpcDialogue {
             });
             // workshop
             workshopButton.gameObject.SetActive(true);
+            workshopButton.onClick.SetListener(() => {
+                Hide();
+                tempGamePanel = Instantiate(game);
+                tempGamePanel.SetActive(true);
+            });
         } else {
             quizButton.gameObject.SetActive(false);
             lectureButton.gameObject.SetActive(false);

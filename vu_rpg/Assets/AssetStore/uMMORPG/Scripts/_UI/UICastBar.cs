@@ -9,9 +9,9 @@ public partial class UICastBar : MonoBehaviour {
 
     void Update() {
         Player player = Utils.ClientLocalPlayer();
-        panel.SetActive(player != null); // hide while not in the game world
+        // panel.SetActive(player != null); // hide while not in the game world
         if (!player) return;
-
+        return;
         if (player.state == "CASTING" && player.currentSkill != -1 &&
             player.skills[player.currentSkill].showCastBar) {
             panel.SetActive(true);
