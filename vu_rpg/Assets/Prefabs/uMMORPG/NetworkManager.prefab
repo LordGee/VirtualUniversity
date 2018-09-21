@@ -68,14 +68,6 @@ MonoBehaviour:
   m_OfflineScene: 
   m_OnlineScene: 
   m_SpawnPrefabs:
-  - {fileID: 110258, guid: a0d8d3ee1a9d34deab41d803ad7a6ddf, type: 2}
-  - {fileID: 142034, guid: eb4d93658e2654e8c9448f27a17f0f9e, type: 2}
-  - {fileID: 100000, guid: 3ebbb149fc6e84237ac32a1558ca695a, type: 2}
-  - {fileID: 109900, guid: 0f4948efce538432191cef46aef01d26, type: 2}
-  - {fileID: 1987394715921876, guid: 09a383191462944fbabc9965a1fd8c2b, type: 2}
-  - {fileID: 1861356044303458, guid: f5eb3a5bff7624ecf86cbacca12bc947, type: 2}
-  - {fileID: 1987394715921876, guid: 33fbbf344246446cdb5af70062968b61, type: 2}
-  - {fileID: 100000, guid: 05682822ff5a34e3f9ee59133371f266, type: 2}
   - {fileID: 1215064441816560, guid: 60e7adb75f3b2394db78713e41d14341, type: 2}
   - {fileID: 1374737608677226, guid: aaa602916dfd2004ba56b258fb86b9da, type: 2}
   m_CustomConfig: 1
@@ -146,6 +138,8 @@ MonoBehaviour:
     ip: 192.168.0.10
   - name: MainPC
     ip: 192.168.0.101
+  - name: Official Server
+    ip: 51.141.124.35
   characterLimit: 4
   characterNameMaxLength: 16
   accountMaxLength: 16
