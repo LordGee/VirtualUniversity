@@ -4845,31 +4845,7 @@ MonoBehaviour:
       petLevel: 0
       petExperience: 0
     amount: 0
-  equipmentInfo:
-  - requiredCategory: WeaponBow
-    location: {fileID: 4274639911735634}
-    defaultItem: {fileID: 0}
-  - requiredCategory: Head
-    location: {fileID: 0}
-    defaultItem: {fileID: 0}
-  - requiredCategory: Chest
-    location: {fileID: 0}
-    defaultItem: {fileID: 0}
-  - requiredCategory: Legs
-    location: {fileID: 0}
-    defaultItem: {fileID: 0}
-  - requiredCategory: 
-    location: {fileID: 0}
-    defaultItem: {fileID: 0}
-  - requiredCategory: Shoulders
-    location: {fileID: 0}
-    defaultItem: {fileID: 0}
-  - requiredCategory: Hands
-    location: {fileID: 0}
-    defaultItem: {fileID: 0}
-  - requiredCategory: Feet
-    location: {fileID: 0}
-    defaultItem: {fileID: 0}
+  equipmentInfo: []
   skillbar:
   - reference: 
     hotKey: 49

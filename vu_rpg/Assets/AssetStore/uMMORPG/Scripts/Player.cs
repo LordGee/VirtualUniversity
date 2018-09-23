@@ -1314,12 +1314,12 @@ public partial class Player : Entity {
 
     void RefreshLocation(int index) {
         ItemSlot slot = equipment[index];
-        EquipmentInfo info = equipmentInfo[index];
-
+        // EquipmentInfo info = equipmentInfo[index];
+        
         // valid category and valid location? otherwise don't bother
-        if (info.requiredCategory != "" && info.location != null) {
+        // if (info.requiredCategory != "" && info.location != null) {
             // clear previous one in any case (when overwriting or clearing)
-            if (info.location.childCount > 0) Destroy(info.location.GetChild(0).gameObject);
+            // if (info.location.childCount > 0) Destroy(info.location.GetChild(0).gameObject);
 
             //  valid item?
             if (slot.amount > 0) {
@@ -1328,7 +1328,7 @@ public partial class Player : Entity {
                 if (template.modelPrefab != null) {
                     // load the model
                     GameObject go = Instantiate(template.modelPrefab);
-                    go.transform.SetParent(info.location, false);
+                    // go.transform.SetParent(info.location, false);
 
                     // is it a skinned mesh with an animator?
                     Animator anim = go.GetComponent<Animator>();
@@ -1341,8 +1341,8 @@ public partial class Player : Entity {
                         RebindAnimators();
                     }
                 }
+          //  }
             }
-        }
     }
 
     [Command(channel=Channels.DefaultUnreliable)] // unimportant => unreliable

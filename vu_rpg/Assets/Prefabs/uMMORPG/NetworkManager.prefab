@@ -132,14 +132,12 @@ MonoBehaviour:
   loginAccountType: 
   registration: 0
   serverList:
-  - name: Local
-    ip: 127.0.0.1
-  - name: Laptop
-    ip: 192.168.0.10
-  - name: MainPC
-    ip: 192.168.0.101
   - name: Official Server
     ip: 51.141.124.35
+  - name: Local
+    ip: 127.0.0.1
+  - name: MainPC
+    ip: 192.168.0.101
   characterLimit: 4
   characterNameMaxLength: 16
   accountMaxLength: 16
